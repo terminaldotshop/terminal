@@ -4,10 +4,8 @@
   "description": "",
   "main": "index.html",
   "scripts": {
-    "dev": "concurrently \"npx wrangler pages dev ./src --live-reload\" \"pnpm run dev:css\"",
-    "dev:css": "tailwindcss -o ./src/index.css --watch",
-    "build": "rm -rf dist && cp -R src/ dist && pnpm run build:css",
-    "build:css": "NODE_ENV=production tailwindcss -o ./dist/index.css -m && fingerprint -d ./dist"
+    "dev": "tailwindcss -o ./src/index.css --watch",
+    "build": "NODE_ENV=production rm -rf dist && tailwindcss -o ./dist/index.css"
   },
   "keywords": [],
   "author": "@terminalhq",
