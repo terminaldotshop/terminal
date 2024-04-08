@@ -1,0 +1,10 @@
+{
+  "name": "terminal-shop",
+  "version": "0.0.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "sst": "3.0.11"
+  }
+}
