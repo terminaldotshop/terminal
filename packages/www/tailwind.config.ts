@@ -2,7 +2,7 @@ import type { Config } from 'tailwindcss'
 import defaultTheme from 'tailwindcss/defaultTheme'
 
 export default {
-  content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
+  content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue,svg}'],
   theme: {
     extend: {
       lineHeight: {
@@ -24,6 +24,10 @@ export default {
           7: 'hsla(203, 6%, 24%, 1)',
           10: 'hsla(210, 100%, 95%, 0.47)',
           11: 'hsla(210, 100%, 97%, 0.62)',
+        },
+        mint: {
+          5: 'hsla(173, 100%, 50%, 0.14)',
+          11: 'hsla(167, 70%, 48%, 1)',
         },
       },
       animation: {

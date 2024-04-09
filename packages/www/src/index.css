@@ -44,9 +44,10 @@ html,
   -moz-tab-size: 4;
   /* 3 */
   -o-tab-size: 4;
-     tab-size: 4;
+  tab-size: 4;
   /* 3 */
-  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-family: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   /* 4 */
   font-feature-settings: normal;
   /* 5 */
@@ -89,7 +90,7 @@ Add the correct text decoration in Chrome, Edge, and Safari.
 
 abbr:where([title]) {
   -webkit-text-decoration: underline dotted;
-          text-decoration: underline dotted;
+  text-decoration: underline dotted;
 }
 
 /*
@@ -135,7 +136,8 @@ code,
 kbd,
 samp,
 pre {
-  font-family: geist, geist-fallback, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-family: geist, geist-fallback, ui-sans-serif, system-ui, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   /* 1 */
   font-feature-settings: normal;
   /* 2 */
@@ -378,7 +380,8 @@ textarea {
 2. Set the default placeholder color to the user's configured gray 400 color.
 */
 
-input::-moz-placeholder, textarea::-moz-placeholder {
+input::-moz-placeholder,
+textarea::-moz-placeholder {
   opacity: 1;
   /* 1 */
   color: #9ca3af;
@@ -398,7 +401,7 @@ Set the default cursor for buttons.
 */
 
 button,
-[role="button"] {
+[role='button'] {
   cursor: pointer;
 }
 
@@ -446,7 +449,9 @@ video {
   display: none;
 }
 
-*, ::before, ::after {
+*,
+::before,
+::after {
   --tw-border-spacing-x: 0;
   --tw-border-spacing-y: 0;
   --tw-translate-x: 0;
@@ -595,11 +600,14 @@ video {
 }
 
 @keyframes blink {
-  0%, 25%, 100% {
+  0%,
+  25%,
+  100% {
     opacity: 1;
   }
 
-  50%, 75% {
+  50%,
+  75% {
     opacity: 0;
   }
 }
@@ -681,7 +689,7 @@ video {
 }
 
 .fill-orange {
-  fill: #FF5C00;
+  fill: #ff5c00;
 }
 
 .px-4 {
@@ -703,7 +711,8 @@ video {
 }
 
 .font-mono {
-  font-family: geist, geist-fallback, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-family: geist, geist-fallback, ui-sans-serif, system-ui, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
 .leading-normal {
@@ -763,12 +772,12 @@ video {
   color: rgb(0 0 0 / var(--tw-text-opacity));
 }
 
-.\[\&\>a\]\:px-4>a {
+.\[\&\>a\]\:px-4 > a {
   padding-left: 1rem;
   padding-right: 1rem;
 }
 
-.\[\&\>a\]\:py-1>a {
+.\[\&\>a\]\:py-1 > a {
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
 }

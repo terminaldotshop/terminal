@@ -4,9 +4,18 @@ import type { HTMLAttributes } from 'astro/types'
 interface Props extends HTMLAttributes<'div'> {
   number: number
 }
+
+const { class: _, ...props } = Astro.props
 ---
 
-<div class="flex text-slate-10 hover:bg-slate-5 px-6" {...Astro.props}>
+<div
+  {...props}
+  class:list={{
+    'flex text-slate-10 hover:bg-slate-5 px-6': true,
+    'data-[state=success]:border-mint-11 data-[state=success]:bg-mint-5 data-[state=success]:border-l-2 data-[state=success]:pl-[22px]': true,
+    [Astro.props.class ?? '']: !!Astro.props.class,
+  }}
+>
   <div class="text-center pr-10">{Astro.props.number}</div>
   <slot />
 </div>

@@ -17,30 +17,41 @@ import Line from '@components/line.astro'
   <Line number={3}>
     <span set:html="//enter your email address" />
   </Line>
-  <Line number={4}>
+  <Line id="email-line" number={4} class="group">
     <div class="flex items-center overflow-x-scroll no-scrollbar">
       <span
-        id="email-input"
         autofocus
+        contenteditable
+        id="email-input"
         class:list={{
-          'bg-transparent text-white leading-10 inline-block caret-transparent': true,
-          'focus:outline-none w-auto whitespace-nowrap': true,
+          'bg-transparent text-white leading-10 flex gap-2 flex-wrap': true,
+          'focus:outline-none whitespace-nowrap caret-transparent': true,
         }}
         role="textbox"
-        contenteditable
       >
       </span>
-      <Cursor class="shrink-0 z-10" />
     </div>
+    <Cursor class="self-center shrink-0 hidden group-has-[:focus]:block" />
   </Line>
 </Layout>
 <script is:inline>
   const emailInput = document.getElementById('email-input')
-  emailInput.parentElement.parentElement.onclick = () => emailInput?.focus()
+  const emailLine = document.getElementById('email-line')
+  emailLine.onclick = () => emailInput?.focus()
 
-  emailInput.addEventListener('keydown', (evt) => {
-    if (evt.keyCode === 13) {
+  emailInput.addEventListener('keypress', (evt) => {
+    if (evt.key === 'Enter') {
       evt.preventDefault()
+
+      emailLine.dataset.state = 'success'
+      emailInput.contentEditable = false
+
+      emailInput.classList.remove('whitespace-nowrap')
+      emailInput.classList.add('whitespace-pre-wrap')
+
+      emailInput.innerHTML =
+        emailInput.innerText +
+        " <img src='/icons/check.svg' class='w-4 h-4 self-center'> <span class='text-slate-10 whitespace-nowrap'>//signed up</span>"
     }
   })
 </script>
