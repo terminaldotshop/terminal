@@ -4,18 +4,22 @@
   "description": "",
   "main": "index.html",
   "scripts": {
-    "dev": "tailwindcss -o ./src/index.css --watch",
-    "build": "./scripts/build"
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "format": "prettier --write --plugin-search-dir=. ."
   },
   "keywords": [],
   "author": "@terminalhq",
   "license": "MIT",
   "devDependencies": {
-    "@1password/asset-fingerprint": "^1.0.1",
-    "concurrently": "^8.2.2",
+    "@types/node": "^20.12.6",
     "tailwindcss": "^3.4.3"
   },
-  "prettier": {
-    "semi": false
+  "dependencies": {
+    "@astrojs/tailwind": "^5.1.0",
+    "astro": "^4.5.17",
+    "prettier-plugin-astro": "^0.13.0"
   }
 }

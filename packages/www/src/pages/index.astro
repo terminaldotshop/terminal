@@ -1,0 +1,46 @@
+---
+import Layout from '@layouts/base.astro'
+import Countdown from '@components/countdown.astro'
+import Cursor from '@components/cursor.astro'
+import Line from '@components/line.astro'
+---
+
+<Layout>
+  <Line number={1}>
+    <h1 set:html="//something is brewing, check back in..." />
+  </Line>
+  <Line number={2}>
+    <div class="flex items-center gap-1.5">
+      <Countdown date="2024-04-18" class="text-white" />
+    </div>
+  </Line>
+  <Line number={3}>
+    <span set:html="//enter your email address" />
+  </Line>
+  <Line number={4}>
+    <div class="flex items-center overflow-x-scroll no-scrollbar">
+      <span
+        id="email-input"
+        autofocus
+        class:list={{
+          'bg-transparent text-white leading-10 inline-block caret-transparent': true,
+          'focus:outline-none w-auto whitespace-nowrap': true,
+        }}
+        role="textbox"
+        contenteditable
+      >
+      </span>
+      <Cursor class="shrink-0 z-10" />
+    </div>
+  </Line>
+</Layout>
+<script is:inline>
+  const emailInput = document.getElementById('email-input')
+  emailInput.parentElement.parentElement.onclick = () => emailInput?.focus()
+
+  emailInput.addEventListener('keydown', (evt) => {
+    if (evt.keyCode === 13) {
+      evt.preventDefault()
+    }
+  })
+</script>

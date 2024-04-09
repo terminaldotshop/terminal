@@ -1,0 +1,13 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+
+interface Props extends HTMLAttributes<'div'> {}
+---
+
+<div
+  class:list={{
+    'bg-orange w-[10px] h-[21px] animate-blink': true,
+    [Astro.props.class ?? '']: !!Astro.props.class,
+  }}
+>
+</div>

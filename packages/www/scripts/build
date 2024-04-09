@@ -1,7 +1,0 @@
-#!/bin/sh
-set -e
-
-export NODE_ENV=production
-rm -rf dist
-cp -r src/ dist/
-tailwindcss -o ./dist/index.css

@@ -1,0 +1,12 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+
+interface Props extends HTMLAttributes<'div'> {
+  number: number
+}
+---
+
+<div class="flex text-slate-10 hover:bg-slate-5 px-6" {...Astro.props}>
+  <div class="text-center pr-10">{Astro.props.number}</div>
+  <slot />
+</div>
