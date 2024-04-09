@@ -10,4 +10,6 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ssh ./cmd/ssh/mai
 FROM alpine:latest  
 WORKDIR /root/
 COPY --from=builder /app/ssh .
+COPY id_ed25519 .
+COPY id_ed25519.pub .
 CMD ["./ssh"]

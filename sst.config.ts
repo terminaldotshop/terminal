@@ -91,6 +91,7 @@ export default $config({
       const image = new docker.Image("SSHImage", {
         build: {
           context: resolve("./go"),
+          platform: "linux/amd64",
         },
         imageName: $interpolate`${repository.repositoryUrl}:${$app.stage}`,
         registry: registryInfo,
@@ -116,7 +117,9 @@ export default $config({
           "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
       });
 
-      const port = 22;
+      const portSSH = 22;
+      const portHTTP = 80;
+
       const taskDefinition = new aws.ecs.TaskDefinition("SSHTask", {
         family: "ssh",
         trackLatest: true,
@@ -131,9 +134,24 @@ export default $config({
             image: image.repoDigest,
             portMappings: [
               {
-                containerPort: port,
-                hostPort: port,
+                containerPort: portSSH,
+                hostPort: portSSH,
                 protocol: "tcp",
+              },
+              {
+                containerPort: portHTTP,
+                hostPort: portHTTP,
+                protocol: "tcp",
+              },
+            ],
+            environment: [
+              {
+                name: "SSH_PORT",
+                value: portSSH.toString(),
+              },
+              {
+                name: "HTTP_PORT",
+                value: portHTTP.toString(),
               },
             ],
           },
@@ -151,31 +169,34 @@ export default $config({
               cidrBlocks: ["0.0.0.0/0"],
             },
           ],
+          ingress: [
+            {
+              fromPort: portSSH,
+              toPort: portSSH,
+              protocol: "tcp",
+              cidrBlocks: ["0.0.0.0/0"],
+            },
+            {
+              fromPort: portHTTP,
+              toPort: portHTTP,
+              protocol: "tcp",
+              cidrBlocks: ["0.0.0.0/0"],
+            },
+          ],
         },
       );
-      const nlb = new aws.lb.LoadBalancer("SSHNlb", {
-        internal: false,
-        loadBalancerType: "network",
-        subnets: [subnet.id],
-        enableCrossZoneLoadBalancing: true,
-        securityGroups: [sshSecurityGroup.id],
-      });
-      const targetGroup = new aws.lb.TargetGroup("SSHNlbTargetGroup", {
-        port: port,
+
+      const sshTargetGroup = new aws.lb.TargetGroup("SSHNlbTargetGroup", {
+        port: portSSH,
         protocol: "TCP",
         targetType: "ip",
         vpcId: vpc.id,
       });
-      new aws.lb.Listener("SSHListener", {
-        loadBalancerArn: nlb.arn,
-        port: port,
+      const httpTargetGroup = new aws.lb.TargetGroup("NlbTargetGroupHttp", {
+        port: portHTTP,
         protocol: "TCP",
-        defaultActions: [
-          {
-            type: "forward",
-            targetGroupArn: targetGroup.arn,
-          },
-        ],
+        targetType: "ip",
+        vpcId: vpc.id,
       });
       const service = new aws.ecs.Service("SSHService", {
         cluster: cluster.arn,
@@ -189,9 +210,44 @@ export default $config({
         },
         loadBalancers: [
           {
-            targetGroupArn: targetGroup.arn,
+            targetGroupArn: sshTargetGroup.arn,
             containerName: "ssh",
-            containerPort: port,
+            containerPort: portSSH,
+          },
+          {
+            targetGroupArn: httpTargetGroup.arn,
+            containerName: "ssh",
+            containerPort: portHTTP,
+          },
+        ],
+      });
+
+      const nlb = new aws.lb.LoadBalancer("SSHNlb", {
+        internal: false,
+        loadBalancerType: "network",
+        subnets: [subnet.id],
+        enableCrossZoneLoadBalancing: true,
+        securityGroups: [sshSecurityGroup.id],
+      });
+      new aws.lb.Listener("SSHListener", {
+        loadBalancerArn: nlb.arn,
+        port: portSSH,
+        protocol: "TCP",
+        defaultActions: [
+          {
+            type: "forward",
+            targetGroupArn: sshTargetGroup.arn,
+          },
+        ],
+      });
+      new aws.lb.Listener("HttpListener", {
+        loadBalancerArn: nlb.arn,
+        port: portHTTP,
+        protocol: "TCP",
+        defaultActions: [
+          {
+            type: "forward",
+            targetGroupArn: httpTargetGroup.arn,
           },
         ],
       });
