@@ -5,7 +5,7 @@
   "main": "index.html",
   "scripts": {
     "dev": "tailwindcss -o ./src/index.css --watch",
-    "build": "NODE_ENV=production rm -rf dist && tailwindcss -o ./dist/index.css"
+    "build": "./scripts/build"
   },
   "keywords": [],
   "author": "@terminalhq",
