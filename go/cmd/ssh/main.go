@@ -29,7 +29,7 @@ import (
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt)
+	signal.Notify(signalChan, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		<-signalChan
 		cancel()
@@ -54,19 +54,16 @@ func main() {
 		log.Error("Could not start server", "error", err)
 	}
 
-	done := make(chan os.Signal, 1)
-
-	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	log.Info("Starting SSH server", "port", sshPort)
 	go func() {
 		if err = s.ListenAndServe(); err != nil && !errors.Is(err, ssh.ErrServerClosed) {
 			log.Error("Could not start server", "error", err)
-			done <- nil
+			cancel()
 		}
 	}()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "http://www.terminal.shop", http.StatusFound)
+		http.Redirect(w, r, "https://www.terminal.shop", http.StatusFound)
 	})
 
 	// Listen on port 80
