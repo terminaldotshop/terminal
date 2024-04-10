@@ -123,8 +123,8 @@ export default $config({
       const taskDefinition = new aws.ecs.TaskDefinition("SSHTask", {
         family: "ssh",
         trackLatest: true,
-        cpu: "256",
-        memory: "512",
+        cpu: "2048",
+        memory: "4096",
         networkMode: "awsvpc",
         requiresCompatibilities: ["FARGATE"],
         executionRoleArn: executionRole.arn,
