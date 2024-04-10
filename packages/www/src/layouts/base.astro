@@ -16,7 +16,11 @@ const links = [
 
 const current =
   links.find(({ href }) => Astro.url.pathname === href) ??
-  links.find(({ href }) => Astro.url.pathname.startsWith(href))
+  links
+    .sort((a, b) => b.href.length - a.href.length)
+    .find(({ href }) => Astro.url.pathname.startsWith(href))
+
+console.log("pathname", Astro.url.pathname)
 if (current) current.active = true
 ---
 
