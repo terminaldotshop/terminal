@@ -89,13 +89,13 @@ const showSshCommand = false
             set:html="# enter your email address"
           />
         </Line>
-        <Line tabindex={-1} id="email-line" number={4} class="group">
+        <Line tabindex={-1} id="email-line" number={4} class="group/email">
           <Input autofocus id="email-input" labelledby="email-label" />
-          <Cursor class="hidden group-has-[:focus]:block" />
+          <Cursor class="hidden group-has-[:focus]/email:block" />
         </Line>
-        <Line id="extra-line" number={5} class="group hidden">
+        <Line id="extra-line" number={5} class="group/extra hidden">
           <Input id="extra-input" />
-          <Cursor class="hidden group-has-[:focus]:block" />
+          <Cursor class="hidden group-has-[:focus]/extra:block" />
         </Line>
       </Fragment>
     ) : null
