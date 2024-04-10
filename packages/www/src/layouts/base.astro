@@ -14,13 +14,11 @@ const links = [
   { href: '/about', text: 'readme', active: false },
 ]
 
-const current =
-  links.find(({ href }) => Astro.url.pathname === href) ??
-  links
-    .sort((a, b) => b.href.length - a.href.length)
-    .find(({ href }) => Astro.url.pathname.startsWith(href))
+const current = links.find(
+  ({ href }) =>
+    Astro.url.pathname === href || Astro.url.pathname === href + '/',
+)
 
-console.log("pathname", Astro.url.pathname)
 if (current) current.active = true
 ---
 

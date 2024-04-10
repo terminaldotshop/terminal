@@ -15,13 +15,12 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.12.6",
-    "tailwindcss": "^3.4.3"
+    "tailwindcss": "^3.4.3",
+    "prettier-plugin-astro": "^0.13.0"
   },
   "dependencies": {
     "@astrojs/tailwind": "^5.1.0",
-    "@terminal/workers": "workspace:*",
     "astro": "^4.5.17",
-    "hono": "^4.2.3",
-    "prettier-plugin-astro": "^0.13.0"
+    "hono": "^4.2.3"
   }
 }
