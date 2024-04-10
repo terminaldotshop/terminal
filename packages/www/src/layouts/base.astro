@@ -1,10 +1,21 @@
 ---
 import '@styles/global.css'
 import Banner from '@components/banner.astro'
+import Button from '@components/button.astro'
 
 const title = 'wip: terminal (initial commit)'
 const description = 'Something is brewing, check back on April 18th.'
 const keywords = 'terminal, terminal shop'
+const url = 'https://www.terminal.shop'
+const producthuntLink = undefined // TODO: add link
+
+const links = [
+  { href: '/', text: 'shop', active: false },
+  { href: '/about', text: 'readme', active: false },
+]
+
+const current = links.find(({ href }) => Astro.url.pathname === href)
+if (current) current.active = true
 ---
 
 <html lang="en" class="group">
@@ -16,7 +27,7 @@ const keywords = 'terminal, terminal shop'
     <meta name="description" content={description} />
     <meta name="keywords" content={keywords} />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://www.terminal.shop" />
+    <meta property="og:url" content={url} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta
@@ -24,7 +35,7 @@ const keywords = 'terminal, terminal shop'
       content="https://www.terminal.shop/images/og.png"
     />
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://www.terminal.shop" />
+    <meta property="twitter:url" content={url} />
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={description} />
     <meta
@@ -90,7 +101,13 @@ const keywords = 'terminal, terminal shop'
   <body
     class="font-mono bg-black text-white leading-normal tracking-normal selection:bg-orange selection:text-black"
   >
-    <Banner id="producthunt" class="group-data-[producthunt=closed]:hidden">
+    <Banner
+      id="producthunt"
+      class:list={{
+        'group-data-[producthunt=closed]:hidden': true,
+        hidden: !producthuntLink,
+      }}
+    >
       we're live on
       <span class="flex gap-1 items-center">
         <svg
@@ -106,11 +123,7 @@ const keywords = 'terminal, terminal shop'
           >
           </path>
         </svg>
-        <a
-          href="https://www.producthunt.com/"
-          target="_blank"
-          class="underline"
-        >
+        <a href={producthuntLink} target="_blank" class="underline">
           Product Hunt
         </a>
       </span>
@@ -148,13 +161,20 @@ const keywords = 'terminal, terminal shop'
           </defs>
         </svg>
       </div>
-      <nav
-        class="flex w-full divide-x [&>*]:px-4 [&>*]:flex [&>*]:items-center"
-      >
-        <a class="cursor-pointer">shop</a>
-        <a class="cursor-no-drop text-gray-11 !border-r">readme</a>
-        <a class="cursor-no-drop text-gray-11 ml-auto">share</a>
+      <nav class="flex w-full divide-x">
+        {
+          links.map(({ href, text, active }) => (
+            <Button
+              disabled={active}
+              href={active ? undefined : href}
+              class:list={{ 'last:!border-r': true, 'text-white': active }}
+            >
+              {text}
+            </Button>
+          ))
+        }
       </nav>
+      <!-- <Button disabled class="ml-auto border-l">share</Button> -->
     </header>
     <main class="my-20 leading-10">
       <slot />

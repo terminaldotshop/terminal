@@ -1,0 +1,26 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+
+interface Props extends HTMLAttributes<'button'> {
+  href?: string
+}
+const { class: _, href, ...props } = Astro.props
+const Element = !!href ? 'a' : 'button'
+---
+
+<Fragment>
+  <!-- @ts-expect-error -->
+  <Element
+    {...props}
+    {href}
+    class:list={{
+      'text-gray-11 h-full focus:bg-gray-6 focus:outline-none': true,
+      'hover:bg-gray-5 active:bg-gray-6': href,
+      'hover:enabled:bg-gray-5 active:enabled:bg-gray-6': !href,
+      'px-4 flex items-center': true,
+      [Astro.props.class ?? '']: !!Astro.props.class,
+    }}
+  >
+    <slot />
+  </Element>
+</Fragment>

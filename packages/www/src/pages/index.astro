@@ -4,32 +4,102 @@ import Countdown from '@components/countdown.astro'
 import Cursor from '@components/cursor.astro'
 import Input from '@components/input.astro'
 import Line from '@components/line.astro'
+
+const showSshCommand = true
 ---
 
 <Layout>
-  <Line number={1}>
-    <h1 set:html="# something is brewing, check back in..." />
-  </Line>
-  <Line number={2}>
-    <div class="flex items-center gap-1.5">
-      <Countdown date="2024-04-18" class="text-white" />
-    </div>
-  </Line>
-  <Line number={3}>
-    <label
-      id="email-label"
-      for="email-input"
-      set:html="# enter your email address"
-    />
-  </Line>
-  <Line id="email-line" number={4} class="group">
-    <Input id="email-input" labelledby="email-label" />
-    <Cursor class="hidden group-has-[:focus]:block" />
-  </Line>
-  <Line id="extra-line" number={5} class="group hidden">
-    <Input id="extra-input" />
-    <Cursor class="hidden group-has-[:focus]:block" />
-  </Line>
+  {
+    showSshCommand ? (
+      <Fragment>
+        <Line number={1}>
+          <h1 set:html="# use the command below to order your delicious 12oz bag of Nil Blend coffee" />
+        </Line>
+        <Line id="ssh-line" number={2} class="group/ssh">
+          <div class="flex flex-wrap items-center">
+            <div class="flex items-center flex-nowrap">
+              <h1 class="text-white whitespace-nowrap">ssh terminal.shop</h1>
+              <Cursor class="ml-1.5" />
+              <div
+                id="ssh-supplement"
+                class:list={{
+                  'hidden w-5 h-5 mx-6 text-gray-10 shrink-0': true,
+                  'group-hover/ssh:block group-active/ssh:text-gray-11 group-focus/ssh:block': true,
+                }}
+              >
+                <svg
+                  id="copy-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-5 h-5"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                >
+                  <path
+                    d="M6.45833 6.45833V3.125H16.875V13.55H13.5417M13.5417 6.45833V16.875H3.125V6.45833H13.5417Z"
+                    class="stroke-current"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                  />
+                </svg>
+                <svg
+                  id="check-icon"
+                  class="hidden text-green-11 w-5 h-5"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g id="check-small, checkmark-small">
+                    <path
+                      id="vector"
+                      class="stroke-current"
+                      d="M5 11.9651L8.37838 14.7522L15 5.83331"
+                      stroke-width="1.5"
+                      stroke-linecap="square"
+                    />
+                  </g>
+                </svg>
+              </div>
+            </div>
+            <span
+              id="ssh-message"
+              class="hidden group-hover/ssh:block group-focus/ssh:block whitespace-nowrap"
+            >
+              # copy to clipboard
+            </span>
+          </div>
+        </Line>
+      </Fragment>
+    ) : null
+  }
+  {
+    !showSshCommand ? (
+      <Fragment>
+        <Line number={1}>
+          <h1 set:html="# something is brewing, check back in..." />
+        </Line>
+        <Line number={2}>
+          <div class="flex items-center gap-1.5">
+            <Countdown date="2024-04-18" class="text-white" />
+          </div>
+        </Line>
+        <Line number={3}>
+          <label
+            id="email-label"
+            for="email-input"
+            set:html="# enter your email address"
+          />
+        </Line>
+        <Line id="email-line" number={4} class="group">
+          <Input id="email-input" labelledby="email-label" />
+          <Cursor class="hidden group-has-[:focus]:block" />
+        </Line>
+        <Line id="extra-line" number={5} class="group hidden">
+          <Input id="extra-input" />
+          <Cursor class="hidden group-has-[:focus]:block" />
+        </Line>
+      </Fragment>
+    ) : null
+  }
 </Layout>
 <script>
   import { hc } from 'hono/client'
@@ -37,79 +107,115 @@ import Line from '@components/line.astro'
 
   const emailInput = document.getElementById('email-input')
   const emailLine = document.getElementById('email-line')
-  if (!emailInput || !emailLine) throw new Error('Missing email input or line')
-
   const extraInput = document.getElementById('extra-input')
   const extraLine = document.getElementById('extra-line')
-  if (!extraInput || !extraLine) throw new Error('Missing extra input or line')
+  if (emailInput && emailLine && extraInput && extraLine) {
+    emailLine.onclick = () => emailInput?.focus()
+    extraLine.onclick = () => extraInput?.focus()
 
-  emailLine.onclick = () => emailInput?.focus()
-  extraLine.onclick = () => extraInput?.focus()
+    const check = `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="check-small, checkmark-small"><path id="vector" class="stroke-current" d="M5 11.9651L8.37838 14.7522L15 5.83331" stroke-width="1.5" stroke-linecap="square"/></g></svg>`
+    const x = `<svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="fill-current" d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>`
 
-  const check = `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="check-small, checkmark-small"><path id="vector" class="stroke-current" d="M5 11.9651L8.37838 14.7522L15 5.83331" stroke-width="1.5" stroke-linecap="square"/></g></svg>`
-  const x = `<svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="fill-current" d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>`
+    const client = hc<AppType>(import.meta.env.PUBLIC_API_URL)
+    let emailTimeout: ReturnType<typeof setTimeout> | undefined
+    emailInput.addEventListener('keypress', async (evt) => {
+      if (evt.key === 'Enter') {
+        evt.preventDefault()
 
-  const client = hc<AppType>(import.meta.env.PUBLIC_API_URL)
-  emailInput.addEventListener('keypress', async (evt) => {
-    if (evt.key === 'Enter') {
-      evt.preventDefault()
+        if (emailTimeout) clearTimeout(emailTimeout)
 
-      const email = emailInput.innerText
-      const valid = email.includes('@') && email.includes('.')
-      let error = valid ? false : true
-      let message = valid
-        ? '# signed up'
-        : '# please enter a valid email address'
+        const email = emailInput.innerText
+        const valid = email.includes('@') && email.includes('.')
+        let error = valid ? false : true
+        let message = valid ? '# signed up' : '# invalid email address'
 
-      try {
-        await client.api.subscription.$post({
-          json: {
-            email,
-          },
-        })
-      } catch (err) {
-        console.error(err)
-        error = true
-        message = (err as Error).message
+        try {
+          await client.api.subscription.$post({
+            json: {
+              email,
+            },
+          })
+        } catch (err) {
+          console.error(err)
+          error = true
+          message = (err as Error).message
+        }
+
+        emailInput.contentEditable = 'false'
+        emailLine.dataset.state = error ? 'error' : 'success'
+        emailInput.classList.remove('whitespace-nowrap')
+        emailInput.parentElement?.classList.add('!overflow-visible')
+
+        const symbol = error ? x : check
+        const visual = `<div class='w-4 h-4 self-center ${error ? 'text-red-11' : 'text-green-11'}'>${symbol}</div>`
+
+        emailInput.innerHTML = `<div class="${error ? 'animate-shake' : ''}">${email}</div> ${visual} <span class='text-gray-10'>${message}</span>`
+
+        if (error) {
+          emailTimeout = setTimeout(() => {
+            emailInput.innerHTML = email
+            emailInput.contentEditable = 'true'
+            emailInput.classList.add('whitespace-nowrap')
+            emailInput.parentElement?.classList.remove('!overflow-visible')
+            emailLine.dataset.state = ''
+
+            const selectedText = window.getSelection()
+            const selectedRange = document.createRange()
+            selectedRange.setStart(emailInput.childNodes[0], email.length)
+            selectedRange.collapse(true)
+            selectedText?.removeAllRanges()
+            selectedText?.addRange(selectedRange)
+            emailInput.focus()
+          }, 2500)
+        } else {
+          extraLine.classList.remove('hidden')
+          extraInput.focus()
+        }
       }
-
-      emailInput.contentEditable = 'false'
-      emailLine.dataset.state = error ? 'error' : 'success'
-      emailInput.classList.remove('whitespace-nowrap')
-      // emailInput.classList.add('animate-shake')
-      emailInput.parentElement?.classList.add('!overflow-visible')
-
-      const symbol = error ? x : check
-      const visual = `<div class='w-4 h-4 self-center ${error ? 'text-red-11' : 'text-green-11'}'>${symbol}</div>`
-
-      emailInput.innerHTML = `<div class="animate-shake">${email}</div> ${visual} <span class='text-gray-10'>${message}</span>`
-
-      if (error) {
-        setTimeout(() => {
-          emailInput.innerHTML = email
-          emailInput.contentEditable = 'true'
-          emailInput.classList.add('whitespace-nowrap')
-          // emailInput.classList.remove('animate-shake')
-          emailInput.parentElement?.classList.remove('!overflow-visible')
-          emailLine.dataset.state = ''
-
-          const selectedText = window.getSelection()
-          const selectedRange = document.createRange()
-          selectedRange.setStart(emailInput.childNodes[0], email.length)
-          selectedRange.collapse(true)
-          selectedText?.removeAllRanges()
-          selectedText?.addRange(selectedRange)
-          emailInput.focus()
-        }, 2500)
-      } else {
-        extraLine.classList.remove('hidden')
-        extraInput.focus()
+    })
+    extraInput.addEventListener('keypress', async (evt) => {
+      if (evt.key === 'Enter') {
+        evt.preventDefault()
       }
+    })
+  }
+
+  const sshLine = document.getElementById('ssh-line')
+  const sshMessage = document.getElementById('ssh-message')
+  const sshSupplement = document.getElementById('ssh-supplement')
+  const copyIcon = document.getElementById('copy-icon')
+  const checkIcon = document.getElementById('check-icon')
+
+  if (sshLine && sshMessage && copyIcon && checkIcon && sshSupplement) {
+    const originalCopyMessage = sshMessage.innerHTML
+
+    let sshTimeout: ReturnType<typeof setTimeout> | undefined
+    function copy() {
+      if (sshTimeout) clearTimeout(sshTimeout)
+
+      navigator.clipboard.writeText('ssh terminal.shop')
+      sshLine.dataset.state = 'success'
+      sshMessage.innerText = '# copied to clipboard'
+      sshSupplement.classList.add('!block')
+      sshMessage.classList.add('!block')
+      copyIcon.classList.add('hidden')
+      checkIcon.classList.remove('hidden')
+
+      sshTimeout = setTimeout(() => {
+        sshLine.removeAttribute('data-state')
+        sshMessage.innerHTML = originalCopyMessage
+        sshMessage.classList.remove('!block')
+        sshSupplement.classList.remove('!block')
+        copyIcon.classList.remove('hidden')
+        checkIcon.classList.add('hidden')
+      }, 2500)
     }
-  })
-  extraInput.addEventListener('keypress', async (evt) => {
-    if (evt.key === 'Enter') {
-      evt.preventDefault()
-    }
-  })
+
+    sshLine.onclick = copy
+    sshLine.addEventListener('keypress', async (evt) => {
+      if (evt.key === 'Enter') {
+        copy()
+      }
+    })
+  }
 </script>
