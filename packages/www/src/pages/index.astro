@@ -89,8 +89,8 @@ const showSshCommand = false
             set:html="# enter your email address"
           />
         </Line>
-        <Line id="email-line" number={4} class="group">
-          <Input id="email-input" labelledby="email-label" />
+        <Line tabindex={-1} id="email-line" number={4} class="group">
+          <Input autofocus id="email-input" labelledby="email-label" />
           <Cursor class="hidden group-has-[:focus]:block" />
         </Line>
         <Line id="extra-line" number={5} class="group hidden">

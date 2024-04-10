@@ -13,10 +13,10 @@ const Element = href ? 'a' : 'div'
 <Fragment>
   <!-- @ts-expect-error -->
   <Element
-    {...props}
+    tabindex="0"
     {href}
     target={href ? '_blank' : undefined}
-    tabindex="0"
+    {...props}
     class:list={{
       'group flex items-center text-gray-10 hover:bg-gray-5 px-6': true,
       'active:border-orange active:border-l-2 active:pl-[22px] active:text-gray-11 active:bg-gray-6': true,
@@ -24,6 +24,7 @@ const Element = href ? 'a' : 'div'
       'data-[state=error]:border-red-11 data-[state=error]:bg-red-5 data-[state=error]:border-l-2 data-[state=error]:pl-[22px]': true,
       '[&>svg]:hover:block [&>svg]:active:text-gray-11': href,
       'focus:border-orange focus:border-l-2 focus:pl-[22px] focus:text-gray-11 focus:bg-gray-6 focus:outline-none': true,
+      'has-[:focus]:border-orange has-[:focus]:border-l-2 has-[:focus]:pl-[22px] has-[:focus]:text-gray-11 has-[:focus]:bg-gray-6 has-[:focus]:outline-none': true,
       [Astro.props.class ?? '']: !!Astro.props.class,
     }}
   >
