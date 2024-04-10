@@ -1,6 +1,6 @@
 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g id="check-small, checkmark-small">
-<path id="vector" d="M5 11.9651L8.37838 14.7522L15 5.83331" stroke="#25D0AB" stroke-width="1.5" stroke-linecap="square"/>
+<path id="vector" class="stroke-current" d="M5 11.9651L8.37838 14.7522L15 5.83331" stroke-width="1.5" stroke-linecap="square"/>
 </g>
 </svg>
 

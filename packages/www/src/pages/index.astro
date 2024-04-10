@@ -2,6 +2,7 @@
 import Layout from '@layouts/base.astro'
 import Countdown from '@components/countdown.astro'
 import Cursor from '@components/cursor.astro'
+import Input from '@components/input.astro'
 import Line from '@components/line.astro'
 ---
 
@@ -18,40 +19,85 @@ import Line from '@components/line.astro'
     <span set:html="//enter your email address" />
   </Line>
   <Line id="email-line" number={4} class="group">
-    <div class="flex items-center overflow-x-scroll no-scrollbar">
-      <span
-        autofocus
-        contenteditable
-        id="email-input"
-        class:list={{
-          'bg-transparent text-white leading-10 flex gap-2 flex-wrap': true,
-          'focus:outline-none whitespace-nowrap caret-transparent': true,
-        }}
-        role="textbox"
-      >
-      </span>
-    </div>
-    <Cursor class="self-center shrink-0 hidden group-has-[:focus]:block" />
+    <Input id="email-input" class="" />
+    <Cursor class="hidden group-has-[:focus]:block" />
+  </Line>
+  <Line id="extra-line" number={5} class="group hidden">
+    <Input id="extra-input" />
+    <Cursor class="hidden group-has-[:focus]:block" />
   </Line>
 </Layout>
-<script is:inline>
+<script>
   const emailInput = document.getElementById('email-input')
   const emailLine = document.getElementById('email-line')
-  emailLine.onclick = () => emailInput?.focus()
+  if (!emailInput || !emailLine) throw new Error('Missing email input or line')
 
-  emailInput.addEventListener('keypress', (evt) => {
+  const extraInput = document.getElementById("extra-input")
+  const extraLine = document.getElementById("extra-line")
+  if (!extraInput || !extraLine) throw new Error('Missing extra input or line')
+
+  emailLine.onclick = () => emailInput?.focus()
+  extraLine.onclick = () => extraInput?.focus()
+
+  const check = `<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="check-small, checkmark-small"><path id="vector" class="stroke-current" d="M5 11.9651L8.37838 14.7522L15 5.83331" stroke-width="1.5" stroke-linecap="square"/></g></svg>`
+  const x = `<svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="fill-current" d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>`
+
+  emailInput.addEventListener('keypress', async (evt) => {
     if (evt.key === 'Enter') {
       evt.preventDefault()
 
-      emailLine.dataset.state = 'success'
-      emailInput.contentEditable = false
+      const email = emailInput.innerText
+      const valid = email.includes('@') && email.includes('.')
+      let error = valid ? false : true
+      let message = valid ? '//signed up' : '//please enter a valid email address'
 
+      // const API_URL = import.meta.env.PUBLIC_API_URL
+      // try {
+      //   const result = await fetch(`${API_URL}/subscribe`, {
+      //     method: 'POST',
+      //     headers: { 'Content-Type': 'application/json' },
+      //     body: JSON.stringify({ email }),
+      //   }).then((res) => res.json())
+      // } catch (err) {
+      //   error = true
+      //   message = (err as Error).message
+      // }
+
+      emailInput.contentEditable = 'false'
+      emailLine.dataset.state = error ? 'error' : 'success'
       emailInput.classList.remove('whitespace-nowrap')
-      emailInput.classList.add('whitespace-pre-wrap')
+      // emailInput.classList.add("animate-bounce-slow")
 
-      emailInput.innerHTML =
-        emailInput.innerText +
-        " <img src='/icons/check.svg' class='w-4 h-4 self-center'> <span class='text-slate-10 whitespace-nowrap'>//signed up</span>"
+      const symbol = error ? x : check
+      const visual = `<div class='w-4 h-4 self-center ${error ? 'text-red-11' : 'text-green-11'}'>${symbol}</div>`
+
+      emailInput.innerHTML = `${email} ${visual} <span class='text-gray-10'>${message}</span>`
+
+      if (error) {
+        setTimeout(() => {
+          emailInput.innerHTML = email
+          emailInput.contentEditable = 'true'
+          emailInput.classList.add('whitespace-nowrap')
+          emailLine.dataset.state = ''
+
+          const selectedText = window.getSelection()
+          const selectedRange = document.createRange()
+          selectedRange.setStart(emailInput.childNodes[0], email.length)
+          selectedRange.collapse(true)
+          selectedText?.removeAllRanges()
+          selectedText?.addRange(selectedRange)
+          emailInput.focus()
+        }, 2500)
+      } else {
+        extraLine.classList.remove('hidden')
+        extraInput.focus()
+      }
     }
   })
+  extraInput.addEventListener('keypress', async (evt) => {
+    if (evt.key === 'Enter') {
+      evt.preventDefault()
+    }
+  })
+
 </script>

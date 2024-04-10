@@ -1,0 +1,24 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+interface Props extends HTMLAttributes<'span'> {}
+const { class: _, ...props } = Astro.props
+---
+
+<div
+  class:list={{
+    'flex items-center overflow-x-scroll no-scrollbar': true,
+    [Astro.props.class ?? '']: !!Astro.props.class,
+  }}
+>
+  <span
+    {...props}
+    autofocus
+    contenteditable
+    class:list={{
+      'bg-transparent text-white leading-10 flex gap-2 flex-wrap': true,
+      'focus:outline-none whitespace-nowrap caret-transparent': true,
+    }}
+    role="textbox"
+  >
+  </span>
+</div>

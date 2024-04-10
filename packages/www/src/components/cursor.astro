@@ -1,15 +1,13 @@
 ---
 import type { HTMLAttributes } from 'astro/types'
-
 interface Props extends HTMLAttributes<'div'> {}
-
 const { class: _, ...props } = Astro.props
 ---
 
 <div
   {...props}
   class:list={{
-    'bg-orange w-[10px] h-[21px] animate-blink': true,
+    'bg-orange w-[10px] h-[21px] animate-blink shrink-0': true,
     [Astro.props.class ?? '']: !!Astro.props.class,
   }}
 >

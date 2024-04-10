@@ -11,8 +11,9 @@ const { class: _, ...props } = Astro.props
 <div
   {...props}
   class:list={{
-    'flex text-slate-10 hover:bg-slate-5 px-6': true,
-    'data-[state=success]:border-mint-11 data-[state=success]:bg-mint-5 data-[state=success]:border-l-2 data-[state=success]:pl-[22px]': true,
+    'flex items-center text-gray-10 hover:bg-gray-5 px-6': true,
+    'data-[state=success]:border-green-11 data-[state=success]:bg-green-5 data-[state=success]:border-l-2 data-[state=success]:pl-[22px]': true,
+    'data-[state=error]:border-red-11 data-[state=error]:bg-red-5 data-[state=error]:border-l-2 data-[state=error]:pl-[22px]': true,
     [Astro.props.class ?? '']: !!Astro.props.class,
   }}
 >
