@@ -7,7 +7,7 @@ import Line from '@components/line.astro'
 ---
 <Layout>
   <Line number={1}>
-    <h1 set:html="//something is brewing, check back in..." />
+    <h1 set:html="# something is brewing, check back in..." />
   </Line>
   <Line number={2}>
     <div class="flex items-center gap-1.5">
@@ -15,7 +15,7 @@ import Line from '@components/line.astro'
     </div>
   </Line>
   <Line number={3}>
-    <span set:html="//enter your email address" />
+    <span set:html="# enter your email address" />
   </Line>
   <Line id="email-line" number={4} class="group">
     <Input id="email-input" class="" />
@@ -52,7 +52,7 @@ import Line from '@components/line.astro'
       const email = emailInput.innerText
       const valid = email.includes('@') && email.includes('.')
       let error = valid ? false : true
-      let message = valid ? '//signed up' : '//please enter a valid email address'
+      let message = valid ? '# signed up' : '# please enter a valid email address'
 
       try {
         await client.api.subscription.$post({ json: {
