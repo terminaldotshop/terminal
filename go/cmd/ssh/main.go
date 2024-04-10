@@ -12,8 +12,11 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
+
+	figure "github.com/common-nighthawk/go-figure"
 
 	"github.com/charmbracelet/bubbles/timer"
 	tea "github.com/charmbracelet/bubbletea"
@@ -111,11 +114,12 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 
 // Just a generic tea.Model to demo terminal information of ssh.
 type model struct {
-	timer    timer.Model
-	term     string
-	width    int
-	height   int
-	renderer *lipgloss.Renderer
+	timer     timer.Model
+	term      string
+	width     int
+	height    int
+	fontIndex int
+	renderer  *lipgloss.Renderer
 }
 
 type tickMessage struct{}
@@ -137,6 +141,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width = msg.Width
 	case tea.KeyMsg:
 		switch msg.String() {
+		case "n":
+			m.fontIndex++
+			if len(fonts) <= m.fontIndex {
+				m.fontIndex = 0
+			}
+			return m, nil
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		}
@@ -153,11 +163,183 @@ func (m model) View() string {
 	minutes := int(timeDiff.Minutes()) % 60
 	seconds := int(timeDiff.Seconds()) % 60
 	milliseconds := int(timeDiff.Milliseconds()) % 1000
-	content := fmt.Sprintf("%02dd %02dh %02dm %02ds %03dms", days, hours, minutes, seconds, milliseconds)
-	return m.renderer.
-		NewStyle().
-		Foreground(lipgloss.Color("#ff5c00")).
-		PaddingLeft((m.width - len(content)) / 2).
-		PaddingTop((m.height - 1) / 2).
-		Render(content)
+	font := fonts[m.fontIndex]
+
+	result := strings.Join(
+		[]string{
+			figure.NewFigure(
+				fmt.Sprintf("%02dd %02dh", days, hours),
+				font, true).String(),
+			figure.NewFigure(
+				fmt.Sprintf("%02dm %02ds", minutes, seconds),
+				font, true).String(),
+			figure.NewFigure(
+				fmt.Sprintf("%03dms", milliseconds),
+				font, true).String(),
+			font,
+		},
+		"\n",
+	)
+
+	lines := strings.Split(result, "\n")
+	height := len(lines)
+	width := 0
+	for _, line := range lines {
+		if len(line) > width {
+			width = len(line)
+		}
+	}
+
+	return m.renderer.NewStyle().PaddingLeft((m.width - width) / 2).PaddingTop((m.height - height) / 2).Render(result)
+}
+
+var fonts = []string{
+	"3-d",
+	"3x5",
+	"5lineoblique",
+	"acrobatic",
+	"alligator",
+	"alligator2",
+	"alphabet",
+	"avatar",
+	"banner",
+	"banner3-D",
+	"banner3",
+	"banner4",
+	"barbwire",
+	"basic",
+	"bell",
+	"big",
+	"bigchief",
+	"binary",
+	"block",
+	"bubble",
+	"bulbhead",
+	"calgphy2",
+	"caligraphy",
+	"catwalk",
+	"chunky",
+	"coinstak",
+	"colossal",
+	"computer",
+	"contessa",
+	"contrast",
+	"cosmic",
+	"cosmike",
+	"cricket",
+	"cursive",
+	"cyberlarge",
+	"cybermedium",
+	"cybersmall",
+	"diamond",
+	"digital",
+	"doh",
+	"doom",
+	"dotmatrix",
+	"drpepper",
+	"eftichess",
+	"eftifont",
+	"eftipiti",
+	"eftirobot",
+	"eftitalic",
+	"eftiwall",
+	"eftiwater",
+	"epic",
+	"fender",
+	"fourtops",
+	"fuzzy",
+	"goofy",
+	"gothic",
+	"graffiti",
+	"hollywood",
+	"invita",
+	"isometric1",
+	"isometric2",
+	"isometric3",
+	"isometric4",
+	"italic",
+	"ivrit",
+	"jazmine",
+	"jerusalem",
+	"katakana",
+	"kban",
+	"larry3d",
+	"lcd",
+	"lean",
+	"letters",
+	"linux",
+	"lockergnome",
+	"madrid",
+	"marquee",
+	"maxfour",
+	"mike",
+	"mini",
+	"mirror",
+	"mnemonic",
+	"morse",
+	"moscow",
+	"nancyj-fancy",
+	"nancyj-underlined",
+	"nancyj",
+	"nipples",
+	"ntgreek",
+	"o8",
+	"ogre",
+	"pawp",
+	"peaks",
+	"pebbles",
+	"pepper",
+	"poison",
+	"puffy",
+	"pyramid",
+	"rectangles",
+	"relief",
+	"relief2",
+	"rev",
+	"roman",
+	"rot13",
+	"rounded",
+	"rowancap",
+	"rozzo",
+	"runic",
+	"runyc",
+	"sblood",
+	"script",
+	"serifcap",
+	"shadow",
+	"short",
+	"slant",
+	"slide",
+	"slscript",
+	"small",
+	"smisome1",
+	"smkeyboard",
+	"smscript",
+	"smshadow",
+	"smslant",
+	"smtengwar",
+	"speed",
+	"stampatello",
+	"standard",
+	"starwars",
+	"stellar",
+	"stop",
+	"straight",
+	"tanja",
+	"tengwar",
+	"term",
+	"thick",
+	"thin",
+	"threepoint",
+	"ticks",
+	"ticksslant",
+	"tinker-toy",
+	"tombstone",
+	"trek",
+	"tsalagi",
+	"twopoint",
+	"univers",
+	"usaflag",
+	"wavy",
+	"weird",
 }

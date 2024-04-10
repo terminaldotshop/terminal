@@ -9,6 +9,7 @@ require (
 	github.com/charmbracelet/log v0.4.0
 	github.com/charmbracelet/ssh v0.0.0-20240401141849-854cddfa2917
 	github.com/charmbracelet/wish v1.4.0
+	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
 )
 
 require (
