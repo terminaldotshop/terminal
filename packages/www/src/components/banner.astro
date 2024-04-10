@@ -23,8 +23,8 @@ const id = Astro.props.id
   <button
     id="close-button"
     class:list={{
-      'h-full ml-auto px-4 text-gray-11 hover:text-[#EFF7FFCC] active:text-gray-12': true,
-      'hover:bg-highlight-1 active:bg-highlight-2 ': true,
+      'h-full ml-auto px-4 text-gray-11 hover:text-[#EFF7FFCC] focus:text-[#EFF7FFCC] active:text-gray-12': true,
+      'hover:bg-highlight-1 active:bg-highlight-2 focus:bg-highlight-1 focus:outline-none': true,
     }}
   >
     esc
@@ -34,9 +34,17 @@ const id = Astro.props.id
   const banner = document.getElementById(id)
   const closeButton = document.getElementById('close-button')
 
-  if (closeButton)
-    closeButton.onclick = () => {
-      window.localStorage.setItem(`${id}-banner`, 'closed')
-      banner?.classList.add('hidden')
-    }
+  function close() {
+    window.localStorage.setItem(`${id}-banner`, 'closed')
+    banner?.classList.add('hidden')
+  }
+
+  if (closeButton) {
+    closeButton.onclick = close
+    closeButton.addEventListener('keypress', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        close()
+      }
+    })
+  }
 </script>

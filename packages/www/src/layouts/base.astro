@@ -92,41 +92,52 @@ if (current) current.active = true
       }
 
       toggle(document, 'producthunt')
+      toggle(document, 'terminalhq')
 
       document.addEventListener('astro:before-swap', (ev) => {
         toggle(ev.newDocument, 'producthunt')
+        toggle(ev.newDocument, 'terminalhq')
       })
     </script>
   </head>
   <body
     class="font-mono bg-black text-white leading-normal tracking-normal selection:bg-orange selection:text-black"
   >
+    <!-- <Banner -->
+    <!--   id="producthunt" -->
+    <!--   class:list={{ -->
+    <!--     'group-data-[producthunt=closed]:hidden': true, -->
+    <!--     hidden: !producthuntLink, -->
+    <!--   }} -->
+    <!-- > -->
+    <!--   we're live on -->
+    <!--   <span class="flex gap-1 items-center"> -->
+    <!--     <svg -->
+    <!--       role="img" -->
+    <!--       viewBox="0 0 24 24" -->
+    <!--       xmlns="http://www.w3.org/2000/svg" -->
+    <!--       class="w-4 h-4" -->
+    <!--     > -->
+    <!--       <title>Product Hunt</title> -->
+    <!--       <path -->
+    <!--         class="fill-current" -->
+    <!--         d="M13.604 8.4h-3.405V12h3.405c.995 0 1.801-.806 1.801-1.801 0-.993-.805-1.799-1.801-1.799zM12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zm1.604 14.4h-3.405V18H7.801V6h5.804c2.319 0 4.2 1.88 4.2 4.199 0 2.321-1.881 4.201-4.201 4.201z" -->
+    <!--       > -->
+    <!--       </path> -->
+    <!--     </svg> -->
+    <!--     <a href={producthuntLink} target="_blank" class="underline"> -->
+    <!--       Product Hunt -->
+    <!--     </a> -->
+    <!--   </span> -->
+    <!-- </Banner> -->
     <Banner
-      id="producthunt"
-      class:list={{
-        'group-data-[producthunt=closed]:hidden': true,
-        hidden: !producthuntLink,
-      }}
+      id="terminalhq"
+      class:list={{ 'group-data-[terminalhq=closed]:hidden': true }}
     >
-      we're live on
-      <span class="flex gap-1 items-center">
-        <svg
-          role="img"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-          class="w-4 h-4"
-        >
-          <title>Product Hunt</title>
-          <path
-            class="fill-current"
-            d="M13.604 8.4h-3.405V12h3.405c.995 0 1.801-.806 1.801-1.801 0-.993-.805-1.799-1.801-1.799zM12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zm1.604 14.4h-3.405V18H7.801V6h5.804c2.319 0 4.2 1.88 4.2 4.199 0 2.321-1.881 4.201-4.201 4.201z"
-          >
-          </path>
-        </svg>
-        <a href={producthuntLink} target="_blank" class="underline">
-          Product Hunt
-        </a>
-      </span>
+      follow us
+      <a href="https://x.com/terminalhq" target="_blank" class="focus:underline focus:outline-none">
+        @terminalhq
+      </a>
     </Banner>
     <header class="h-10 bg-gray-1 border-b flex items-stretch">
       <div id="logo" class="px-6 border-r flex items-center">

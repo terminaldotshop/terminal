@@ -20,7 +20,7 @@ const heroes = [
   </Line>
   {
     heroes.map((hero, index) => (
-      <Line number={index + 1} href={`https://x.com/${hero}`}>
+      <Line number={index + 2} href={`https://x.com/${hero}`}>
         <h2 set:html={`# @${hero}`} />
       </Line>
     ))
