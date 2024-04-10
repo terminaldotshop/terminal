@@ -14,7 +14,9 @@ const links = [
   { href: '/about', text: 'readme', active: false },
 ]
 
-const current = links.find(({ href }) => Astro.url.pathname === href)
+const current =
+  links.find(({ href }) => Astro.url.pathname === href) ??
+  links.find(({ href }) => Astro.url.pathname.startsWith(href))
 if (current) current.active = true
 ---
 
@@ -135,7 +137,11 @@ if (current) current.active = true
       class:list={{ 'group-data-[terminalhq=closed]:hidden': true }}
     >
       follow us
-      <a href="https://x.com/terminalhq" target="_blank" class="focus:underline focus:outline-none">
+      <a
+        href="https://x.com/terminalhq"
+        target="_blank"
+        class="focus:underline focus:outline-none"
+      >
         @terminalhq
       </a>
     </Banner>
