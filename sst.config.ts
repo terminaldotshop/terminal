@@ -9,7 +9,10 @@ export default $config({
       removal: input?.stage === "production" ? "retain" : "remove",
       home: "cloudflare",
       providers: {
-        aws: true,
+        aws: {
+          profile:
+            input.stage === "production" ? "ironbay-production" : "ironbay-dev",
+        },
         random: true,
         docker: true,
       },
@@ -22,6 +25,7 @@ export default $config({
         : $app.stage + ".dev.terminal.shop";
     const secrets = {
       SwellSecret: new sst.Secret("SwellSecret"),
+      AirtableSecret: new sst.Secret("AirtableSecret"),
     };
     const auth = new sst.cloudflare.Auth("Auth", {
       authenticator: {
@@ -32,19 +36,23 @@ export default $config({
     });
     const api = new sst.cloudflare.Worker("Api", {
       handler: "./packages/workers/src/api.ts",
-      link: [secrets.SwellSecret, auth],
+      link: [secrets.SwellSecret, secrets.AirtableSecret, auth],
       domain: "api." + domain,
     });
-    if (!$dev) {
-      const www = new sst.cloudflare.StaticSite("Www", {
-        domain: "www." + domain,
-        path: "./packages/www",
-        build: {
-          command: "bun run build",
-          output: "./dist",
-        },
-      });
 
+    const www = new sst.cloudflare.StaticSite("Www", {
+      domain: "www." + domain,
+      path: "./packages/www",
+      environment: {
+        PUBLIC_API_URL: api.url.apply((u) => u!),
+      },
+      build: {
+        command: "bun run build",
+        output: "./dist",
+      },
+    });
+
+    if (!$dev) {
       const repository = new aws.ecr.Repository("DockerRepository", {
         name: [$app.name, $app.stage].join("-"),
         forceDelete: true,

@@ -7,7 +7,7 @@ export function createContext<T>() {
       return storage.getStore();
     },
     with(value: T, fn: () => void) {
-      storage.run(value, fn);
+      return storage.run(value, fn);
     },
   };
 }

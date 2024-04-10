@@ -1,7 +1,11 @@
-import { Hono } from "hono";
+import { Hono, MiddlewareHandler } from "hono";
 import { logger } from "hono/logger";
 import { session } from "./session";
 import { createContext } from "./context";
+import { cors } from "hono/cors";
+import { vValidator } from "@hono/valibot-validator";
+import { email, object, string } from "valibot";
+import { Resource } from "sst";
 
 const SessionContext = createContext<typeof session.$typeValues>();
 
@@ -11,29 +15,56 @@ function useUserID() {
   return session.properties.userID;
 }
 
-const app = new Hono();
-app.use(logger());
-app.use(async (c, next) => {
+const auth: MiddlewareHandler = async (c, next) => {
   const authHeader = c.req.header("authorization");
-  if (!authHeader) {
-    return c.json({ error: "Authorization header is missing" }, 401);
+  if (authHeader) {
+    const match = authHeader.match(/^Bearer (.+)$/);
+    if (!match) {
+      return c.json(
+        { error: "Bearer token not found or improperly formatted" },
+        401,
+      );
+    }
+    const bearerToken = match[1];
+    const result = await session.verify(bearerToken);
+    return SessionContext.with(result, next);
   }
+  return SessionContext.with({ type: "public", properties: {} }, next);
+};
 
-  const match = authHeader.match(/^Bearer (.+)$/);
-  if (!match) {
-    return c.json(
-      { error: "Bearer token not found or improperly formatted" },
-      401,
-    );
-  }
-
-  const bearerToken = match[1];
-  const result = await session.verify(bearerToken);
-  return SessionContext.with(result, next);
-});
-
-app.get("/user/me", async (c) => {
-  const userID = useUserID();
-});
+const app = new Hono()
+  .use(logger())
+  .use(cors())
+  .use(auth)
+  .get("/api/user/me", async (c) => {})
+  .post(
+    "/api/subscription",
+    vValidator(
+      "json",
+      object({
+        email: string([email("Please provide a valid email address")]),
+      }),
+    ),
+    async (c) => {
+      const body = c.req.valid("json");
+      console.log("subscribing", body.email);
+      const result = await fetch(
+        `https://api.airtable.com/v0/appKabRJfxfpSDVTo/subscribers`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            fields: body,
+          }),
+          headers: {
+            Authorization: `Bearer ${Resource.AirtableSecret.value}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      console.log(result, await result.json());
+      return c.json({});
+    },
+  );
 
 export default app;
+export type AppType = typeof app;

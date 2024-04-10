@@ -10,6 +10,11 @@ export default AuthHandler({
           .formData()
           .then((data) => data.get("fingerprint"));
 
+        if (!fingerprint) {
+          return c.json({ error: "Fingerprint is required" }, 400);
+        }
+
+        console.log("searching for user with fingerprint", fingerprint);
         const search = await swell(
           "/accounts?where[fingerprint]=" + fingerprint,
           {},

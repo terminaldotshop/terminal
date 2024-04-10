@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.html",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "sst dev astro dev",
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
@@ -19,7 +19,9 @@
   },
   "dependencies": {
     "@astrojs/tailwind": "^5.1.0",
+    "@terminal/workers": "workspace:*",
     "astro": "^4.5.17",
+    "hono": "^4.2.3",
     "prettier-plugin-astro": "^0.13.0"
   }
 }
