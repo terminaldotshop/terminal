@@ -1,10 +1,15 @@
 ---
 import type { HTMLAttributes } from 'astro/types'
 
-interface Props extends HTMLAttributes<'div'> {}
+interface Props extends HTMLAttributes<'div'> {
+  id: string
+}
+const { class: _, ...props } = Astro.props
+const id = Astro.props.id
 ---
 
 <div
+  {...props}
   class:list={{
     'h-8 flex items-center bg-orange text-sm': true,
     [Astro.props.class ?? '']: !!Astro.props.class,
@@ -15,5 +20,23 @@ interface Props extends HTMLAttributes<'div'> {}
   >
     <slot />
   </div>
-  <button class="ml-auto px-4 text-gray-11">esc</button>
+  <button
+    id="close-button"
+    class:list={{
+      'ml-auto px-4 text-gray-11 h-full': true,
+      'hover:bg-highlight-1 active:bg-highlight-2': true,
+    }}
+  >
+    esc
+  </button>
 </div>
+<script define:vars={{ id }}>
+  const banner = document.getElementById(id)
+  const closeButton = document.getElementById('close-button')
+
+  if (closeButton)
+    closeButton.onclick = () => {
+      window.localStorage.setItem(`${id}-banner`, 'closed')
+      banner?.classList.add('hidden')
+    }
+</script>

@@ -4,9 +4,15 @@ import type { HTMLAttributes } from 'astro/types'
 interface Props extends HTMLAttributes<'div'> {
   date: string
 }
+const { class: _, ...props } = Astro.props
 ---
 
-<div id="countdown-container" data-date={Astro.props.date} {...Astro.props}>
+<div
+  {...props}
+  id="countdown-container"
+  data-date={Astro.props.date}
+  class:list={{ [Astro.props.class ?? '']: !!Astro.props.class }}
+>
   <span id="days">_d</span>
   <span id="hours">_h</span>
   <span id="mins">_m</span>
@@ -56,29 +62,26 @@ interface Props extends HTMLAttributes<'div'> {
   let timeout = 0
   let count = 0
 
-  const logo = document.getElementById('logo')
-  if (logo) {
-    logo.onclick = () => {
-      if (timeout) clearTimeout(timeout)
+  container.onclick = () => {
+    if (timeout) clearTimeout(timeout)
 
-      count = count + 1
-      if (count > 9) {
-        count = 0
+    count = count + 1
+    if (count > 9) {
+      count = 0
 
-        msElement.classList.toggle('hidden')
-        clearTimeout(countdown)
+      msElement.classList.toggle('hidden')
+      clearTimeout(countdown)
 
-        const hidden = msElement.classList.contains('hidden')
-        if (hidden) {
-          countdown = setInterval(calculate, 1000)
-        } else {
-          countdown = setInterval(calculate, 5)
-        }
+      const hidden = msElement.classList.contains('hidden')
+      if (hidden) {
+        countdown = setInterval(calculate, 1000)
+      } else {
+        countdown = setInterval(calculate, 5)
       }
-
-      timeout = setTimeout(() => {
-        count = 0
-      }, 200)
     }
+
+    timeout = setTimeout(() => {
+      count = 0
+    }, 200)
   }
 </script>

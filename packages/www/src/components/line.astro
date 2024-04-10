@@ -14,9 +14,10 @@ const { class: _, ...props } = Astro.props
     'flex items-center text-gray-10 hover:bg-gray-5 px-6': true,
     'data-[state=success]:border-green-11 data-[state=success]:bg-green-5 data-[state=success]:border-l-2 data-[state=success]:pl-[22px]': true,
     'data-[state=error]:border-red-11 data-[state=error]:bg-red-5 data-[state=error]:border-l-2 data-[state=error]:pl-[22px]': true,
+    'active:border-orange active:border-l-2 active:pl-[22px]': true,
     [Astro.props.class ?? '']: !!Astro.props.class,
   }}
 >
-  <div class="text-center pr-10">{Astro.props.number}</div>
+  <div class="text-center pr-10 self-start">{Astro.props.number}</div>
   <slot />
 </div>
