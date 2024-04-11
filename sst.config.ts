@@ -127,6 +127,7 @@ export default $config({
 
       const portSSH = 22;
       const portHTTP = 80;
+      const portHTTPS = 443;
 
       const taskDefinition = new aws.ecs.TaskDefinition("SSHTask", {
         family: "ssh",
@@ -190,6 +191,12 @@ export default $config({
               protocol: "tcp",
               cidrBlocks: ["0.0.0.0/0"],
             },
+            {
+              fromPort: portHTTPS,
+              toPort: portHTTPS,
+              protocol: "tcp",
+              cidrBlocks: ["0.0.0.0/0"],
+            },
           ],
         },
       );
@@ -230,6 +237,29 @@ export default $config({
         ],
       });
 
+      const cert = new aws.acm.Certificate("SSLCertificate", {
+        domainName: "terminal.shop",
+        validationMethod: "DNS",
+      });
+      const zone = await cloudflare.getZone({ name: "terminal.shop" });
+      const records: cloudflare.Record[] = [];
+      cert.domainValidationOptions.apply((domainValidationOptions) => {
+        const [options] = domainValidationOptions;
+        records.push(
+          new cloudflare.Record("CertificateValidationRecord", {
+            zoneId: zone.zoneId,
+            name: options.resourceRecordName,
+            type: options.resourceRecordType,
+            value: options.resourceRecordValue,
+            ttl: 300,
+          }),
+        );
+      });
+      const validation = new aws.acm.CertificateValidation("CertValidation", {
+        certificateArn: cert.arn,
+        validationRecordFqdns: records.map((record) => record.hostname),
+      });
+
       const nlb = new aws.lb.LoadBalancer("SSHNlb", {
         internal: false,
         loadBalancerType: "network",
@@ -252,6 +282,18 @@ export default $config({
         loadBalancerArn: nlb.arn,
         port: portHTTP,
         protocol: "TCP",
+        defaultActions: [
+          {
+            type: "forward",
+            targetGroupArn: httpTargetGroup.arn,
+          },
+        ],
+      });
+      new aws.lb.Listener("HttpsListener", {
+        certificateArn: validation.certificateArn,
+        loadBalancerArn: nlb.arn,
+        port: portHTTPS,
+        protocol: "TLS",
         defaultActions: [
           {
             type: "forward",
