@@ -8,7 +8,6 @@ on:
 
 concurrency: 
   group: ${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -21,6 +20,12 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            .sst
+          key: ${{ runner.os }}-sst
 
       - uses: oven-sh/setup-bun@v1
         with:
@@ -44,4 +49,5 @@ jobs:
 
       - name: Deploy
         run: "NO_BUN=true sst deploy --stage=${GITHUB_REF_NAME}"
+
 
