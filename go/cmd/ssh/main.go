@@ -154,7 +154,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-var date = time.Date(2024, time.April, 18, 11, 0, 0, 0, time.UTC)
+var date = time.Date(2024, time.April, 18, 0, 0, 0, 0, time.UTC)
 
 func (m model) View() string {
 	timeDiff := date.Sub(time.Now())
@@ -162,7 +162,7 @@ func (m model) View() string {
 	hours := int(timeDiff.Hours()) % 24
 	minutes := int(timeDiff.Minutes()) % 60
 	seconds := int(timeDiff.Seconds()) % 60
-	milliseconds := int(timeDiff.Milliseconds()) % 1000
+	// milliseconds := int(timeDiff.Milliseconds()) % 1000
 	font := fonts[m.fontIndex]
 
 	result := strings.Join(
@@ -173,10 +173,9 @@ func (m model) View() string {
 			figure.NewFigure(
 				fmt.Sprintf("%02dm %02ds", minutes, seconds),
 				font, true).String(),
-			figure.NewFigure(
-				fmt.Sprintf("%03dms", milliseconds),
-				font, true).String(),
-			font,
+			// figure.NewFigure(
+			// 	fmt.Sprintf("%03dms", milliseconds),
+			// 	font, true).String(),
 		},
 		"\n",
 	)
@@ -194,6 +193,8 @@ func (m model) View() string {
 }
 
 var fonts = []string{
+	"eftipiti",
+	"dotmatrix",
 	"3-d",
 	"3x5",
 	"5lineoblique",
@@ -235,11 +236,9 @@ var fonts = []string{
 	"digital",
 	"doh",
 	"doom",
-	"dotmatrix",
 	"drpepper",
 	"eftichess",
 	"eftifont",
-	"eftipiti",
 	"eftirobot",
 	"eftitalic",
 	"eftiwall",
