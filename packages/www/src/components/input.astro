@@ -54,7 +54,6 @@ const { class: _, ...props } = Astro.props
       caret.classList.remove('animate-blink')
 
       const selection = document.getSelection()
-      console.log(selection)
       visible = selection?.isCollapsed ?? false // input?.selectionStart === input?.selectionEnd
       position = visible ? selection?.anchorOffset : undefined // visible ? input?.selectionStart : null 
 
