@@ -1,7 +1,7 @@
 ---
 import Layout from '@layouts/base.astro'
 import Countdown from '@components/countdown.astro'
-import Cursor from '@components/cursor.astro'
+import Caret from '@components/caret.astro'
 import Input from '@components/input.astro'
 import Line from '@components/line.astro'
 
@@ -19,7 +19,7 @@ const showSshCommand = false
           <div class="flex flex-wrap items-center">
             <div class="flex items-center flex-nowrap">
               <h1 class="text-white whitespace-nowrap">ssh terminal.shop</h1>
-              <Cursor class="ml-1.5" />
+              <Caret class="ml-1.5" />
               <div
                 id="ssh-supplement"
                 class:list={{
@@ -89,13 +89,11 @@ const showSshCommand = false
             set:html="# enter your email address"
           />
         </Line>
-        <Line tabindex={-1} id="email-line" number={4} class="group/email">
+        <Line tabindex={-1} id="email-line" number={4}>
           <Input autofocus id="email-input" labelledby="email-label" />
-          <Cursor class="hidden group-has-[:focus]/email:block" />
         </Line>
-        <Line id="extra-line" number={5} class="group/extra hidden">
+        <Line tabindex={-1} id="extra-line" number={5} class="hidden">
           <Input id="extra-input" />
-          <Cursor class="hidden group-has-[:focus]/extra:block" />
         </Line>
       </Fragment>
     ) : null

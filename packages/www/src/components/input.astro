@@ -1,5 +1,6 @@
 ---
 import type { HTMLAttributes } from 'astro/types'
+import Caret from '@components/caret.astro'
 interface Props extends HTMLAttributes<'span'> {
   labelledby?: string
 }
@@ -8,7 +9,8 @@ const { class: _, ...props } = Astro.props
 
 <div
   class:list={{
-    'flex items-center overflow-x-scroll no-scrollbar': true,
+    'input-container relative group/input': true,
+    'flex items-center overflow-x-scroll no-scrollbar pr-[10px]': true,
     [Astro.props.class ?? '']: !!Astro.props.class,
   }}
 >
@@ -18,10 +20,72 @@ const { class: _, ...props } = Astro.props
     contenteditable
     aria-labelledby={Astro.props.labelledby}
     class:list={{
+      'input': true,
       'bg-transparent text-white leading-10 flex gap-2 flex-wrap': true,
       'focus:outline-none whitespace-nowrap caret-transparent': true,
     }}
     role="textbox"
   >
   </span>
+  <div class="input-clone absolute inset-0 flex items-center pointer-events-none" aria-hidden="true">
+    <div class="input-content flex items-center leading-10 whitespace-nowrap focus:outline-none">
+      <span class="input-before text-transparent"></span>
+      <Caret class="input-caret hidden group-has-[:focus]/input:block" />
+      <span class="input-after text-transparent"></span>
+    </div>
+  </div>
 </div>
+<script>
+  const containers = document.querySelectorAll('.input-container');
+  containers.forEach((element) => {
+    const container = element as HTMLDivElement
+    const clone = container.querySelector('.input-clone') as HTMLDivElement
+    const before = container.querySelector('.input-before') as HTMLDivElement
+    const after = container.querySelector('.input-after') as HTMLDivElement
+    const caret = container.querySelector('.input-caret') as HTMLDivElement
+    const input = container.querySelector('.input') as HTMLDivElement
+
+    let position: number | undefined = undefined
+    let visible: boolean = false
+    let blinkTimeout: ReturnType<typeof setTimeout> | undefined = undefined 
+
+    function update() {
+      if (blinkTimeout) clearTimeout(blinkTimeout)
+      caret.classList.remove('animate-blink')
+
+      const selection = document.getSelection()
+      console.log(selection)
+      visible = selection?.isCollapsed ?? false // input?.selectionStart === input?.selectionEnd
+      position = visible ? selection?.anchorOffset : undefined // visible ? input?.selectionStart : null 
+
+      if (position !== undefined) {
+        const beforeText = input.innerText
+          .substring(0, position)
+          .replace(/ /g, '&nbsp')
+        const afterText = input.innerText.substring(position).replace(/ /g, '&nbsp')
+
+        before.innerHTML = beforeText
+        after.innerHTML = afterText
+      }
+
+      if (visible) {
+        caret.classList.remove("!hidden")
+      } else {
+        caret.classList.add("!hidden")
+      }
+
+      clone.scrollLeft = input.scrollLeft
+
+      blinkTimeout = setTimeout(() => {
+        caret.classList.add('animate-blink')
+      }, 200)
+    }
+
+    input.addEventListener('input', update)
+    input.addEventListener('keydown', update)
+    input.addEventListener('click', update)
+    input.addEventListener('keyup', update)
+    input.addEventListener('touchend', update)
+    input.addEventListener('change', update)
+  })
+</script>
