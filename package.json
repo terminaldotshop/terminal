@@ -2,6 +2,15 @@
   "name": "terminal-shop",
   "version": "0.0.0",
   "sideEffects": false,
+  "scripts": {
+    "dev": "sst dev",
+    "build": "sst build",
+    "deploy": "sst deploy",
+    "remove": "sst remove",
+    "console": "sst console",
+    "typecheck": "tsc -noEmit",
+    "sso": "aws sso login --sso-session=ironbay"
+  },
   "workspaces": [
     "packages/*"
   ],
