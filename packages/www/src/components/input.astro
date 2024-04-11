@@ -80,11 +80,16 @@ const { class: _, ...props } = Astro.props
       }, 200)
     }
 
-    input.addEventListener('input', update)
-    input.addEventListener('keydown', update)
-    input.addEventListener('click', update)
     input.addEventListener('keyup', update)
-    input.addEventListener('touchend', update)
+    input.addEventListener('keydown', update)
+    input.addEventListener('mousedown', update)
+    input.addEventListener('touchstart', update)
+    input.addEventListener('input', update)
+    input.addEventListener('paste', update)
+    input.addEventListener('cut', update)
+    input.addEventListener('mousemove', update)
+    input.addEventListener('select', update)
+    input.addEventListener('selectstart', update)
     input.addEventListener('change', update)
   })
 </script>
