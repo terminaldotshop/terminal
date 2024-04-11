@@ -10,8 +10,11 @@ export default $config({
       home: "cloudflare",
       providers: {
         aws: {
-          profile:
-            input.stage === "production" ? "ironbay-production" : "ironbay-dev",
+          profile: process.env.GITHUB_ACTIONS
+            ? undefined
+            : input.stage === "production"
+              ? "ironbay-production"
+              : "ironbay-dev",
         },
         random: true,
         docker: true,
