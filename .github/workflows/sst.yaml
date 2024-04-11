@@ -1,0 +1,47 @@
+name: sst
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - production
+
+concurrency: 
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "20"
+
+      - run: "curl -fsSL https://ion.sst.dev/install | bash"
+
+      - if: github.ref == 'refs/heads/production'
+        name: Configure Production AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::435146552667:role/terminal-shop-production-github
+          aws-region: us-east-1
+
+      - name: Install Dependencies
+        run: bun install
+
+      - name: Deploy
+        run: "NO_BUN=true sst deploy --stage=${GITHUB_REF_NAME}"
+
