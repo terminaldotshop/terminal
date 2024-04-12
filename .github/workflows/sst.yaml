@@ -50,6 +50,9 @@ jobs:
       - name: Deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: "NO_BUN=true sst deploy --stage=${GITHUB_REF_NAME}"
+        run: |
+          sst install
+          rm -rf .sst/platform/node_modules/npmlog
+          sst deploy --stage=${GITHUB_REF_NAME}
 
 
