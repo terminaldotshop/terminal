@@ -52,7 +52,8 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           sst install
-          rm -rf .sst/platform/node_modules/npmlog
+          cat .sst/platform/node_modules/string-width/package.json
+          cat .sst/platform/node_modules/width-align/package.json
           sst deploy --stage=${GITHUB_REF_NAME}
 
 
