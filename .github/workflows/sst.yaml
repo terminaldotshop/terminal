@@ -53,7 +53,7 @@ jobs:
         run: |
           sst install
           cat .sst/platform/node_modules/string-width/package.json
-          cat .sst/platform/node_modules/width-align/package.json
+          # cat .sst/platform/node_modules/width-align/package.json
           sst deploy --stage=${GITHUB_REF_NAME}
 
 
