@@ -1,34 +1,8 @@
 ---
 import Layout from '@layouts/base.astro'
-import Line from '@components/line.astro'
-import Caret from '@components/caret.astro'
-
-const heroes = [
-  'thdxr',
-  'adamdotdev',
-  'theprimeagen',
-  'teej_dv',
-  'iamdavidhill',
-]
+import AboutComponent from '@components/about'
 ---
 
 <Layout>
-  <Line number={1}>
-    <h1
-      set:html="# Amazingly awesome products for developers brought to you by a group of talented, good looking, and humble heroes..."
-    />
-  </Line>
-  {
-    heroes.map((hero, index) => (
-      <Line number={index + 2} href={`https://x.com/${hero}`}>
-        <h2 set:html={`# @${hero}`} />
-      </Line>
-    ))
-  }
-  <Line number={heroes.length + 2}>
-    <div class="flex items-center gap-1.5">
-      <h3 class="text-white whitespace-nowrap">Terminal Products, Inc.</h3>
-      <Caret />
-    </div>
-  </Line>
+  <AboutComponent client:load />
 </Layout>

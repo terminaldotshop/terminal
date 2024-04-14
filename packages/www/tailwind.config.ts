@@ -39,6 +39,10 @@ export default {
           5: 'hsla(5, 99%, 56%, 0.33)',
           11: 'hsl(12, 100%, 75%)',
         },
+        blue: {
+          5: 'hsla(225, 98%, 62%, 0.42)',
+          11: 'hsl(228, 100%, 81%)',
+        },
       },
       animation: {
         blink: 'blink 1.45s infinite step-start',

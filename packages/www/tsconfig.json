@@ -6,7 +6,9 @@
       "@layouts/*": ["src/layouts/*"],
       "@components/*": ["src/components/*"],
       "@styles/*": ["src/styles/*"]
-    }
+    },
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js"
   },
   "exclude": ["dist"]
 }
