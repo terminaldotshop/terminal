@@ -6,6 +6,7 @@ import { cors } from "hono/cors";
 import { vValidator } from "@hono/valibot-validator";
 import { email, object, string } from "valibot";
 import { Resource } from "sst";
+import { swell } from "./swell";
 
 const SessionContext = createContext<typeof session.$typeValues>();
 
@@ -36,7 +37,13 @@ const app = new Hono()
   .use(logger())
   .use(cors())
   .use(auth)
-  .get("/api/user/me", async (c) => {})
+  .get("/api/user/me", async (c) => {
+    return c.json({ userID: useUserID() });
+  })
+  .get("/api/product", async (c) => {
+    const products = await swell("/products", {});
+    return c.json(products);
+  })
   .post(
     "/api/subscription",
     vValidator(
