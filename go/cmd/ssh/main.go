@@ -154,7 +154,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-var date = time.Date(2024, time.April, 18, 0, 0, 0, 0, time.UTC)
+var date = time.Date(2024, time.April, 18, 17, 0, 0, 0, time.UTC)
 
 func (m model) View() string {
 	timeDiff := date.Sub(time.Now())

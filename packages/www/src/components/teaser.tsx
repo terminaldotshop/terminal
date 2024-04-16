@@ -68,7 +68,7 @@ const TeaserComponent: Component<TeaserProps> = () => {
         <h1># something is brewing</h1>
       </Line>
       <Line number={2}>
-        <Countdown date="2024-04-18" class="text-white" />
+        <Countdown date="2024-04-18T17:00:00.00Z" class="text-white" />
       </Line>
       <Line number={3}>
         <label id="email-label" for="email-input">
