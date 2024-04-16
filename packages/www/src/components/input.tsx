@@ -33,11 +33,14 @@ const InputComponent: Component<InputProps> = (props) => {
   const [before, setBefore] = createSignal<string>()
   const [after, setAfter] = createSignal<string>()
   const [blink, setBlink] = createSignal<boolean>(true)
+  const [internalValue, setInternalValue] = createSignal<string>()
 
   let blinkTimeout: ReturnType<typeof setTimeout> | undefined = undefined
 
   const update = () => {
     if (props.readonly) return
+
+    setInternalValue(ref?.innerText)
 
     const selection = document.getSelection()
     const visible = selection?.isCollapsed ?? false
@@ -117,9 +120,14 @@ const InputComponent: Component<InputProps> = (props) => {
       ></span>
       <Show when={props.state !== 'normal'}>
         <span class="text-white leading-10 flex gap-2 flex-wrap">
-          <div classList={{ 'animate-shake': props.state === 'error' }}>
-            {props.value}
-          </div>
+          <Show when={props.readonly}>
+            <div>{props.value}</div>
+          </Show>
+          <Show when={!props.readonly}>
+            <div classList={{ 'animate-shake': props.state === 'error' }}>
+              {internalValue()}
+            </div>
+          </Show>
           <div
             classList={{
               'w-4 h-4 self-center': true,
