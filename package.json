@@ -18,5 +18,8 @@
   "dependencies": {
     "patch-package": "^8.0.0",
     "sst": "3.0.11"
+  },
+  "devDependencies": {
+    "@types/shippo": "^1.7.8"
   }
 }

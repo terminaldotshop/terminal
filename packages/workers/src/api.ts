@@ -4,12 +4,52 @@ import { session } from "./session";
 import { createContext } from "./context";
 import { cors } from "hono/cors";
 import { vValidator } from "@hono/valibot-validator";
-import { array, email, integer, length, number, object, string } from "valibot";
+import {
+  array,
+  email,
+  integer,
+  length,
+  minLength,
+  number,
+  object,
+  optional,
+  string,
+} from "valibot";
 import { Resource } from "sst";
-import { swell } from "./swell";
 import { stripe } from "./stripe";
+import { shippo } from "./shippo";
 
 const SessionContext = createContext<typeof session.$typeValues>();
+
+const from = {
+  name: "Terminal Products, Inc.",
+  street1: "7969 NW 2nd Street",
+  street2: "#1129",
+  city: "Miami",
+  state: "FL",
+  zip: "33126",
+  country: "US",
+};
+
+// single 12oz bag
+const small = {
+  length: 7,
+  width: 4.5,
+  height: 2.75,
+  distance_unit: "in",
+  weight: 1,
+  mass_unit: "lb",
+};
+
+// 1-3 12oz bags
+const large = {
+  length: 11.25,
+  width: 8,
+  height: 3,
+  distance_unit: "in",
+  weight: 1,
+  mass_unit: "lb",
+};
 
 function useUserID() {
   const session = SessionContext.use();
@@ -69,9 +109,9 @@ const app = new Hono()
         shipping: object({
           name: string(),
           line1: string(),
-          line2: string(),
+          line2: optional(string()),
           city: string(),
-          state: string(),
+          state: string([length(2)]),
           country: string([length(2)]),
           zip: string(),
         }),
@@ -86,6 +126,52 @@ const app = new Hono()
     async (c) => {
       const body = c.req.valid("json");
       console.log(body);
+
+      // TODO: handle other products, only nil blend for now
+      const quantity = body.products.reduce(
+        (total, product) => total + product.quantity,
+        0,
+      );
+
+      if (quantity <= 0) throw new Error("Quantity must be greater than 0");
+
+      let largeBoxesNeeded = Math.floor(quantity / 3);
+      let singleBoxesNeeded = quantity % 3;
+
+      if (singleBoxesNeeded === 2) {
+        largeBoxesNeeded += 1;
+        singleBoxesNeeded = 0; // Used a large box instead of single boxes
+      }
+
+      const parcels = [];
+      for (let i = 0; i < largeBoxesNeeded; i++) parcels.push({ ...large });
+      for (let i = 0; i < singleBoxesNeeded; i++) parcels.push({ ...small });
+
+      const shipment = await shippo("/shipments", {
+        method: "POST",
+        body: JSON.stringify({
+          address_from: from,
+          address_to: {
+            ...body.shipping,
+            line1: undefined,
+            line2: undefined,
+            street1: body.shipping.line1,
+            street2: body.shipping.line2,
+          },
+          parcels,
+          async: false,
+        }),
+      });
+
+      console.log("shipment", shipment);
+
+      if (shipment.status !== "SUCCESS")
+        throw new Error("Failed to get shipping rates.");
+
+      const [rate] = shipment.rates.sort(
+        (a, b) => Number.parseFloat(a.amount) - Number.parseFloat(b.amount),
+      );
+
       await stripe().customers.update(useUserID(), {
         email: body.email,
       });
@@ -101,13 +187,16 @@ const app = new Hono()
             postal_code: body.shipping.zip,
           },
         },
+        metadata: {
+          rate: rate.object_id,
+        },
         shipping_cost: {
           shipping_rate_data: {
             type: "fixed_amount",
-            display_name: "Standard Shipping",
+            display_name: `${rate.provider} ${rate.servicelevel.name}`,
             fixed_amount: {
               currency: "usd",
-              amount: 1000,
+              amount: Number.parseFloat(rate.amount) * 100,
             },
           },
         },
@@ -137,12 +226,14 @@ const app = new Hono()
     vValidator(
       "json",
       object({
-        orderID: string([length(1)]),
-        token: string([length(1)]),
+        orderID: string([minLength(1)]),
+        token: string([minLength(1)]),
       }),
     ),
     async (c) => {
       const body = c.req.valid("json");
+      const invoice = await stripe().invoices.retrieve(body.orderID);
+      invoice.metadata.rate;
       const paymentMethod = await stripe().paymentMethods.create({
         type: "card",
         card: {
@@ -164,6 +255,26 @@ const app = new Hono()
       await stripe().invoices.pay(body.orderID, {
         payment_method: existing.id,
       });
+
+      const label = await shippo("/transactions", {
+        method: "POST",
+        body: JSON.stringify({
+          rate: invoice.metadata.rate,
+          async: false,
+        }),
+      });
+
+      console.log("label", label);
+
+      await stripe().invoices.update(body.orderID, {
+        metadata: {
+          ...invoice.metadata,
+          label: label.label_url,
+          trackingNumber: label.tracking_number,
+          trackingUrl: label.tracking_url_provider,
+        },
+      });
+
       return c.json(true);
     },
   )

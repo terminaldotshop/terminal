@@ -31,6 +31,7 @@ export default $config({
       SwellSecret: new sst.Secret("SwellSecret"),
       AirtableSecret: new sst.Secret("AirtableSecret"),
       StripeSecret: new sst.Secret("StripeSecret"),
+      ShippoSecret: new sst.Secret("ShippoSecret"),
     };
     const auth = new sst.cloudflare.Auth("Auth", {
       authenticator: {
@@ -44,8 +45,9 @@ export default $config({
       link: [
         secrets.SwellSecret,
         secrets.AirtableSecret,
-        auth,
         secrets.StripeSecret,
+        secrets.ShippoSecret,
+        auth,
       ],
       domain: "api." + domain,
     });
