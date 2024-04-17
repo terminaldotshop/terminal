@@ -152,6 +152,9 @@ func (m Model) systemUpdates(raw tea.Msg) (bool, tea.Model, tea.Cmd) {
 	case StartShipping:
 		m.currentPage = 3
 		return true, m, nil
+	case StartCC:
+		m.currentPage = 4
+		return true, m, nil
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c":
