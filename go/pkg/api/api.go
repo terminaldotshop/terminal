@@ -49,7 +49,7 @@ func FetchProducts() (ProductResponse, error) {
 	return productResponse, nil
 }
 
-func FetchOneProduct() (*Widget, error) {
+func FetchOneProduct() (*Product, error) {
 	response, err := FetchProducts()
 	if err != nil {
 		return nil, err
@@ -120,12 +120,19 @@ type ProductOrder struct {
 }
 
 // {"id":"in_1P6deNDgGJQx1Mr65m1t9LEE","subtotal":7500,"shipping":1000,"total":8500}
+type ShippingInfoResponse struct {
+	ID          string  `json:"id"`
+	DisplayName string  `json:"name"`
+	Cost        float64 `json:"cost"`
+	Estimate    string  `json:"estimate"`
+}
+
 type OrderResponse struct {
-	OrderID      string `json:"id"`
-	Tax          int    `json:"tax"`
-	ShippingCost int    `json:"shipping"`
-	Subtotal     int    `json:"subtotal"`
-	Total        int    `json:"total"`
+	OrderID  string               `json:"id"`
+	Tax      int                  `json:"tax"`
+	Shipping ShippingInfoResponse `json:"shipping"`
+	Subtotal int                  `json:"subtotal"`
+	Total    int                  `json:"total"`
 }
 
 func CreateOrder(bearer string, order OrderParams) (*OrderResponse, error) {

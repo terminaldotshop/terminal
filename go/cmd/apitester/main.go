@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -47,7 +48,7 @@ func main() {
 		"São Paulo",
 		"01310-000",
 	)
-	if true {
+	if false {
 		card = brazilCard
 	}
 
@@ -63,7 +64,7 @@ func main() {
 		"Berlin",
 		"10117",
 	)
-	if true {
+	if false {
 		card = berlinCard
 		card.AddressState = nil
 	}
@@ -91,6 +92,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	pretty, _ := json.MarshalIndent(order, "", "  ")
+	fmt.Println("order:", string(pretty))
 
 	fmt.Println("Requesting card info...")
 	info, err := api.StripeCreditCard(card)
