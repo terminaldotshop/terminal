@@ -111,7 +111,7 @@ const app = new Hono()
           line1: string(),
           line2: optional(string()),
           city: string(),
-          state: string([length(2)]),
+          state: optional(string([length(2)])),
           country: string([length(2)]),
           zip: string(),
         }),
@@ -171,6 +171,12 @@ const app = new Hono()
       const [rate] = shipment.rates.sort(
         (a, b) => Number.parseFloat(a.amount) - Number.parseFloat(b.amount),
       );
+      const shipping = {
+        id: rate.object_id,
+        name: `${rate.provider} ${rate.servicelevel.name}`,
+        cost: Number.parseFloat(rate.amount),
+        estimate: rate.duration_terms,
+      };
 
       await stripe().customers.update(useUserID(), {
         email: body.email,
@@ -188,15 +194,15 @@ const app = new Hono()
           },
         },
         metadata: {
-          rate: rate.object_id,
+          rate: shipping.id,
         },
         shipping_cost: {
           shipping_rate_data: {
             type: "fixed_amount",
-            display_name: `${rate.provider} ${rate.servicelevel.name}`,
+            display_name: shipping.name,
             fixed_amount: {
               currency: "usd",
-              amount: Number.parseFloat(rate.amount) * 100,
+              amount: shipping.cost * 100,
             },
           },
         },
@@ -216,7 +222,7 @@ const app = new Hono()
         id: invoice.id,
         tax: result.tax,
         subtotal: result.subtotal,
-        shipping: result.shipping_cost.amount_total,
+        shipping,
         total: result.amount_due,
       });
     },
