@@ -6,10 +6,7 @@ export default AuthHandler({
   providers: {
     ssh: (route, ctx) => {
       route.post("/login", async (c) => {
-        const fingerprint = await c.req
-          .formData()
-          .then((data) => data.get("fingerprint"));
-
+        const fingerprint = await c.req.json().then((x) => x["fingerprint"]);
         if (!fingerprint) {
           return c.json({ error: "Fingerprint is required" }, 400);
         }
@@ -19,10 +16,11 @@ export default AuthHandler({
           "/accounts?where[fingerprint]=" + fingerprint,
           {},
         );
-        let userID = search.results[0]?.id;
-        if (!userID) {
+        var user = search.results[0];
+
+        if (!user) {
           console.log("creating user");
-          userID = await swell("/accounts", {
+          user = await swell("/accounts", {
             method: "POST",
             headers: {
               "content-type": "application/x-www-form-urlencoded",
@@ -33,10 +31,13 @@ export default AuthHandler({
             }).toString(),
           }).then((res) => res.id);
         }
+        const x = "";
         return c.json({
+          userID: user.id,
+          email: user.email.endsWith("terminal.shop") ? undefined : user.email,
           accessToken: await session.create({
             type: "user",
-            properties: { userID },
+            properties: { userID: user.id },
           }),
         });
       });
