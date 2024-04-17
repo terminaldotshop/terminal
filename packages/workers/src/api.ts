@@ -4,7 +4,7 @@ import { session } from "./session";
 import { createContext } from "./context";
 import { cors } from "hono/cors";
 import { vValidator } from "@hono/valibot-validator";
-import { email, object, string } from "valibot";
+import { array, email, integer, length, number, object, string } from "valibot";
 import { Resource } from "sst";
 import { swell } from "./swell";
 
@@ -44,6 +44,48 @@ const app = new Hono()
     const products = await swell("/products", {});
     return c.json(products);
   })
+  .post(
+    "/api/order",
+    // vValidator(
+    //   "json",
+    //   object({
+    //     shipping: object({
+    //       address1: string(),
+    //       address2: string(),
+    //       city: string(),
+    //       country: string([length(2)]),
+    //       name: string(),
+    //     }),
+    //     products: array(
+    //       object({
+    //         id: string(),
+    //         quantity: number([integer()]),
+    //       }),
+    //     ),
+    //   }),
+    // ),
+    async (c) => {
+      const accountID = "6612082b13c85300127985de";
+      console.log("wtf");
+
+      console.log(
+        "ok",
+        await swell("/orders", {
+          method: "POST",
+          headers: {
+            "content-type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            account_id: accountID,
+            "items[0][product_id]": "6615f3dc14a8960012e304d9",
+            "items[0][quantity]": "1",
+            "shipping[price]": "10",
+          }).toString(),
+        }),
+      );
+      return c.json(true);
+    },
+  )
   .post(
     "/api/subscription",
     vValidator(

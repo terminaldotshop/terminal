@@ -1,7 +1,5 @@
 /// <reference path="./.sst/platform/config.d.ts" />
-
 import { resolve } from "path";
-
 export default $config({
   app(input) {
     return {
@@ -18,13 +16,13 @@ export default $config({
         },
         random: true,
         docker: true,
+        tls: true,
       },
     };
   },
   async run() {
     const isPermanentStage =
       $app.stage === "production" || $app.stage === "dev";
-
     const domain =
       $app.stage === "production"
         ? "terminal.shop"
@@ -45,7 +43,6 @@ export default $config({
       link: [secrets.SwellSecret, secrets.AirtableSecret, auth],
       domain: "api." + domain,
     });
-
     const www = new sst.cloudflare.StaticSite("Www", {
       domain: "www." + domain,
       path: "./packages/www",
@@ -57,7 +54,6 @@ export default $config({
         output: "./dist",
       },
     });
-
     if (isPermanentStage) {
       const github = new aws.iam.OpenIdConnectProvider("GithubOidc", {
         url: "https://token.actions.githubusercontent.com",
@@ -92,13 +88,17 @@ export default $config({
         role: githubRole.name,
       });
     }
-
+    const ssh = new tls.PrivateKey("SSHKey", {
+      algorithm: "ED25519",
+    });
+    ssh.privateKeyPem.apply(console.log);
+    ssh.privateKeyOpenssh.apply(console.log);
+    ssh.privateKeyPemPkcs8.apply(console.log);
     if (!$dev) {
       const repository = new aws.ecr.Repository("DockerRepository", {
         name: [$app.name, $app.stage].join("-"),
         forceDelete: true,
       });
-
       const vpc = new aws.ec2.Vpc("Vpc", {
         cidrBlock: "10.0.0.0/16",
         enableDnsSupport: true,
@@ -136,7 +136,6 @@ export default $config({
           password: password,
         };
       });
-
       const image = new docker.Image("SSHImage", {
         build: {
           context: resolve("./go"),
@@ -165,11 +164,9 @@ export default $config({
         policyArn:
           "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
       });
-
       const portSSH = 22;
       const portHTTP = 80;
       const portHTTPS = 443;
-
       const taskDefinition = new aws.ecs.TaskDefinition("SSHTask", {
         family: "ssh",
         trackLatest: true,
@@ -241,7 +238,6 @@ export default $config({
           ],
         },
       );
-
       const sshTargetGroup = new aws.lb.TargetGroup("SSHNlbTargetGroup", {
         port: portSSH,
         protocol: "TCP",
@@ -277,7 +273,6 @@ export default $config({
           },
         ],
       });
-
       const cert = new aws.acm.Certificate("SSLCertificate", {
         domainName: "terminal.shop",
         validationMethod: "DNS",
@@ -300,7 +295,6 @@ export default $config({
         certificateArn: cert.arn,
         validationRecordFqdns: records.map((record) => record.hostname),
       });
-
       const nlb = new aws.lb.LoadBalancer("SSHNlb", {
         internal: false,
         loadBalancerType: "network",

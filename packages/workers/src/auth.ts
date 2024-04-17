@@ -29,9 +29,8 @@ export default AuthHandler({
               email: "ssh+" + fingerprint + "@terminal.shop",
               fingerprint,
             }).toString(),
-          }).then((res) => res.id);
+          });
         }
-        const x = "";
         return c.json({
           userID: user.id,
           email: user.email.endsWith("terminal.shop") ? undefined : user.email,
