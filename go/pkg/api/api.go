@@ -60,6 +60,23 @@ func FetchOneProduct() (*Product, error) {
 	}
 
 	product := response[0]
+	product.Art = `
+                {
+             }   }   {
+            {   {  }  }
+             }   }{  {
+           _{  }{  }  }_
+          (  }{  }{  {  )
+          |""---------""|
+          |             /""\
+          |            | _  |
+          |             / | |
+          |             |/  |
+          |             /  /
+          |            |  /
+          |            "T"
+           ""---------""`
+
 	return &product, nil
 }
 
@@ -99,19 +116,9 @@ func FetchUserToken(public_key string) (*UserCredentials, error) {
 }
 
 type OrderParams struct {
-	Email    string          `json:"email"`
-	Shipping ShippingDetails `json:"shipping"`
-	Products []ProductOrder  `json:"products"`
-}
-
-type ShippingDetails struct {
-	Name     string  `json:"name"`
-	Address1 *string `json:"line1"`
-	Address2 *string `json:"line2"`
-	City     *string `json:"city"`
-	State    *string `json:"state,omitempty"`
-	Country  *string `json:"country"`
-	Zip      *string `json:"zip"`
+	Email    string         `json:"email"`
+	Shipping Address        `json:"shipping"`
+	Products []ProductOrder `json:"products"`
 }
 
 type ProductOrder struct {

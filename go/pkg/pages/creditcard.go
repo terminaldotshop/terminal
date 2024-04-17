@@ -99,10 +99,10 @@ func (s *CreditCardPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd)
 	if f, ok := form.(*huh.Form); ok {
 		s.form = f
 		if s.form.State == huh.StateCompleted {
-            m.creditCardState = s.CreditCardState
-            if s.CreditCardState.Different {
-                return true, m, NewNavigateCCAddress
-            }
+			m.creditCardState = s.CreditCardState
+			if s.CreditCardState.Different {
+				return true, m, NewNavigateCCAddress
+			}
 			return true, m, NewNavigateConfirm
 		}
 		return true, m, cmd
@@ -113,8 +113,7 @@ func (s *CreditCardPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd)
 
 func (s *CreditCardPage) Title() string { return "CreditCard" }
 
-
 func (s *CreditCardPage) Render(m *Model) string {
-    return RenderSplitView(*m, s.form.View(),
-        lipgloss.JoinVertical(0, RenderEmail(*m), RenderShipping(*m, m.shippingState, "Shipping")))
+	return RenderSplitView(*m, s.form.View(),
+		lipgloss.JoinVertical(0, RenderEmail(*m), RenderShipping(*m, m.shippingAddress, "Shipping")))
 }

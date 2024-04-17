@@ -72,14 +72,14 @@ func main() {
 	fmt.Println("Requesting order...")
 	order, err := api.CreateOrder(token.AccessToken, api.OrderParams{
 		Email: "KEKW_ADAM_IS_VEGAN@gmail.com",
-		Shipping: api.ShippingDetails{
-			Address1: card.AddressLine1,
-			Address2: card.AddressLine2,
-			City:     card.AddressCity,
-			State:    card.AddressState,
-			Country:  card.AddressCountry,
-			Zip:      card.AddressZip,
-			Name:     "teej-dv",
+		Shipping: api.Address{
+			AddrLine1: card.AddressLine1,
+			AddrLine2: card.AddressLine2,
+			City:      card.AddressCity,
+			State:     card.AddressState,
+			Country:   card.AddressCountry,
+			Zip:       card.AddressZip,
+			Name:      "teej-dv",
 		},
 		Products: []api.ProductOrder{
 			{

@@ -32,7 +32,7 @@ const (
 
 type OrderInfo struct {
 	count   int
-	product api.Product
+	product *api.Product
 }
 
 type Model struct {
@@ -51,22 +51,23 @@ type Model struct {
 	order OrderInfo
 	email string
 
-	shippingState   ShippingState
 	creditCardState CreditCardState
 
-	creditCardAddr ShippingState
+	shippingAddress api.Address
+	billingAddress  api.Address
 
 	Dialog *string
 }
 
-var defaultShippingState = ShippingState{
-	Name:      "Teej DV",
-	AddrLine1: "Streamer Lane",
-	AddrLine2: "",
-	City:      "Miami",
-	State:     "FL",
-	Zip:       "33131",
-}
+var defaultShippingState = api.NewAddress(
+	"Teej DV",
+	"Streamer Lane",
+	"",
+	"Miami",
+	"FL",
+	"US",
+	"33131",
+)
 
 var defaultCreditCardState = CreditCardState{
 	Name: "Teej DV",
@@ -79,16 +80,15 @@ var defaultCreditCardState = CreditCardState{
 	Different: true,
 }
 
-var defaultCrediCardAddr = CreditCardAddress{
-	ShippingState: ShippingState{
-		Name:      "TJ DeVries",
-		AddrLine1: "Credit Card Drive",
-		AddrLine2: "WithSecondLine",
-		City:      "Miami",
-		State:     "FL",
-		Zip:       "33131",
-	},
-}
+var defaultBillingAddress = api.NewAddress(
+	"TJ DeVries",
+	"Credit Card Drive",
+	"WithSecondLine",
+	"Miami",
+	"FL",
+	"US",
+	"33131",
+)
 
 var defaultEmail = "teej_dv@twitch.tv"
 
@@ -119,6 +119,8 @@ func stateToNumber(toState string) int {
 func NewModel(toState string) *Model {
 	renderer := lipgloss.DefaultRenderer()
 
+	productPage := NewProductPage()
+
 	model := &Model{
 		renderer:    renderer,
 		currentPage: PRODUCT_PAGE,
@@ -129,7 +131,7 @@ func NewModel(toState string) *Model {
 		Dialog:      nil,
 		pages: []Page{
 			&MinWidthPage{},
-			&ProductPage{},
+			productPage,
 			NewEmailPage(),
 			NewShippingPage(),
 			NewCreditCardPage(),
@@ -138,7 +140,7 @@ func NewModel(toState string) *Model {
 		},
 		order: OrderInfo{
 			count:   0,
-			product: api.GetProducts()[0],
+			product: productPage.Product,
 		},
 	}
 
@@ -155,9 +157,14 @@ func NewModel(toState string) *Model {
 
 	log.Warn("test", "state", state, "email", goToEmail, "shipping", goToShipping, "cc", goToCC, "ccaddr", goToCCAddr, "con", goToConfirm)
 	if state >= goToEmail {
+		product, err := api.FetchOneProduct()
+		if err != nil {
+			log.Fatal("Failed to fetch. Tag @thdxr on x.com")
+		}
+
 		log.Warn("order info")
 		model.order.count = 1
-		model.order.product = api.GetProducts()[0]
+		model.order.product = product
 		model.currentPage = EMAIL_PAGE
 	}
 
@@ -169,7 +176,7 @@ func NewModel(toState string) *Model {
 
 	if state >= goToCC {
 		log.Warn("shipping", "cc page?", CC_PAGE)
-		model.shippingState = defaultShippingState
+		model.shippingAddress = defaultShippingState
 		model.currentPage = CC_PAGE
 	}
 
@@ -181,7 +188,7 @@ func NewModel(toState string) *Model {
 
 	if state >= goToConfirm {
 		log.Warn("cc addr")
-		model.creditCardAddr = defaultCrediCardAddr.ShippingState
+		model.billingAddress = defaultBillingAddress
 		model.currentPage = CONFIRM_PAGE
 	}
 
