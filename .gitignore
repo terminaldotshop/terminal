@@ -3,5 +3,6 @@ dist
 .DS_Store
 .env
 go/id_ed25519
+
 # sst
 .sst
