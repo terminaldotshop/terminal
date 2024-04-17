@@ -5,6 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/log"
 	"github.com/terminalhq/terminal/go/pkg/api"
 )
 
@@ -60,8 +61,8 @@ var defaultEmail = "piq@called.it"
 
 const (
     goToEmail = 1
-    goToShipping
-    goToCC
+    goToShipping = 2
+    goToCC = 3
 )
 
 func stateToNumber(toState string) int {
@@ -100,7 +101,11 @@ func NewModel(toState string) *Model {
 	}
 
     state := stateToNumber(toState)
+
+    log.Warn("initial state", "state", state, "email", goToEmail, "shippingState", goToShipping, "cc", goToCC)
     if state == goToEmail {
+        model.order.count = 1
+        model.order.widget = api.GetWidgets()[0]
         model.currentPage = 2
     }
     if state == goToShipping {
@@ -135,8 +140,7 @@ func (m Model) systemUpdates(raw tea.Msg) (bool, tea.Model, tea.Cmd) {
 
 		if m.width < MIN_WIDTH || m.height < MIN_HEIGHT {
 			m.currentPage = 0
-		} else {
-			// TODO: we need to implement history
+		} else if m.currentPage == 0 {
 			m.currentPage = 1
 		}
 
@@ -173,6 +177,7 @@ func (m Model) Update(raw tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m Model) View() string {
 	page := m.pages[m.currentPage]
+    log.Warn("I am on page", "title", page.Title(), "currentPage", m.currentPage)
 
 	theme := GetTheme(m.renderer)
 	title := theme.ActivePage().Render(page.Title())

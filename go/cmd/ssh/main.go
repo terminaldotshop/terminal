@@ -45,6 +45,7 @@ func main() {
 	if httpPort == "" {
 		httpPort = "8000"
 	}
+
 	s, err := wish.NewServer(
 		wish.WithAddress(net.JoinHostPort("0.0.0.0", sshPort)),
 		wish.WithMiddleware(
