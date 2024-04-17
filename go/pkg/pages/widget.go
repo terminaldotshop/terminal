@@ -27,7 +27,7 @@ func (w *WidgetPage) Update(m Model, raw tea.Msg) (bool, tea.Model, tea.Cmd) {
     return false, m, nil
 }
 
-func (w *WidgetPage) Title() string { return "Widget" }
+func (w *WidgetPage) Title() string { return "Order" }
 
 func (w *WidgetPage) Render(m *Model) string {
 	titleStyle := m.theme.ActiveTitleForeground().

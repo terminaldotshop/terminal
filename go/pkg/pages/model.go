@@ -1,6 +1,7 @@
 package pages
 
 import (
+	"fmt"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -175,18 +176,37 @@ func (m Model) Update(raw tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+func (m Model) createTitle() string {
+	theme := GetTheme(m.renderer)
+
+    titles := make([]string, 0)
+    for i, page := range m.pages {
+        if i == 0 {
+            continue
+        }
+        current := i == m.currentPage
+        style := theme.Page()
+        if current {
+            style = theme.ActivePage()
+        }
+
+        title := style.MarginLeft(1).Render(fmt.Sprintf("> %s", page.Title()))
+
+        titles = append(titles, title)
+    }
+
+    return lipgloss.JoinHorizontal(0, titles...)
+}
+
 func (m Model) View() string {
 	page := m.pages[m.currentPage]
     log.Warn("I am on page", "title", page.Title(), "currentPage", m.currentPage)
-
-	theme := GetTheme(m.renderer)
-	title := theme.ActivePage().Render(page.Title())
 
 	pageStyle := m.renderer.NewStyle()
 
 	return lipgloss.JoinVertical(
 		lipgloss.Top,
-		title,
+		m.createTitle(),
 		pageStyle.Render(page.Render(&m)))
 }
 

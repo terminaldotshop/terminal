@@ -55,7 +55,7 @@ func (w *EmailPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd) {
     return false, m, nil
 }
 
-func (w *EmailPage) Title() string { return "Lets Start With The Email" }
+func (w *EmailPage) Title() string { return "Email" }
 
 func (w *EmailPage) Render(m *Model) string {
     return w.form.View()
