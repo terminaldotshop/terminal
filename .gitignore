@@ -1,10 +1,7 @@
 node_modules
 dist
-<<<<<<< HEAD
 .DS_Store
-=======
 .env
->>>>>>> 7ccc1fc (remove .env)
-
+go/id_ed25519
 # sst
 .sst
