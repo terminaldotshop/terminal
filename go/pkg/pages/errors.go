@@ -9,12 +9,12 @@ import (
 type errorHandler func(str string) error
 
 func withinLen(min, max int, name string) errorHandler {
-    return func(str string) error {
-        if len(str) < min && len(str) >= max {
-            return fmt.Errorf("expected %s to be between %d and %d, but got %d", name, min, max, len(str))
-        }
-        return nil
-    }
+	return func(str string) error {
+		if len(str) < min && len(str) >= max {
+			return fmt.Errorf("expected %s to be between %d and %d, but got %d", name, min, max, len(str))
+		}
+		return nil
+	}
 }
 
 func ccnValidator(s string) error {
@@ -42,45 +42,41 @@ func ccnValidator(s string) error {
 }
 
 func isDigits(name string) errorHandler {
-    return func(str string) error {
+	return func(str string) error {
+		for _, c := range str {
+			if !(c >= '0' && c <= '9') {
+				return fmt.Errorf("[%s] expected only digits but got %s", name, str)
+			}
+		}
 
-        for _, c := range str {
-            if !(c >= '0' && c <= '9') {
-                return fmt.Errorf("expected only digits but got %s", str)
-            }
-        }
-
-        return nil
-    }
+		return nil
+	}
 }
 
-
 func mustBeLen(length int, name string) errorHandler {
-    return func(str string) error {
-        if len(str) != length {
-            return fmt.Errorf("Expected %s to be length %d but got %d", name, length, len(str))
-        }
-        return nil
-    }
+	return func(str string) error {
+		if len(str) != length {
+			return fmt.Errorf("Expected %s to be length %d but got %d", name, length, len(str))
+		}
+		return nil
+	}
 }
 
 func notEmpty(name string) errorHandler {
-    return func(str string) error {
-        if len(str) == 0 {
-            return fmt.Errorf("%s cannot be empty", name)
-        }
-        return nil
-    }
+	return func(str string) error {
+		if len(str) == 0 {
+			return fmt.Errorf("%s cannot be empty", name)
+		}
+		return nil
+	}
 }
 
 func compose(a, b errorHandler) errorHandler {
-    return func(str string) error {
-        err := a(str)
-        if err != nil {
-            return err
-        }
-        return b(str)
-    }
+	return func(str string) error {
+		err := a(str)
+		if err != nil {
+			return err
+		}
+		return b(str)
+	}
 }
-
-

@@ -14,7 +14,7 @@ type CreditCardAddress struct {
 
 func NewCreditCardAddress() *CreditCardAddress {
 	creditCard := CreditCardAddress{
-		address: api.Address{},
+		address: api.NewAddress("", "", "", "", "", "", ""),
 		form:    nil,
 	}
 
@@ -52,6 +52,6 @@ func (s *CreditCardAddress) Render(m *Model) string {
 		lipgloss.JoinVertical(0,
 			RenderEmail(*m),
 			RenderShipping(*m, m.shippingAddress, "Shipping"),
-			RenderCreditCard(*m, m.creditCardState)),
+			RenderCreditCard(*m, m.creditCard)),
 	)
 }

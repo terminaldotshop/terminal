@@ -27,10 +27,10 @@ func (s *ConfirmPage) Render(m *Model) string {
 	lines := []string{
 		RenderEmail(*m),
 		RenderShipping(*m, m.shippingAddress, "Shipping Address"),
-		RenderCreditCard(*m, m.creditCardState),
+		RenderCreditCard(*m, m.creditCard),
 	}
 
-	if m.creditCardState.Different {
+	if m.differentBillingAddress {
 		lines = append(lines, RenderShipping(*m, m.billingAddress, "CC Address"))
 	}
 

@@ -23,13 +23,6 @@ const (
 	CONFIRM_PAGE           = 6
 )
 
-// type currentPage int
-//
-// const (
-// 	Cart currentPage = iota
-// 	Product
-// )
-
 type OrderInfo struct {
 	count   int
 	product *api.Product
@@ -51,7 +44,9 @@ type Model struct {
 	order OrderInfo
 	email string
 
-	creditCardState CreditCardState
+	creditCard api.CreditCard
+
+	differentBillingAddress bool
 
 	shippingAddress api.Address
 	billingAddress  api.Address
@@ -69,16 +64,13 @@ var defaultShippingState = api.NewAddress(
 	"33131",
 )
 
-var defaultCreditCardState = CreditCardState{
-	Name: "Teej DV",
-
-	CC:       "4242 4242 4242 4242",
-	CVC:      "314",
-	ExpMonth: "12",
-	ExpYear:  "34",
-
-	Different: true,
-}
+var defaultCreditCard = api.NewCreditCard(
+	"Teej DV",
+	"4242 4242 4242 4242",
+	"314",
+	"12",
+	"34",
+)
 
 var defaultBillingAddress = api.NewAddress(
 	"TJ DeVries",
@@ -137,6 +129,7 @@ func NewModel(toState string) *Model {
 			NewCreditCardPage(),
 			NewCreditCardAddress(),
 			NewConfirmPage(),
+			// TODO: Add a page to show that order worked. Animate the coffee
 		},
 		order: OrderInfo{
 			count:   0,
@@ -182,7 +175,7 @@ func NewModel(toState string) *Model {
 
 	if state >= goToCCAddr {
 		log.Warn("cc")
-		model.creditCardState = defaultCreditCardState
+		model.creditCard = defaultCreditCard
 		model.currentPage = CC_ADDR_PAGE
 	}
 
@@ -257,7 +250,7 @@ func (m Model) systemUpdates(raw tea.Msg) (bool, tea.Model, tea.Cmd) {
 		case "shift+tab":
 			if m.currentPage >= EMAIL_PAGE {
 				m.currentPage -= 1
-				if m.currentPage == CC_ADDR_PAGE && m.creditCardState.Different == false {
+				if m.currentPage == CC_ADDR_PAGE && !m.differentBillingAddress {
 					m.currentPage -= 1
 				}
 			}

@@ -24,14 +24,14 @@ func RenderShipping(m Model, shipping api.Address, title string) string {
 	lines := []string{
 		theme.ActiveTitleForeground().Render(title),
 		value(theme, shipping.Name),
-		value(theme, *shipping.AddrLine1),
+		value(theme, shipping.AddrLine1),
 	}
 
-	if len(strings.TrimSpace(*shipping.AddrLine2)) > 0 {
-		lines = append(lines, value(theme, *shipping.AddrLine2))
+	if len(strings.TrimSpace(shipping.AddrLine2)) > 0 {
+		lines = append(lines, value(theme, shipping.AddrLine2))
 	}
 
-	lines = append(lines, cityStateZip(theme, *shipping.City, *shipping.State, *shipping.Zip))
+	lines = append(lines, cityStateZip(theme, shipping.City, shipping.State, shipping.Zip))
 
 	return lipgloss.JoinVertical(
 		0,
@@ -50,14 +50,14 @@ func keyValue(theme Theme, key, value string) string {
 	return fmt.Sprintf("%s: %s", theme.ActiveDescForeground().Render(key), theme.DescForeground().Render(value))
 }
 
-func RenderCreditCard(m Model, credit CreditCardState) string {
+func RenderCreditCard(m Model, credit api.CreditCard) string {
 	theme := m.theme
 
 	return lipgloss.JoinVertical(
 		0,
 		theme.ActiveTitleForeground().Render("Credit Card Info"),
 		value(theme, credit.Name),
-		cc(theme, credit.CC),
+		cc(theme, credit.Number),
 		lipgloss.JoinHorizontal(
 			0,
 			keyValue(theme, "CVC", "***"),

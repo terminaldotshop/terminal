@@ -22,28 +22,28 @@ func newShippingForm(address *api.Address) *huh.Form {
 				Validate(notEmpty("name")),
 			huh.NewInput().
 				Title("Address Line 1").
-				Value(address.AddrLine1).
+				Value(&address.AddrLine1).
 				// Validating fields is easy. The form will mark erroneous fields
 				// and display error messages accordingly.
 				Validate(notEmpty("Shipping Address Line 1")),
 			huh.NewInput().
 				Title("Address Line 2").
-				Value(address.AddrLine2),
+				Value(&address.AddrLine2),
 			huh.NewInput().
 				Title("City").
-				Value(address.City).
+				Value(&address.City).
 				Validate(notEmpty("City")),
 			huh.NewInput().
 				Title("State").
-				Value(address.State).
+				Value(&address.State).
 				Validate(compose(notEmpty("State"), mustBeLen(2, "State"))),
 			huh.NewInput().
 				Title("Zip").
-				Value(address.Zip).
+				Value(&address.Zip).
 				Validate(notEmpty("Zip")),
 			huh.NewInput().
 				Title("Country").
-				Value(address.Country).
+				Value(&address.Country).
 				Validate(notEmpty("Country")),
 		),
 	)
@@ -51,7 +51,7 @@ func newShippingForm(address *api.Address) *huh.Form {
 
 func NewShippingPage() *ShippingPage {
 	shipping := ShippingPage{
-		address: api.Address{},
+		address: api.NewAddress("", "", "", "", "", "", ""),
 		form:    nil,
 	}
 

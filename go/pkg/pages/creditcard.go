@@ -4,27 +4,17 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/terminalhq/terminal/go/pkg/api"
 )
 
 type CreditCardPage struct {
-	CreditCardState
+	card api.CreditCard
 	form *huh.Form
+
+	differentBillingAddress bool
 }
 
-type CreditCardState struct {
-	Name string
-
-	CC       string
-	CVC      string
-	ExpMonth string
-	ExpYear  string
-
-	Different bool
-
-	// Store a shipping state?
-}
-
-func newCreditCardForm(creditCard *CreditCardState) *huh.Form {
+func newCreditCardForm(differentBillingAddress *bool, creditCard *api.CreditCard) *huh.Form {
 	return huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
@@ -35,7 +25,7 @@ func newCreditCardForm(creditCard *CreditCardState) *huh.Form {
 				Validate(notEmpty("name")),
 			huh.NewInput().
 				Title("Credit Card").
-				Value(&creditCard.CC).
+				Value(&creditCard.Number).
 				// Validating fields is easy. The form will mark erroneous fields
 				// and display error messages accordingly.
 				Validate(ccnValidator),
@@ -62,21 +52,14 @@ func newCreditCardForm(creditCard *CreditCardState) *huh.Form {
 					mustBeLen(2, "ExpYear"))),
 			huh.NewConfirm().
 				Title("Is Shipping Address Different From Billing?").
-				Value(&creditCard.Different),
+				Value(differentBillingAddress),
 		),
 	)
 }
 
 func NewCreditCardPage() *CreditCardPage {
 	creditCard := CreditCardPage{
-		CreditCardState: CreditCardState{
-			Different: false,
-			Name:      "",
-			CC:        "",
-			CVC:       "",
-			ExpMonth:  "",
-			ExpYear:   "",
-		},
+		card: api.NewDefaultCreditCard(),
 		form: nil,
 	}
 
@@ -84,23 +67,24 @@ func NewCreditCardPage() *CreditCardPage {
 }
 
 func (c *CreditCardPage) Exit(m Model) Model {
-	m.creditCardState = c.CreditCardState
+	m.creditCard = c.card
 	return m
 }
 
 func (c *CreditCardPage) Enter(m Model) {
-	c.CreditCardState = m.creditCardState
-	c.form = newCreditCardForm(&c.CreditCardState)
+	c.card = m.creditCard
+	c.form = newCreditCardForm(&c.differentBillingAddress, &c.card)
 	c.form.Init()
 }
 
-func (s *CreditCardPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd) {
-	form, cmd := s.form.Update(msg)
+func (c *CreditCardPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd) {
+	form, cmd := c.form.Update(msg)
 	if f, ok := form.(*huh.Form); ok {
-		s.form = f
-		if s.form.State == huh.StateCompleted {
-			m.creditCardState = s.CreditCardState
-			if s.CreditCardState.Different {
+		c.form = f
+		if c.form.State == huh.StateCompleted {
+			m.creditCard = c.card
+			m.differentBillingAddress = c.differentBillingAddress
+			if c.differentBillingAddress {
 				return true, m, NewNavigateCCAddress
 			}
 			return true, m, NewNavigateConfirm
