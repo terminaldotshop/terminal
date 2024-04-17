@@ -20,7 +20,13 @@ func main() {
     flag.StringVar(&dialog, "dialog", "", "adds a dialog to the model")
     flag.Parse()
 
-    assert.Assert(screen == "" || screen == "email" || screen == "cc" || screen == "shipping", "invalid screen jump")
+    // TODO: Sucks
+    assert.Assert(screen == "" ||
+        screen == "email" ||
+        screen == "cc" ||
+        screen == "shipping" ||
+        screen == "cc-addr" ||
+        screen == "confirm", "invalid screen jump")
 
     f, err := tea.LogToFile("/tmp/out", "")
     if err != nil {

@@ -19,7 +19,8 @@ const (
 	EMAIL_PAGE             = 2
 	SHIPPING_PAGE          = 3
 	CC_PAGE                = 4
-	SUMMARY_PAGE           = 5
+	CC_ADDR_PAGE           = 5
+	CONFIRM_PAGE           = 6
 )
 
 // type currentPage int
@@ -53,6 +54,8 @@ type Model struct {
 	shippingState   ShippingState
 	creditCardState CreditCardState
 
+	creditCardAddr ShippingState
+
 	Dialog *string
 }
 
@@ -68,10 +71,23 @@ var defaultShippingState = ShippingState{
 var defaultCreditCardState = CreditCardState{
 	Name: "default Name",
 
-	CC:       "default CC",
-	CVC:      "default CVC",
-	ExpMonth: "default ExpMonth",
-	ExpYear:  "default ExpYear",
+	CC:       "1234 1234 1234 1234",
+	CVC:      "123",
+	ExpMonth: "12",
+	ExpYear:  "12",
+
+	Different: true,
+}
+
+var defaultCrediCardAddr = CreditCardAddress{
+	ShippingState: ShippingState{
+		Name:      "dCCAddress Name",
+		AddrLine1: "dCCAddress AddrLine1",
+		AddrLine2: "dCCAddress AddrLine2",
+		City:      "dCCAddress City",
+		State:     "DS",
+		Zip:       "222222",
+	},
 }
 
 var defaultEmail = "piq@called.it"
@@ -80,16 +96,22 @@ const (
 	goToEmail    = 1
 	goToShipping = 2
 	goToCC       = 3
+	goToCCAddr   = 4
+	goToConfirm  = 5
 )
 
 func stateToNumber(toState string) int {
 	switch strings.ToLower(toState) {
 	case "email":
-		return 1
+		return goToEmail
 	case "shipping":
-		return 2
+		return goToShipping
 	case "cc":
-		return 3
+		return goToCC
+	case "cc-addr":
+		return goToCCAddr
+	case "confirm":
+		return goToConfirm
 	}
 	return 0
 }
@@ -111,6 +133,8 @@ func NewModel(toState string) *Model {
 			NewEmailPage(),
 			NewShippingPage(),
 			NewCreditCardPage(),
+			NewCreditCardAddress(),
+			NewConfirmPage(),
 		},
 		order: OrderInfo{
 			count:   0,
@@ -120,24 +144,50 @@ func NewModel(toState string) *Model {
 
 	state := stateToNumber(toState)
 
-	log.Warn("initial state", "state", state, "email", goToEmail, "shippingState", goToShipping, "cc", goToCC)
+	log.Warn("initial state",
+		"state", state,
+		"email", goToEmail,
+		"shippingState", goToShipping,
+		"cc", goToCC,
+		"cc-addr", goToCCAddr,
+		"confirm", goToConfirm,
+	)
+
+	log.Warn("test", "state", state, "email", goToEmail, "shipping", goToShipping, "cc", goToCC, "ccaddr", goToCCAddr, "con", goToConfirm)
 	if state >= goToEmail {
+		log.Warn("order info")
 		model.order.count = 1
 		model.order.product = api.GetProducts()[0]
 		model.currentPage = EMAIL_PAGE
 	}
 
 	if state >= goToShipping {
+		log.Warn("email")
 		model.email = defaultEmail
 		model.currentPage = SHIPPING_PAGE
 	}
 
 	if state >= goToCC {
+		log.Warn("shipping", "cc page?", CC_PAGE)
 		model.shippingState = defaultShippingState
 		model.currentPage = CC_PAGE
 	}
 
-    model.pages[model.currentPage].Enter(*model)
+	if state >= goToCCAddr {
+		log.Warn("cc")
+		model.creditCardState = defaultCreditCardState
+		model.currentPage = CC_ADDR_PAGE
+	}
+
+	if state >= goToConfirm {
+		log.Warn("cc addr")
+		model.creditCardAddr = defaultCrediCardAddr.ShippingState
+		model.currentPage = CONFIRM_PAGE
+	}
+
+	model.pages[model.currentPage].Enter(*model)
+
+	log.Warn("starting terminal.shop", "page", model.currentPage, "title", model.pages[model.currentPage].Title())
 
 	return model
 }
@@ -159,11 +209,11 @@ func (m Model) Init() tea.Cmd {
 }
 
 func nav(m Model, newPage int) Model {
-    log.Warn("navigation event", "from", m.currentPage, "to", newPage)
-    m = m.pages[m.currentPage].Exit(m)
-    m.currentPage = newPage
-    m.pages[m.currentPage].Enter(m)
-    return m
+	log.Warn("navigation event", "from", m.currentPage, "to", newPage)
+	m = m.pages[m.currentPage].Exit(m)
+	m.currentPage = newPage
+	m.pages[m.currentPage].Enter(m)
+	return m
 }
 
 func (m Model) systemUpdates(raw tea.Msg) (bool, tea.Model, tea.Cmd) {
@@ -171,7 +221,7 @@ func (m Model) systemUpdates(raw tea.Msg) (bool, tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
-        m.minWidth = m.width < MIN_WIDTH || m.height < MIN_HEIGHT
+		m.minWidth = m.width < MIN_WIDTH || m.height < MIN_HEIGHT
 		return true, m, nil
 
 	case NavigateProduct:
@@ -180,8 +230,12 @@ func (m Model) systemUpdates(raw tea.Msg) (bool, tea.Model, tea.Cmd) {
 		return true, nav(m, EMAIL_PAGE), nil
 	case NavigateShipping:
 		return true, nav(m, SHIPPING_PAGE), nil
-    case NavigateCC:
+	case NavigateCC:
 		return true, nav(m, CC_PAGE), nil
+	case NavigateCCAddress:
+		return true, nav(m, CC_ADDR_PAGE), nil
+	case NavigateConfirm:
+		return true, nav(m, CONFIRM_PAGE), nil
 
 	case Dialog:
 		m.Dialog = &msg.msg
@@ -190,10 +244,13 @@ func (m Model) systemUpdates(raw tea.Msg) (bool, tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "shift+tab":
-            if m.currentPage >= EMAIL_PAGE {
-                m.currentPage -= 1
-            }
-            m.pages[m.currentPage].Enter(m)
+			if m.currentPage >= EMAIL_PAGE {
+				m.currentPage -= 1
+				if m.currentPage == CC_ADDR_PAGE && m.creditCardState.Different == false {
+					m.currentPage -= 1
+				}
+			}
+			m.pages[m.currentPage].Enter(m)
 			return true, m, nil
 		case "esc":
 			m.Dialog = nil
@@ -258,9 +315,9 @@ func (m Model) View() string {
 	} else {
 
 		page := m.pages[m.currentPage]
-        if m.minWidth {
-            page = m.pages[0]
-        }
+		if m.minWidth {
+			page = m.pages[0]
+		}
 
 		pageStyle := m.renderer.NewStyle()
 		renderedPage = pageStyle.Render(page.Render(&m))

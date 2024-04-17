@@ -99,8 +99,11 @@ func (s *CreditCardPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd)
 	if f, ok := form.(*huh.Form); ok {
 		s.form = f
 		if s.form.State == huh.StateCompleted {
-			m.creditCardState = s.CreditCardState
-			return true, m, NewNavigateCC
+            m.creditCardState = s.CreditCardState
+            if s.CreditCardState.Different {
+                return true, m, NewNavigateCCAddress
+            }
+			return true, m, NewNavigateConfirm
 		}
 		return true, m, cmd
 	}

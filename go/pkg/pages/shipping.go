@@ -19,7 +19,7 @@ type ShippingState struct {
 	Zip       string
 }
 
-func newShippingForm(shipping *ShippingPage) *huh.Form {
+func newShippingForm(shipping *ShippingState) *huh.Form {
     return huh.NewForm(
         huh.NewGroup(
             huh.NewInput().
@@ -76,7 +76,7 @@ func (s *ShippingPage) Exit(m Model) Model {
 
 func (s *ShippingPage) Enter(m Model) {
     s.ShippingState = m.shippingState
-    s.form = newShippingForm(s)
+    s.form = newShippingForm(&s.ShippingState)
     s.form.Init()
 }
 
