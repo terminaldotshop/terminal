@@ -3,7 +3,6 @@ package pages
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
-	"github.com/charmbracelet/log"
 )
 
 type CreditCardPage struct {
