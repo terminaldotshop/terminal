@@ -10,6 +10,7 @@ type Theme interface {
 	ActivePriceForeground() lipgloss.Style
 	ActiveDescForeground() lipgloss.Style
 	ActiveTitleForeground() lipgloss.Style
+	HRB() lipgloss.Style
 	ActiveNormalForeground() lipgloss.Style
 
 	Page() lipgloss.Style
@@ -22,6 +23,7 @@ type BasicTheme struct {
 	title        lipgloss.Style
 	normal       lipgloss.Style
 	page         lipgloss.Style
+	hrb          lipgloss.Style
 	activePrice  lipgloss.Style
 	activeDesc   lipgloss.Style
 	activeTitle  lipgloss.Style
@@ -29,44 +31,48 @@ type BasicTheme struct {
 	activePage   lipgloss.Style
 }
 
+func (b *BasicTheme) HRB() lipgloss.Style {
+	return b.hrb.Copy()
+}
+
 func (b *BasicTheme) PriceForeground() lipgloss.Style {
-	return b.activeDesc
+	return b.activeDesc.Copy()
 }
 
 func (b *BasicTheme) DescForeground() lipgloss.Style {
-	return b.desc
+	return b.desc.Copy()
 }
 
 func (b *BasicTheme) TitleForeground() lipgloss.Style {
-	return b.title
+	return b.title.Copy()
 }
 
 func (b *BasicTheme) NormalForeground() lipgloss.Style {
-	return b.normal
+	return b.normal.Copy()
 }
 
 func (b *BasicTheme) ActivePriceForeground() lipgloss.Style {
-	return b.activeDesc
+	return b.activeDesc.Copy()
 }
 
 func (b *BasicTheme) ActiveDescForeground() lipgloss.Style {
-	return b.activeDesc
+	return b.activeDesc.Copy()
 }
 
 func (b *BasicTheme) ActiveTitleForeground() lipgloss.Style {
-	return b.activeTitle
+	return b.activeTitle.Copy()
 }
 
 func (b *BasicTheme) ActiveNormalForeground() lipgloss.Style {
-	return b.activeNormal
+	return b.activeNormal.Copy()
 }
 
 func (b *BasicTheme) Page() lipgloss.Style {
-	return b.page
+	return b.page.Copy()
 }
 
 func (b *BasicTheme) ActivePage() lipgloss.Style {
-	return b.activePage
+	return b.activePage.Copy()
 }
 
 func GetTheme(renderer *lipgloss.Renderer) Theme {
@@ -77,11 +83,15 @@ func GetTheme(renderer *lipgloss.Renderer) Theme {
 		page: renderer.NewStyle().
 			Foreground(lipgloss.Color("#4e545d")).
 			MarginLeft(4),
-		activeDesc:   renderer.NewStyle(),
-		activeTitle:  renderer.NewStyle().
-            Bold(true).
-            Foreground(lipgloss.Color("#b294bb")).
-            Underline(true),
+		activeDesc: renderer.NewStyle(),
+		hrb: renderer.NewStyle().
+			Bold(true).
+            Border(lipgloss.RoundedBorder()).
+			Foreground(lipgloss.Color("#EC465A")),
+		activeTitle: renderer.NewStyle().
+			Bold(true).
+			Foreground(lipgloss.Color("#b294bb")).
+			Underline(true),
 		activeNormal: renderer.NewStyle(),
 		activePage: renderer.NewStyle().
 			Foreground(lipgloss.Color("#99cc99")).

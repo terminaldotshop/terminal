@@ -53,6 +53,7 @@ func NewModel() *Model {
 type Page interface {
 	Title() string
 	Render(m *Model) string
+    Update(m Model, raw tea.Msg) (bool, tea.Model, tea.Cmd)
 }
 
 func (m Model) Init() tea.Cmd {
@@ -88,27 +89,12 @@ func (m Model) Update(raw tea.Msg) (tea.Model, tea.Cmd) {
         return model, cmd
     }
 
-    /*
 	// Not sure this is great... but it's kind of nice to all be in the same place
 	page := m.pages[m.currentPage]
-	switch page := page.(type) {
-	case *WidgetPage:
-		_ = page
-
-		switch msg := raw.(type) {
-		case tea.KeyMsg:
-			switch msg.String() {
-			case "left":
-				// This would be where we can change the amount of this page
-			}
-		}
+    if handled, model, cmd := page.Update(m, raw); handled {
+        return model, cmd
 	}
 
-		case "tab":
-			m.currentPage = (m.currentPage + 1) % len(m.pages)
-		}
-	}
-    */
 	return m, nil
 }
 

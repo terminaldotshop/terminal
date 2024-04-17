@@ -2,6 +2,8 @@ package pages
 
 import (
 	"fmt"
+
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -9,6 +11,10 @@ const MIN_WIDTH = 100
 const MIN_HEIGHT = 28
 
 type MinWidthPage struct { }
+
+func (w *MinWidthPage) Update(m Model, _ tea.Msg) (bool, tea.Model, tea.Cmd) {
+    return false, m, nil
+}
 
 func (w *MinWidthPage) Title() string { return "Minimum Width Required" }
 
