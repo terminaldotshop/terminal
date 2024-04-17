@@ -24,6 +24,19 @@ func (s *ConfirmPage) Render(m *Model) string {
     container := lipgloss.NewStyle().
         Height(m.GetMaxPageHeight())
 
-    return container.Render("Render")
+    lines := []string{
+        RenderEmail(*m),
+        RenderShipping(*m, m.shippingState, "Shipping Address"),
+        RenderCreditCard(*m, m.creditCardState),
+    }
+
+    if m.creditCardState.Different {
+        lines = append(lines, RenderShipping(*m, m.creditCardAddr, "CC Address"))
+    }
+
+    return container.Render(
+        lipgloss.JoinVertical(
+            0,
+            lines...))
 }
 

@@ -113,8 +113,8 @@ func (s *CreditCardPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd)
 
 func (s *CreditCardPage) Title() string { return "CreditCard" }
 
+
 func (s *CreditCardPage) Render(m *Model) string {
-    container := lipgloss.NewStyle().
-        Height(m.GetMaxPageHeight())
-    return container.Render(s.form.View())
+    return RenderSplitView(*m, s.form.View(),
+        lipgloss.JoinVertical(0, RenderEmail(*m), RenderShipping(*m, m.shippingState, "Shipping")))
 }

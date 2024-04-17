@@ -196,6 +196,10 @@ func (m *Model) GetMaxPageHeight() int {
 	return m.height - (BREAD_CRUMB_HEIGHT + HELP_MENU)
 }
 
+func (m *Model) GetMaxPageWidth() int {
+	return m.width
+}
+
 type Page interface {
 	Enter(m Model)
 	Exit(m Model) Model
