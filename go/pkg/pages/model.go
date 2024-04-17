@@ -42,6 +42,7 @@ func NewModel() *Model {
 		pages: []Page{
 			&MinWidthPage{},
 			&WidgetPage{},
+            NewEmailPage(),
 		},
 		order: OrderInfo{
 			count:  0,
@@ -74,6 +75,12 @@ func (m Model) systemUpdates(raw tea.Msg) (bool, tea.Model, tea.Cmd) {
         }
 
 		return true, m, nil
+    case BeginCheckout:
+        m.currentPage = 2
+        return true, m, nil
+    case StartShipping:
+        m.currentPage = 3
+        return true, m, nil
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":

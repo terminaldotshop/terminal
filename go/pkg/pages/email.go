@@ -1,19 +1,61 @@
 package pages
 
 import (
-    tea "github.com/charmbracelet/bubbletea"
-    _ "github.com/charmbracelet/huh"
+	"errors"
+	"net/mail"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/huh"
 )
 
-type EmailPage struct { }
+type EmailPage struct {
+    form *huh.Form
+    email string
+}
 
-func (w *EmailPage) Update(m Model, _ tea.Msg) (bool, tea.Model, tea.Cmd) {
+func NewEmailPage() *EmailPage {
+    email := EmailPage{
+        form: nil,
+        email: "",
+    }
+
+    email.form = huh.NewForm(
+        huh.NewGroup(
+            huh.NewInput().
+                Title("Email").
+                Value(&email.email).
+                // Validating fields is easy. The form will mark erroneous fields
+                // and display error messages accordingly.
+                Validate(func(str string) error {
+                    _, err := mail.ParseAddress(str)
+                    if err != nil {
+                        return errors.New("Not a valid email address")
+                    }
+                    return nil
+                }),
+            ),
+        )
+
+    email.form.Init()
+
+    return &email
+}
+
+func (w *EmailPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd) {
+    form, cmd := w.form.Update(msg)
+	if f, ok := form.(*huh.Form); ok {
+		w.form = f
+        if w.form.State == huh.StateCompleted {
+            return true, m, NewStartShipping
+        }
+        return true, m, cmd
+	}
+
     return false, m, nil
 }
 
 func (w *EmailPage) Title() string { return "Lets Start With The Email" }
 
 func (w *EmailPage) Render(m *Model) string {
-    return "git commit, git push"
-
+    return w.form.View()
 }
