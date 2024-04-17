@@ -7,6 +7,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/stripe/stripe-go/v78"
+	"github.com/stripe/stripe-go/v78/token"
+	// "github.com/stripe/stripe-go/v78/customer"
 )
 
 func FetchWidgets() (*WidgetResponse, error) {
@@ -121,4 +125,32 @@ func PlaceOrder(order Order) (*OrderResposne, error) {
 
 	return &orderResponse, nil
 
+}
+
+type StripeCreditCardInfo struct {
+	token *stripe.Token
+}
+
+func StripeCreditCard() (*StripeCreditCardInfo, error) {
+	// THIS IS A TEST TOKEN, SO ITS OK IF PRIME LEAKS THIS. ITS PUBLIC
+	stripe.Key = "sk_test_51OrLKuDgGJQx1Mr6B29OZycDITZQGbHj0LK9l0roCuqrZGOH26XhKdtQHpdFwdkW73VTIkEhoXWKcDzBTcp7MEM800eJDJ96pK"
+
+	params := &stripe.TokenParams{
+		Card: &stripe.CardParams{
+			Number:   stripe.String("4242424242424242"),
+			ExpMonth: stripe.String("5"),
+			ExpYear:  stripe.String("2024"),
+			CVC:      stripe.String("314"),
+		},
+	}
+	result, err := token.New(params)
+	if err != nil {
+		return nil, err
+	}
+
+	info := &StripeCreditCardInfo{
+		token: result,
+	}
+
+	return info, nil
 }
