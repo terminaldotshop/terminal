@@ -20,6 +20,13 @@ func getHelpBasedOnPage(m Model) string {
         )
     }
 
+    infoPageNav := []string{
+        helpNav(m.theme, "S-tab", "go back to product"),
+        helpNav(m.theme, "enter or tab", "next field or page"),
+        helpNav(m.theme, "C-c", "quit"),
+    }
+
+
     switch m.currentPage {
     case MIN_WIDTH_NOT_MET_PAGE:
         return "You did too much enhance, please unenhance"
@@ -32,8 +39,7 @@ func getHelpBasedOnPage(m Model) string {
         )
     case EMAIL_PAGE:
         return lipgloss.JoinHorizontal(0,
-            helpNav(m.theme, "S-tab", "go back to product"),
-            helpNav(m.theme, "C-c", "quit"),
+            infoPageNav...
         )
     }
 
