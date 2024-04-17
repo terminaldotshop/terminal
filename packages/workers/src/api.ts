@@ -149,14 +149,20 @@ const app = new Hono()
           token: body.token,
         },
       });
-      const attachment = await stripe().paymentMethods.attach(
-        paymentMethod.id,
-        {
+      let existing = await stripe()
+        .paymentMethods.list()
+        .then((result) =>
+          result.data.find(
+            (pm) => pm.card.fingerprint === paymentMethod.card.fingerprint,
+          ),
+        );
+      if (!existing) {
+        existing = await stripe().paymentMethods.attach(paymentMethod.id, {
           customer: useUserID(),
-        },
-      );
+        });
+      }
       await stripe().invoices.pay(body.orderID, {
-        payment_method: attachment.id,
+        payment_method: existing.id,
       });
       return c.json(true);
     },
