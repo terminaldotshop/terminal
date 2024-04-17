@@ -1,12 +1,8 @@
 ---
 import Layout from '@layouts/base.astro'
 import Shop from '@components/shop'
-import Teaser from '@components/teaser'
-
-const showSshCommand = false
 ---
 
 <Layout>
-  {showSshCommand ? <Shop client:load /> : null}
-  {!showSshCommand ? <Teaser client:load /> : null}
+  <Shop client:load />
 </Layout>

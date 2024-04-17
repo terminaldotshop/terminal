@@ -105,7 +105,6 @@ const InputComponent: Component<InputProps> = (props) => {
           'focus:outline-none whitespace-nowrap caret-transparent': true,
           hidden: props.state !== 'normal',
         }}
-        innerText={props.readonly ? props.value : ''}
         onInput={update}
         onKeyUp={update}
         onSelect={update}
@@ -117,7 +116,9 @@ const InputComponent: Component<InputProps> = (props) => {
         onKeyPress={submit}
         // onChange={update}
         // onKeyDown={update}
-      ></span>
+      >
+        {props.readonly ? props.value : ''}
+      </span>
       <Show when={props.state !== 'normal'}>
         <span class="text-white leading-10 flex gap-2 flex-wrap">
           <Show when={props.readonly}>

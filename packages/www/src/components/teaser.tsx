@@ -16,6 +16,8 @@ type TeaserProps = {} & JSX.HTMLAttributes<HTMLDivElement>
 type InputLineProps = ComponentProps<typeof InputLine>
 type State = InputLineProps['state']
 
+export const release = new Date('2024-04-18T17:00:00.00Z')
+
 const TeaserComponent: Component<TeaserProps> = () => {
   const client = hc<AppType>(import.meta.env.PUBLIC_API_URL)
   let stateTimeout: ReturnType<typeof setTimeout> | undefined
@@ -68,7 +70,7 @@ const TeaserComponent: Component<TeaserProps> = () => {
         <h1># something is brewing</h1>
       </Line>
       <Line number={2}>
-        <Countdown date="2024-04-18T17:00:00.00Z" class="text-white" />
+        <Countdown date={release} class="text-white" />
       </Line>
       <Line number={3}>
         <label id="email-label" for="email-input">

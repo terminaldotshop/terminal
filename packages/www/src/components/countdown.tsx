@@ -10,7 +10,7 @@ const CountdownComponent: Component<CountdownProps> = (props) => {
 
   return (
     <div {...props} classList={{ [props.class ?? '']: !!props.class }}>
-      {`${countdown.days}d ${countdown.hours}h ${countdown.minutes}m ${countdown.seconds}s`}
+      {`${Math.max(countdown.days ?? 0, 0)}d ${Math.max(countdown.hours ?? 0, 0)}h ${Math.max(countdown.minutes ?? 0, 0)}m ${Math.max(countdown.seconds ?? 0, 0)}s`}
     </div>
   )
 }
