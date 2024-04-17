@@ -46,6 +46,7 @@ func (w *EmailPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd) {
 	if f, ok := form.(*huh.Form); ok {
 		w.form = f
         if w.form.State == huh.StateCompleted {
+            m.email = w.email
             return true, m, NewStartShipping
         }
         return true, m, cmd

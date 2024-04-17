@@ -25,6 +25,8 @@ type Model struct {
 	width  int
 	height int
 
+    email string
+
 	renderer *lipgloss.Renderer
 	theme    Theme
 	order    OrderInfo
@@ -38,6 +40,7 @@ func NewModel() *Model {
 		currentPage: 1,
 		theme:       GetTheme(renderer),
 		width:       0,
+		email:       "",
 		height:      0,
 		pages: []Page{
 			&MinWidthPage{},
