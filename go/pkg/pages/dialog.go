@@ -2,7 +2,7 @@ package pages
 
 import "github.com/charmbracelet/lipgloss"
 
-func NewDialog(m Model, display string) string {
+func DisplayDialog(m Model, display string) string {
     dialogBoxStyle := lipgloss.NewStyle().
         Border(lipgloss.RoundedBorder()).
         BorderForeground(lipgloss.Color("#874BFD")).

@@ -15,6 +15,9 @@ func (w *ProductPage) Update(m Model, raw tea.Msg) (bool, tea.Model, tea.Cmd) {
     case tea.KeyMsg:
         switch msg.String() {
         case "c", "C", "enter":
+            if m.order.count == 0 {
+                return true, m, NewDialog("You must select how many bags of coffee you wish to purchase")
+            }
             return true, m, NewNavigateEmail
         case "j", "<", "left", "-":
             m.order.count = int(math.Max(0, float64(m.order.count - 1)))

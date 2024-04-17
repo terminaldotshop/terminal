@@ -177,6 +177,9 @@ func (m Model) systemUpdates(raw tea.Msg) (bool, tea.Model, tea.Cmd) {
 	case NavigateShipping:
 		m.currentPage = SHIPPING_PAGE
 		return true, m, nil
+	case Dialog:
+		m.Dialog = &msg.msg
+		return true, m, nil
 	case NavigateCC:
 		m.currentPage = CC_PAGE
 		return true, m, nil
@@ -241,7 +244,7 @@ func (m Model) View() string {
 
     var renderedPage string
     if m.Dialog != nil && len(*m.Dialog) > 0 {
-        renderedPage = NewDialog(m, *m.Dialog)
+        renderedPage = DisplayDialog(m, *m.Dialog)
     } else {
         page := m.pages[m.currentPage]
         log.Warn("I am on page", "title", page.Title(), "currentPage", m.currentPage)
