@@ -1,6 +1,7 @@
 import { AuthHandler } from "sst/auth";
 import { session } from "./session";
 import { swell } from "./swell";
+import { stripe } from "./stripe";
 
 export default AuthHandler({
   providers: {
@@ -12,28 +13,19 @@ export default AuthHandler({
         }
 
         console.log("searching for user with fingerprint", fingerprint);
-        const search = await swell(
-          "/accounts?where[fingerprint]=" + fingerprint,
-          {},
-        );
-        var user = search.results[0];
-
+        const search = await stripe().customers.search({
+          query: `metadata["fingerprint"]:"${fingerprint}"`,
+        });
+        let user = search.data[0];
         if (!user) {
           console.log("creating user");
-          user = await swell("/accounts", {
-            method: "POST",
-            headers: {
-              "content-type": "application/x-www-form-urlencoded",
-            },
-            body: new URLSearchParams({
-              email: "ssh+" + fingerprint + "@terminal.shop",
-              fingerprint,
-            }).toString(),
+          user = await stripe().customers.create({
+            metadata: { fingerprint },
           });
         }
         return c.json({
           userID: user.id,
-          email: user.email.endsWith("terminal.shop") ? undefined : user.email,
+          email: user.email || undefined,
           accessToken: await session.create({
             type: "user",
             properties: { userID: user.id },

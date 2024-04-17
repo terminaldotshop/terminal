@@ -30,10 +30,11 @@ export default $config({
     const secrets = {
       SwellSecret: new sst.Secret("SwellSecret"),
       AirtableSecret: new sst.Secret("AirtableSecret"),
+      StripeSecret: new sst.Secret("StripeSecret"),
     };
     const auth = new sst.cloudflare.Auth("Auth", {
       authenticator: {
-        link: [secrets.SwellSecret],
+        link: [secrets.SwellSecret, secrets.StripeSecret],
         handler: "./packages/workers/src/auth.ts",
         domain: "auth." + domain,
       },

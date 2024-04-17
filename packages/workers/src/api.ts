@@ -84,6 +84,17 @@ const app = new Hono()
     },
   )
   .post(
+    "/api/payment",
+    vValidator(
+      "json",
+      object({
+        orderID: string(),
+        token: string(),
+      }),
+    ),
+    async (c) => {},
+  )
+  .post(
     "/api/subscription",
     vValidator(
       "json",

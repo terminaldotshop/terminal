@@ -9,12 +9,14 @@
     "remove": "sst remove",
     "console": "sst console",
     "typecheck": "tsc -noEmit",
-    "sso": "aws sso login --sso-session=ironbay"
+    "sso": "aws sso login --sso-session=ironbay",
+    "postinstall": "patch-package"
   },
   "workspaces": [
     "packages/*"
   ],
   "dependencies": {
+    "patch-package": "^8.0.0",
     "sst": "3.0.11"
   }
 }
