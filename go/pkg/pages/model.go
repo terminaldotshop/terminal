@@ -52,6 +52,8 @@ type Model struct {
 
 	shippingState   ShippingState
 	creditCardState CreditCardState
+
+    Dialog *string
 }
 
 var defaultShippingState = ShippingState{
@@ -102,6 +104,7 @@ func NewModel(toState string) *Model {
 		width:       0,
 		email:       "",
 		height:      0,
+        Dialog:      nil,
 		pages: []Page{
 			&MinWidthPage{},
 			&WidgetPage{},
@@ -229,15 +232,22 @@ func (m Model) createTitle() string {
 }
 
 func (m Model) View() string {
-	page := m.pages[m.currentPage]
-	log.Warn("I am on page", "title", page.Title(), "currentPage", m.currentPage)
 
-	pageStyle := m.renderer.NewStyle()
+    var renderedPage string
+    if m.Dialog != nil && len(*m.Dialog) > 0 {
+        renderedPage = NewDialog(m, *m.Dialog)
+    } else {
+        page := m.pages[m.currentPage]
+        log.Warn("I am on page", "title", page.Title(), "currentPage", m.currentPage)
+
+        pageStyle := m.renderer.NewStyle()
+        renderedPage = pageStyle.Render(page.Render(&m))
+    }
 
 	return lipgloss.JoinVertical(
 		lipgloss.Top,
 		m.createTitle(),
-		pageStyle.Render(page.Render(&m)),
+        renderedPage,
         helpMenu(m),
     )
 }

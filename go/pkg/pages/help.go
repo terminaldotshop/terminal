@@ -14,6 +14,11 @@ func helpNav(theme Theme, k, m string) string {
 }
 
 func getHelpBasedOnPage(m Model) string {
+    if m.Dialog != nil {
+        return lipgloss.JoinHorizontal(0,
+            helpNav(m.theme, "<esc>", "close dialog"),
+        )
+    }
 
     switch m.currentPage {
     case MIN_WIDTH_NOT_MET_PAGE:
