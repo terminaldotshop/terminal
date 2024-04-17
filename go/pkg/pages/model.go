@@ -25,11 +25,12 @@ type Model struct {
 	width  int
 	height int
 
-    email string
-
 	renderer *lipgloss.Renderer
 	theme    Theme
-	order    OrderInfo
+
+	// Customer information
+	order OrderInfo
+	email string
 }
 
 func NewModel() *Model {
@@ -47,6 +48,7 @@ func NewModel() *Model {
 			&WidgetPage{},
 			NewEmailPage(),
 			&ShippingPage{},
+			NewCreditCardPage(),
 		},
 		order: OrderInfo{
 			count:  0,
