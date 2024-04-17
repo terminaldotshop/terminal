@@ -10,6 +10,9 @@ import (
 	"github.com/terminalhq/terminal/go/pkg/api"
 )
 
+var BREAD_CRUMB_HEIGHT = 3
+var HELP_MENU = 3
+
 // type currentPage int
 //
 // const (
@@ -36,52 +39,52 @@ type Model struct {
 	order OrderInfo
 	email string
 
-    shippingState ShippingState
-    creditCardState CreditCardState
+	shippingState   ShippingState
+	creditCardState CreditCardState
 }
 
 var defaultShippingState = ShippingState{
-	Name: "default Name",
+	Name:      "default Name",
 	AddrLine1: "default AddrLine1",
 	AddrLine2: "default AddrLine2",
-	City: "default City",
-	State: "default State",
-	Zip: "default Zip",
+	City:      "default City",
+	State:     "default State",
+	Zip:       "default Zip",
 }
 
 var defaultCreditCardState = CreditCardState{
 	Name: "default Name",
 
-	CC: "default CC",
-	CVC: "default CVC",
+	CC:       "default CC",
+	CVC:      "default CVC",
 	ExpMonth: "default ExpMonth",
-	ExpYear: "default ExpYear",
+	ExpYear:  "default ExpYear",
 }
 
 var defaultEmail = "piq@called.it"
 
 const (
-    goToEmail = 1
-    goToShipping = 2
-    goToCC = 3
+	goToEmail    = 1
+	goToShipping = 2
+	goToCC       = 3
 )
 
 func stateToNumber(toState string) int {
-    switch strings.ToLower(toState) {
-    case "email":
-        return 1
-    case "shipping":
-        return 2
-    case "cc":
-        return 3
-    }
-    return 0
+	switch strings.ToLower(toState) {
+	case "email":
+		return 1
+	case "shipping":
+		return 2
+	case "cc":
+		return 3
+	}
+	return 0
 }
 
 func NewModel(toState string) *Model {
 	renderer := lipgloss.DefaultRenderer()
 
-    model :=  &Model{
+	model := &Model{
 		renderer:    renderer,
 		currentPage: 1,
 		theme:       GetTheme(renderer),
@@ -101,26 +104,30 @@ func NewModel(toState string) *Model {
 		},
 	}
 
-    state := stateToNumber(toState)
+	state := stateToNumber(toState)
 
-    log.Warn("initial state", "state", state, "email", goToEmail, "shippingState", goToShipping, "cc", goToCC)
-    if state == goToEmail {
-        model.order.count = 1
-        model.order.widget = api.GetWidgets()[0]
-        model.currentPage = 2
-    }
-    if state == goToShipping {
-        model.email = defaultEmail
-        model.currentPage = 3
-    }
+	log.Warn("initial state", "state", state, "email", goToEmail, "shippingState", goToShipping, "cc", goToCC)
+	if state == goToEmail {
+		model.order.count = 1
+		model.order.widget = api.GetWidgets()[0]
+		model.currentPage = 2
+	}
+	if state == goToShipping {
+		model.email = defaultEmail
+		model.currentPage = 3
+	}
 
-    if state == goToCC {
-        model.email = defaultEmail
-        model.shippingState = defaultShippingState
-        model.currentPage = 4
-    }
+	if state == goToCC {
+		model.email = defaultEmail
+		model.shippingState = defaultShippingState
+		model.currentPage = 4
+	}
 
-    return model
+	return model
+}
+
+func (m *Model) GetMaxPageHeight() int {
+    return m.height - (BREAD_CRUMB_HEIGHT + HELP_MENU)
 }
 
 type Page interface {
@@ -180,37 +187,46 @@ func (m Model) Update(raw tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) createTitle() string {
-	theme := GetTheme(m.renderer)
 
-    titles := make([]string, 0)
-    for i, page := range m.pages {
-        if i == 0 {
-            continue
-        }
-        current := i == m.currentPage
-        style := theme.Page()
-        if current {
-            style = theme.ActivePage()
-        }
+    titleContainer := lipgloss.NewStyle().
+        Margin(1, 0, 1, 0)
 
-        title := style.MarginLeft(1).Render(fmt.Sprintf("> %s", page.Title()))
-
-        titles = append(titles, title)
+    if m.currentPage == 0 {
+        return titleContainer.Render(" ")
     }
 
-    return lipgloss.JoinHorizontal(0, titles...)
+	theme := GetTheme(m.renderer)
+
+	titles := make([]string, 0)
+	for i, page := range m.pages {
+		if i == 0 {
+			continue
+		}
+		current := i == m.currentPage
+		style := theme.Page()
+		if current {
+			style = theme.ActivePage()
+		}
+
+		title := style.MarginLeft(1).Render(fmt.Sprintf("> %s", page.Title()))
+
+		titles = append(titles, title)
+	}
+
+	return titleContainer.Render(lipgloss.JoinHorizontal(0, titles...))
 }
 
 func (m Model) View() string {
 	page := m.pages[m.currentPage]
-    log.Warn("I am on page", "title", page.Title(), "currentPage", m.currentPage)
+	log.Warn("I am on page", "title", page.Title(), "currentPage", m.currentPage)
 
 	pageStyle := m.renderer.NewStyle()
 
 	return lipgloss.JoinVertical(
 		lipgloss.Top,
 		m.createTitle(),
-		pageStyle.Render(page.Render(&m)))
+		pageStyle.Render(page.Render(&m)),
+        helpMenu(m),
+    )
 }
 
-// func (m *Model) SetProductCount

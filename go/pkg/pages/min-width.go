@@ -7,8 +7,8 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-const MIN_WIDTH = 100
-const MIN_HEIGHT = 28
+const MIN_WIDTH = 120
+const MIN_HEIGHT = 30
 
 type MinWidthPage struct { }
 
@@ -19,6 +19,12 @@ func (w *MinWidthPage) Update(m Model, _ tea.Msg) (bool, tea.Model, tea.Cmd) {
 func (w *MinWidthPage) Title() string { return "Minimum Width Required" }
 
 func (w *MinWidthPage) Render(m *Model) string {
+
+    height := m.GetMaxPageHeight()
+
+    minWidthContainer := lipgloss.NewStyle().
+        Height(height).
+        AlignVertical(lipgloss.Center)
 
     title := m.theme.ActiveTitleForeground().
         AlignHorizontal(lipgloss.Center).
@@ -32,7 +38,7 @@ func (w *MinWidthPage) Render(m *Model) string {
 		Width(m.width).
         Render(fmt.Sprintf("You have %dx%d but we require a minimum of %dx%d", m.height, m.width, MIN_HEIGHT, MIN_WIDTH))
 
-    return lipgloss.JoinVertical(0, title, desc)
+    return minWidthContainer.Render(lipgloss.JoinVertical(0, title, desc))
 }
 
 
