@@ -1,6 +1,9 @@
 package pages
 
-import tea "github.com/charmbracelet/bubbletea"
+import (
+    tea "github.com/charmbracelet/bubbletea"
+    _ "github.com/charmbracelet/huh"
+)
 
 type EmailPage struct { }
 
