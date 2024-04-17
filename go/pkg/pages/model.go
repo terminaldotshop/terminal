@@ -61,8 +61,8 @@ var defaultShippingState = ShippingState{
 	AddrLine1: "default AddrLine1",
 	AddrLine2: "default AddrLine2",
 	City:      "default City",
-	State:     "default State",
-	Zip:       "default Zip",
+	State:     "SD",
+	Zip:       "55555",
 }
 
 var defaultCreditCardState = CreditCardState{
@@ -121,21 +121,23 @@ func NewModel(toState string) *Model {
 	state := stateToNumber(toState)
 
 	log.Warn("initial state", "state", state, "email", goToEmail, "shippingState", goToShipping, "cc", goToCC)
-	if state == goToEmail {
+	if state >= goToEmail {
 		model.order.count = 1
 		model.order.product = api.GetProducts()[0]
 		model.currentPage = EMAIL_PAGE
 	}
-	if state == goToShipping {
+
+	if state >= goToShipping {
 		model.email = defaultEmail
 		model.currentPage = SHIPPING_PAGE
 	}
 
-	if state == goToCC {
-		model.email = defaultEmail
+	if state >= goToCC {
 		model.shippingState = defaultShippingState
 		model.currentPage = CC_PAGE
 	}
+
+    model.pages[model.currentPage].Enter(*model)
 
 	return model
 }
@@ -145,6 +147,8 @@ func (m *Model) GetMaxPageHeight() int {
 }
 
 type Page interface {
+	Enter(m Model)
+	Exit(m Model) Model
 	Title() string
 	Render(m *Model) string
 	Update(m Model, raw tea.Msg) (bool, tea.Model, tea.Cmd)
@@ -154,31 +158,43 @@ func (m Model) Init() tea.Cmd {
 	return nil
 }
 
+func nav(m Model, newPage int) Model {
+    log.Warn("navigation event", "from", m.currentPage, "to", newPage)
+    m = m.pages[m.currentPage].Exit(m)
+    m.currentPage = newPage
+    m.pages[m.currentPage].Enter(m)
+    return m
+}
+
 func (m Model) systemUpdates(raw tea.Msg) (bool, tea.Model, tea.Cmd) {
 	switch msg := raw.(type) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
         m.minWidth = m.width < MIN_WIDTH || m.height < MIN_HEIGHT
+		return true, m, nil
 
-		return true, m, nil
 	case NavigateProduct:
-		m.currentPage = PRODUCT_PAGE
-		return true, m, nil
+		return true, nav(m, PRODUCT_PAGE), nil
 	case NavigateEmail:
-		m.currentPage = EMAIL_PAGE
-		return true, m, nil
+		return true, nav(m, EMAIL_PAGE), nil
 	case NavigateShipping:
-		m.currentPage = SHIPPING_PAGE
-		return true, m, nil
+		return true, nav(m, SHIPPING_PAGE), nil
+    case NavigateCC:
+		return true, nav(m, CC_PAGE), nil
+
 	case Dialog:
 		m.Dialog = &msg.msg
 		return true, m, nil
-	case NavigateCC:
-		m.currentPage = CC_PAGE
-		return true, m, nil
+
 	case tea.KeyMsg:
 		switch msg.String() {
+		case "shift+tab":
+            if m.currentPage >= EMAIL_PAGE {
+                m.currentPage -= 1
+            }
+            m.pages[m.currentPage].Enter(m)
+			return true, m, nil
 		case "esc":
 			m.Dialog = nil
 			return true, m, nil
@@ -217,7 +233,7 @@ func (m Model) createTitle() string {
 
 	titles := make([]string, 0)
 	for i, page := range m.pages {
-		if i == 0 {
+		if i == 1 {
 			continue
 		}
 		current := i == m.currentPage

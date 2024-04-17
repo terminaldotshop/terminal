@@ -10,7 +10,7 @@ type errorHandler func(str string) error
 
 func withinLen(min, max int, name string) errorHandler {
     return func(str string) error {
-        if len(str) >= min && len(str) < max {
+        if len(str) < min && len(str) >= max {
             return fmt.Errorf("expected %s to be between %d and %d, but got %d", name, min, max, len(str))
         }
         return nil

@@ -19,20 +19,8 @@ type ShippingState struct {
 	Zip       string
 }
 
-func NewShippingPage() *ShippingPage {
-	shipping := ShippingPage{
-        ShippingState: ShippingState{
-            Name:      "",
-            AddrLine1: "",
-            AddrLine2: "",
-            City:      "",
-            State:     "",
-            Zip:       "",
-        },
-        form:      nil,
-	}
-
-    shipping.form = huh.NewForm(
+func newShippingForm(shipping *ShippingPage) *huh.Form {
+    return huh.NewForm(
         huh.NewGroup(
             huh.NewInput().
                 Title("Name").
@@ -63,10 +51,33 @@ func NewShippingPage() *ShippingPage {
                 Validate(notEmpty("Zip")),
             ),
         )
+}
 
-    shipping.form.Init()
+func NewShippingPage() *ShippingPage {
+	shipping := ShippingPage{
+        ShippingState: ShippingState{
+            Name:      "",
+            AddrLine1: "",
+            AddrLine2: "",
+            City:      "",
+            State:     "",
+            Zip:       "",
+        },
+        form:      nil,
+	}
 
 	return &shipping
+}
+
+func (s *ShippingPage) Exit(m Model) Model {
+    m.shippingState = s.ShippingState
+    return m
+}
+
+func (s *ShippingPage) Enter(m Model) {
+    s.ShippingState = m.shippingState
+    s.form = newShippingForm(s)
+    s.form.Init()
 }
 
 func (s *ShippingPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd) {

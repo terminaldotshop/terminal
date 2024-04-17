@@ -14,13 +14,8 @@ type EmailPage struct {
     email string
 }
 
-func NewEmailPage() *EmailPage {
-    email := EmailPage{
-        form: nil,
-        email: "",
-    }
-
-    email.form = huh.NewForm(
+func newEmailForm(email *EmailPage) *huh.Form {
+    return huh.NewForm(
         huh.NewGroup(
             huh.NewInput().
                 Title("Email").
@@ -36,10 +31,26 @@ func NewEmailPage() *EmailPage {
                 }),
             ),
         )
+}
 
-    email.form.Init()
+func NewEmailPage() *EmailPage {
+    email := EmailPage{
+        form: nil,
+        email: "",
+    }
 
     return &email
+}
+
+func (w *EmailPage) Exit(m Model) Model {
+    m.email = w.email
+    return m
+}
+
+func (w *EmailPage) Enter(m Model) {
+    w.email = m.email
+    w.form = newEmailForm(w)
+    w.form.Init()
 }
 
 func (w *EmailPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd) {

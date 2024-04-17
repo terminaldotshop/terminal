@@ -10,6 +10,8 @@ import (
 
 type ProductPage struct { }
 
+func (p *ProductPage) Exit(m Model) Model { return m }
+func (s *ProductPage) Enter(m Model) { }
 func (w *ProductPage) Update(m Model, raw tea.Msg) (bool, tea.Model, tea.Cmd) {
     switch msg := raw.(type) {
     case tea.KeyMsg:

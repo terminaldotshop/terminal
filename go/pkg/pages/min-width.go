@@ -16,6 +16,8 @@ func (w *MinWidthPage) Update(m Model, _ tea.Msg) (bool, tea.Model, tea.Cmd) {
     return false, m, nil
 }
 
+func (w *MinWidthPage) Exit(m Model) Model { return m }
+func (w *MinWidthPage) Enter(m Model) { }
 func (w *MinWidthPage) Title() string { return "Minimum Width Required" }
 
 func (w *MinWidthPage) Render(m *Model) string {

@@ -3,6 +3,7 @@ package pages
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/log"
 )
 
 type CreditCardPage struct {
@@ -18,22 +19,13 @@ type CreditCardState struct {
 	ExpMonth string
 	ExpYear  string
 
-    // Store a shipping state?
+	Different bool
+
+	// Store a shipping state?
 }
 
-func NewCreditCardPage() *CreditCardPage {
-	creditCard := CreditCardPage{
-		CreditCardState: CreditCardState{
-			Name:     "",
-			CC:       "",
-			CVC:      "",
-			ExpMonth: "",
-			ExpYear:  "",
-		},
-		form: nil,
-	}
-
-	creditCard.form = huh.NewForm(
+func newCreditCardForm(creditCard *CreditCardState) *huh.Form {
+	return huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Name On CC").
@@ -51,29 +43,55 @@ func NewCreditCardPage() *CreditCardPage {
 				Title("CVC").
 				Value(&creditCard.CVC).
 				Validate(compose(
-                    compose(
-                        notEmpty("CVC"),
-                        isDigits("CVC")),
-                    withinLen(3, 4, "CVC"),
-                )),
+					compose(
+						notEmpty("CVC"),
+						isDigits("CVC")),
+					withinLen(3, 4, "CVC"),
+				)),
 			huh.NewInput().
 				Title("ExpMonth").
 				Value(&creditCard.ExpMonth).
 				Validate(compose(
-                    compose(notEmpty("ExpMonth"), isDigits("ExpMonth")),
-                    mustBeLen(2, "ExpMonth"))),
+					compose(notEmpty("ExpMonth"), isDigits("ExpMonth")),
+					mustBeLen(2, "ExpMonth"))),
 			huh.NewInput().
 				Title("ExpYear").
 				Value(&creditCard.ExpYear).
 				Validate(compose(
-                    compose(notEmpty("ExpYear"), isDigits("ExpYear")),
-                    mustBeLen(2, "ExpYear"))),
+					compose(notEmpty("ExpYear"), isDigits("ExpYear")),
+					mustBeLen(2, "ExpYear"))),
+			huh.NewConfirm().
+				Title("Is Shipping Address Different From Billing?").
+				Value(&creditCard.Different),
 		),
 	)
+}
 
-	creditCard.form.Init()
+func NewCreditCardPage() *CreditCardPage {
+	creditCard := CreditCardPage{
+		CreditCardState: CreditCardState{
+			Different: false,
+			Name:      "",
+			CC:        "",
+			CVC:       "",
+			ExpMonth:  "",
+			ExpYear:   "",
+		},
+		form: nil,
+	}
 
 	return &creditCard
+}
+
+func (c *CreditCardPage) Exit(m Model) Model {
+	m.creditCardState = c.CreditCardState
+	return m
+}
+
+func (c *CreditCardPage) Enter(m Model) {
+	c.CreditCardState = m.creditCardState
+	c.form = newCreditCardForm(&c.CreditCardState)
+	c.form.Init()
 }
 
 func (s *CreditCardPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd) {
