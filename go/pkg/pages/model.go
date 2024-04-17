@@ -1,6 +1,8 @@
 package pages
 
 import (
+	"strings"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/terminalhq/terminal/go/pkg/api"
@@ -33,12 +35,51 @@ type Model struct {
 	email string
 
     shippingState ShippingState
+    creditCardState CreditCardState
 }
 
-func NewModel() *Model {
+var defaultShippingState = ShippingState{
+	Name: "default Name",
+	AddrLine1: "default AddrLine1",
+	AddrLine2: "default AddrLine2",
+	City: "default City",
+	State: "default State",
+	Zip: "default Zip",
+}
+
+var defaultCreditCardState = CreditCardState{
+	Name: "default Name",
+
+	CC: "default CC",
+	CVC: "default CVC",
+	ExpMonth: "default ExpMonth",
+	ExpYear: "default ExpYear",
+}
+
+var defaultEmail = "piq@called.it"
+
+const (
+    goToEmail = 1
+    goToShipping
+    goToCC
+)
+
+func stateToNumber(toState string) int {
+    switch strings.ToLower(toState) {
+    case "email":
+        return 1
+    case "shipping":
+        return 2
+    case "cc":
+        return 3
+    }
+    return 0
+}
+
+func NewModel(toState string) *Model {
 	renderer := lipgloss.DefaultRenderer()
 
-	return &Model{
+    model :=  &Model{
 		renderer:    renderer,
 		currentPage: 1,
 		theme:       GetTheme(renderer),
@@ -57,6 +98,23 @@ func NewModel() *Model {
 			widget: api.GetWidgets()[0],
 		},
 	}
+
+    state := stateToNumber(toState)
+    if state == goToEmail {
+        model.currentPage = 2
+    }
+    if state == goToShipping {
+        model.email = defaultEmail
+        model.currentPage = 3
+    }
+
+    if state == goToCC {
+        model.email = defaultEmail
+        model.shippingState = defaultShippingState
+        model.currentPage = 4
+    }
+
+    return model
 }
 
 type Page interface {

@@ -1,41 +1,9 @@
 package pages
 
 import (
-	"fmt"
-
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 )
-
-type errorHandler func(str string) error
-
-func mustBeLen(length int, name string) errorHandler {
-    return func(str string) error {
-        if len(str) != length {
-            return fmt.Errorf("Expected %s to be length %d but got %d", name, length, len(str))
-        }
-        return nil
-    }
-}
-
-func notEmpty(name string) errorHandler {
-    return func(str string) error {
-        if len(str) == 0 {
-            return fmt.Errorf("%s cannot be empty", name)
-        }
-        return nil
-    }
-}
-
-func compose(a, b errorHandler) errorHandler {
-    return func(str string) error {
-        err := a(str)
-        if err != nil {
-            return err
-        }
-        return b(str)
-    }
-}
 
 type ShippingPage struct {
     ShippingState
