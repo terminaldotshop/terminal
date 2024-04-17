@@ -28,12 +28,12 @@ const (
 //
 // const (
 // 	Cart currentPage = iota
-// 	Widget
+// 	Product
 // )
 
 type OrderInfo struct {
 	count  int
-	widget api.Widget
+	product api.Product
 }
 
 type Model struct {
@@ -107,14 +107,14 @@ func NewModel(toState string) *Model {
         Dialog:      nil,
 		pages: []Page{
 			&MinWidthPage{},
-			&WidgetPage{},
+			&ProductPage{},
 			NewEmailPage(),
 			NewShippingPage(),
 			NewCreditCardPage(),
 		},
 		order: OrderInfo{
 			count:  0,
-			widget: api.GetWidgets()[0],
+			product: api.GetProducts()[0],
 		},
 	}
 
@@ -123,7 +123,7 @@ func NewModel(toState string) *Model {
 	log.Warn("initial state", "state", state, "email", goToEmail, "shippingState", goToShipping, "cc", goToCC)
 	if state == goToEmail {
 		model.order.count = 1
-		model.order.widget = api.GetWidgets()[0]
+		model.order.product = api.GetProducts()[0]
 		model.currentPage = EMAIL_PAGE
 	}
 	if state == goToShipping {
@@ -168,19 +168,23 @@ func (m Model) systemUpdates(raw tea.Msg) (bool, tea.Model, tea.Cmd) {
 		}
 
 		return true, m, nil
-	case BeginCheckout:
+	case NavigateProduct:
+		m.currentPage = PRODUCT_PAGE
+		return true, m, nil
+	case NavigateEmail:
 		m.currentPage = EMAIL_PAGE
 		return true, m, nil
-	case StartShipping:
+	case NavigateShipping:
 		m.currentPage = SHIPPING_PAGE
 		return true, m, nil
-	case StartCC:
+	case NavigateCC:
 		m.currentPage = CC_PAGE
 		return true, m, nil
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "escape":
+		case "esc":
             m.Dialog = nil
+            return true, m, nil
 		case "ctrl+c":
 			return true, m, tea.Quit
 		}

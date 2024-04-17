@@ -8,9 +8,9 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type WidgetPage struct { }
+type ProductPage struct { }
 
-func (w *WidgetPage) Update(m Model, raw tea.Msg) (bool, tea.Model, tea.Cmd) {
+func (w *ProductPage) Update(m Model, raw tea.Msg) (bool, tea.Model, tea.Cmd) {
     switch msg := raw.(type) {
     case tea.KeyMsg:
         switch msg.String() {
@@ -27,9 +27,9 @@ func (w *WidgetPage) Update(m Model, raw tea.Msg) (bool, tea.Model, tea.Cmd) {
     return false, m, nil
 }
 
-func (w *WidgetPage) Title() string { return "Order" }
+func (w *ProductPage) Title() string { return "Order" }
 
-func (w *WidgetPage) Render(m *Model) string {
+func (w *ProductPage) Render(m *Model) string {
 	titleStyle := m.theme.ActiveTitleForeground().
         AlignHorizontal(lipgloss.Center).
 		Width(m.width).
@@ -62,13 +62,8 @@ func (w *WidgetPage) Render(m *Model) string {
         Margin(1, 1, 0, 1).
         Render(countStr)
 
-    checkout := m.theme.HRB().
-        AlignHorizontal(lipgloss.Right).
-        AlignVertical(lipgloss.Bottom).
-        Render("[C]heckout")
-
     countSpacing := lipgloss.NewStyle().
-        Width(descWidth - (lipgloss.Width(countRight) + lipgloss.Width(countLeft) + lipgloss.Width(count) + lipgloss.Width(checkout))).
+        Width(descWidth - (lipgloss.Width(countRight) + lipgloss.Width(countLeft) + lipgloss.Width(count))).
         Render("")
 
 	row := lipgloss.JoinHorizontal(
@@ -78,7 +73,7 @@ func (w *WidgetPage) Render(m *Model) string {
             lipgloss.Top,
             desc,
             checkoutSpacing,
-            lipgloss.JoinHorizontal(0, countLeft, count, countRight, countSpacing, checkout)))
+            lipgloss.JoinHorizontal(0, countLeft, count, countRight, countSpacing)))
 
     return lipgloss.JoinVertical(0,
         titleStyle.Render(fmt.Sprintf("===== %s =====", m.order.product.Name)),

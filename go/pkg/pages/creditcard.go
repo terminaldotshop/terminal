@@ -82,7 +82,7 @@ func (s *CreditCardPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd)
 		s.form = f
 		if s.form.State == huh.StateCompleted {
 			m.creditCardState = s.CreditCardState
-			return true, m, NewStartCC
+			return true, m, NewNavigateCC
 		}
 		return true, m, cmd
 	}

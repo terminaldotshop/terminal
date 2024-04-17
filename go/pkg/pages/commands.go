@@ -2,20 +2,25 @@ package pages
 
 import tea "github.com/charmbracelet/bubbletea"
 
-type BeginCheckout struct { }
-type StartShipping struct { }
-type StartCC struct { }
+type NavigateProduct struct { }
+type NavigateEmail struct { }
+type NavigateShipping struct { }
+type NavigateCC struct { }
 
-func NewBeginCheckout() tea.Msg {
-    return BeginCheckout{}
+func NewNavigateEmail() tea.Msg {
+    return NavigateEmail{}
 }
 
-func NewStartShipping() tea.Msg {
-    return StartShipping{}
+func NewNavigateShipping() tea.Msg {
+    return NavigateShipping{}
 }
 
-func NewStartCC() tea.Msg {
-    return StartCC{}
+func NewNavigateCC() tea.Msg {
+    return NavigateCC{}
+}
+
+func NewNavigateProduct() tea.Msg {
+    return NavigateProduct{}
 }
 
 

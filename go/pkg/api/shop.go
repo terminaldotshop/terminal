@@ -1,13 +1,13 @@
 package api
 
-type WidgetResponse struct {
+type ProductResponse struct {
 	Count     int      `json:"count"`
 	PageCount int      `json:"page_count"`
 	Page      int      `json:"page"`
-	Results   []Widget `json:"results"`
+	Results   []Product `json:"results"`
 }
 
-type Widget struct {
+type Product struct {
 	Art  string
 	Name string `json:"name"`
 	// Sku             string `json:"sku"`
@@ -45,8 +45,8 @@ type Widget struct {
 	ID string `json:"id"`
 }
 
-func GetWidgets() []Widget {
-	return []Widget{
+func GetProducts() []Product {
+	return []Product{
 		{
 			Art: `
                   ██████
@@ -70,7 +70,7 @@ func GetWidgets() []Widget {
       ██████    ██      ██    ██████
                 ██      ██
                   ██████`,
-			Name:        "Foo Widget",
+			Name:        "Foo Product",
 			Price:       5.0,
 			Active:      true,
 			Description: "Test Description",

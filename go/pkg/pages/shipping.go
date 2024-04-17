@@ -75,7 +75,7 @@ func (s *ShippingPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd) {
 		s.form = f
         if s.form.State == huh.StateCompleted {
             m.shippingState = s.ShippingState
-            return true, m, NewStartCC
+            return true, m, NewNavigateCC
         }
         return true, m, cmd
 	}

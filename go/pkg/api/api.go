@@ -13,7 +13,7 @@ import (
 	// "github.com/stripe/stripe-go/v78/customer"
 )
 
-func FetchWidgets() (*WidgetResponse, error) {
+func FetchProducts() (*ProductResponse, error) {
 	resp, err := (http.Get("https://api.terminal.shop/api/product"))
 	if err != nil {
 		return nil, err
@@ -25,16 +25,16 @@ func FetchWidgets() (*WidgetResponse, error) {
 		return nil, err
 	}
 
-	var widgetResponse WidgetResponse
-	if err := json.Unmarshal(body, &widgetResponse); err != nil {
+	var productResponse ProductResponse
+	if err := json.Unmarshal(body, &productResponse); err != nil {
 		return nil, err
 	}
 
-	return &widgetResponse, nil
+	return &productResponse, nil
 }
 
-func FetchOneProduct() (*Widget, error) {
-	response, err := FetchWidgets()
+func FetchOneProduct() (*Product, error) {
+	response, err := FetchProducts()
 	if err != nil {
 		return nil, err
 	}
@@ -43,8 +43,8 @@ func FetchOneProduct() (*Widget, error) {
 		return nil, errors.New("No response somehow....")
 	}
 
-	widget := response.Results[0]
-	return &widget, nil
+	product := response.Results[0]
+	return &product, nil
 }
 
 type FingerprintRequest struct {
