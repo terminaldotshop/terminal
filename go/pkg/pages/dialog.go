@@ -17,7 +17,7 @@ func DisplayDialog(m Model, display string) string {
     return lipgloss.Place(m.width, m.GetMaxPageHeight(),
         lipgloss.Center, lipgloss.Center,
         dialogBoxStyle.Render(display),
-        lipgloss.WithWhitespaceChars("猫咪"),
+        lipgloss.WithWhitespaceChars("咖啡"),
         lipgloss.WithWhitespaceForeground(subtle),
     )
 }
