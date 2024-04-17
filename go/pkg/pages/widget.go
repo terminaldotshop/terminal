@@ -2,8 +2,6 @@ package pages
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -20,19 +18,16 @@ func (w *WidgetPage) Render(m *Model) string {
     artWidth := m.width / 2
     descWidth := m.width - artWidth
 
-    artContainer := lipgloss.NewStyle().
+    art := lipgloss.NewStyle().
         Width(artWidth)
 
-    descContainer := lipgloss.NewStyle().
+    desc := lipgloss.NewStyle().
         Width(descWidth)
 
-	descriptionStyle := m.renderer.
-        NewStyle().
-		Margin(0, 2).
-        Padding(0, 2)
-
-	rightSide := descriptionStyle.Render(m.order.widget.Description)
-	row := lipgloss.JoinHorizontal(lipgloss.Left, m.order.widget.Art, rightSide)
+	row := lipgloss.JoinHorizontal(
+        lipgloss.Left,
+        art.Render(m.order.widget.Art),
+        desc.Render(m.order.widget.Description))
 
 	return fmt.Sprintf(`%s
 %s`, titleStyle.Render(fmt.Sprintf("===== %s =====", m.order.widget.Name)), row)

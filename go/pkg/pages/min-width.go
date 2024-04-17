@@ -2,10 +2,11 @@ package pages
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/charmbracelet/lipgloss"
 )
+
+const MIN_WIDTH = 100
+const MIN_HEIGHT = 28
 
 type MinWidthPage struct { }
 
@@ -23,7 +24,7 @@ func (w *MinWidthPage) Render(m *Model) string {
     desc := m.theme.ActiveDescForeground().
         AlignHorizontal(lipgloss.Center).
 		Width(m.width).
-        Render(fmt.Sprintf("You have %dx%d but we require a minimum of 100x30", m.width, m.height))
+        Render(fmt.Sprintf("You have %dx%d but we require a minimum of %dx%d", m.height, m.width, MIN_HEIGHT, MIN_WIDTH))
 
     return lipgloss.JoinVertical(0, title, desc)
 }

@@ -1,8 +1,6 @@
 package pages
 
 import (
-	"fmt"
-
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/terminalhq/terminal/go/pkg/api"
@@ -41,10 +39,10 @@ func NewModel() *Model {
 		theme:       GetTheme(renderer),
 		width:       0,
 		height:      0,
-		pages:       []Page{
-            &MinWidthPage{},
-            &WidgetPage{},
-        },
+		pages: []Page{
+			&MinWidthPage{},
+			&WidgetPage{},
+		},
 		order: OrderInfo{
 			count:  0,
 			widget: api.GetWidgets()[0],
@@ -61,7 +59,36 @@ func (m Model) Init() tea.Cmd {
 	return nil
 }
 
+func (m Model) systemUpdates(raw tea.Msg) (bool, tea.Model, tea.Cmd) {
+	switch msg := raw.(type) {
+	case tea.WindowSizeMsg:
+		m.width = msg.Width
+		m.height = msg.Height
+
+        if m.width < MIN_WIDTH || m.height < MIN_HEIGHT {
+            m.currentPage = 0
+        } else {
+            // TODO: we need to implement history
+            m.currentPage = 1
+        }
+
+		return true, m, nil
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "q", "ctrl+c":
+			return true, m, tea.Quit
+        }
+    }
+    return false, m, nil
+}
+
 func (m Model) Update(raw tea.Msg) (tea.Model, tea.Cmd) {
+
+    if handled, model, cmd := m.systemUpdates(raw); handled {
+        return model, cmd
+    }
+
+    /*
 	// Not sure this is great... but it's kind of nice to all be in the same place
 	page := m.pages[m.currentPage]
 	switch page := page.(type) {
@@ -77,19 +104,11 @@ func (m Model) Update(raw tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	switch msg := raw.(type) {
-	case tea.WindowSizeMsg:
-		m.width = msg.Width
-		m.height = msg.Height
-		return m, nil
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "q", "ctrl+c":
-			return m, tea.Quit
 		case "tab":
 			m.currentPage = (m.currentPage + 1) % len(m.pages)
 		}
 	}
+    */
 	return m, nil
 }
 
@@ -97,22 +116,14 @@ func (m Model) View() string {
 	page := m.pages[m.currentPage]
 
 	theme := GetTheme(m.renderer)
+    title := theme.ActivePage().Render(page.Title())
 
-	titles := []string{}
-	for idx, page := range m.pages {
-		if idx == m.currentPage {
-			titles = append(titles, theme.ActivePage().Render(
-				fmt.Sprintf("* %s", page.Title())),
-			)
-		} else {
-			titles = append(titles, theme.Page().Render(page.Title()))
-		}
-	}
-
-	headers := lipgloss.JoinHorizontal(lipgloss.Left, titles...)
 	pageStyle := m.renderer.NewStyle()
 
-	return fmt.Sprintf("%s\n%s", headers, pageStyle.Render(page.Render(&m)))
+	return lipgloss.JoinVertical(
+        lipgloss.Top,
+        title,
+        pageStyle.Render(page.Render(&m)))
 }
 
 // func (m *Model) SetProductCount
