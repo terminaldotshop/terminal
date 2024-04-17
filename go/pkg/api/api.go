@@ -9,12 +9,28 @@ import (
 	"net/http"
 
 	"github.com/stripe/stripe-go/v78"
+	// "github.com/stripe/stripe-go/v78/client"
+	// "github.com/stripe/stripe-go/v78/paymentintent"
 	"github.com/stripe/stripe-go/v78/token"
 	// "github.com/stripe/stripe-go/v78/customer"
 )
 
-func FetchProducts() (*ProductResponse, error) {
-	resp, err := (http.Get("https://api.terminal.shop/api/product"))
+// const apiURL = "https://api.thdxr.dev.terminal.shop/"
+// const authURL = "https://auth.thdxr.dev.terminal.shop/"
+
+const apiURL = "https://api.adam.dev.terminal.shop/"
+const authURL = "https://auth.adam.dev.terminal.shop/"
+
+func routeAPI(path string) string {
+	return fmt.Sprintf("%s%s", apiURL, path)
+}
+
+func routeAuth(path string) string {
+	return fmt.Sprintf("%s%s", authURL, path)
+}
+
+func FetchProducts() (ProductResponse, error) {
+	resp, err := http.Get(routeAPI("api/product"))
 	if err != nil {
 		return nil, err
 	}
@@ -30,10 +46,10 @@ func FetchProducts() (*ProductResponse, error) {
 		return nil, err
 	}
 
-	return &productResponse, nil
+	return productResponse, nil
 }
 
-func FetchOneProduct() (*Product, error) {
+func FetchOneProduct() (*Widget, error) {
 	response, err := FetchProducts()
 	if err != nil {
 		return nil, err
@@ -43,7 +59,7 @@ func FetchOneProduct() (*Product, error) {
 		return nil, errors.New("No response somehow....")
 	}
 
-	product := response.Results[0]
+	product := response[0]
 	return &product, nil
 }
 
@@ -63,7 +79,7 @@ func (u UserCredentials) String() string {
 func FetchUserToken(public_key string) (*UserCredentials, error) {
 	fingerprint := FingerprintRequest{Fingerprint: public_key}
 	marshalled, _ := json.Marshal(fingerprint)
-	resp, err := http.Post("https://auth.terminal.shop/ssh/login", "application/json", bytes.NewReader(marshalled))
+	resp, err := http.Post(routeAuth("ssh/login"), "application/json", bytes.NewReader(marshalled))
 	if err != nil {
 		return nil, err
 	}
@@ -82,17 +98,20 @@ func FetchUserToken(public_key string) (*UserCredentials, error) {
 	return &creds, nil
 }
 
-type Order struct {
+type OrderParams struct {
+	Email    string          `json:"email"`
 	Shipping ShippingDetails `json:"shipping"`
 	Products []ProductOrder  `json:"products"`
 }
 
 type ShippingDetails struct {
-	Address1 string `json:"address1"`
-	Address2 string `json:"address2"`
-	City     string `json:"city"`
-	Country  string `json:"country"`
-	Name     string `json:"name"`
+	Address1 *string `json:"line1"`
+	Address2 *string `json:"line2"`
+	City     *string `json:"city"`
+	State    *string `json:"state,omitempty"`
+	Zip      *string `json:"zip"`
+	Country  *string `json:"country"`
+	Name     string  `json:"name"`
 }
 
 type ProductOrder struct {
@@ -100,57 +119,114 @@ type ProductOrder struct {
 	Quantity int    `json:"quantity"`
 }
 
-type OrderResposne struct{}
+// {"id":"in_1P6deNDgGJQx1Mr65m1t9LEE","subtotal":7500,"shipping":1000,"total":8500}
+type OrderResponse struct {
+	OrderID      string `json:"id"`
+	Tax          int    `json:"tax"`
+	ShippingCost int    `json:"shipping"`
+	Subtotal     int    `json:"subtotal"`
+	Total        int    `json:"total"`
+}
 
-func PlaceOrder(order Order) (*OrderResposne, error) {
+func CreateOrder(bearer string, order OrderParams) (*OrderResponse, error) {
 	buf, err := json.Marshal(order)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := http.Post("https://api.terminal.shop/api/order", "application/json", bytes.NewReader(buf))
+	// resp, err := http.Post(routeAPI("api/order"), "application/json", bytes.NewReader(buf))
+	request, err := http.NewRequest("POST", routeAPI("api/order"), bytes.NewReader(buf))
 	if err != nil {
 		return nil, err
 	}
+
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", bearer))
+	resp, err := http.DefaultClient.Do(request)
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	var orderResponse OrderResposne
+	var orderResponse OrderResponse
 	if err := json.Unmarshal(body, &orderResponse); err != nil {
 		return nil, err
 	}
 
-	return &orderResponse, nil
-
-}
-
-type StripeCreditCardInfo struct {
-	token *stripe.Token
-}
-
-func StripeCreditCard() (*StripeCreditCardInfo, error) {
-	// THIS IS A TEST TOKEN, SO ITS OK IF PRIME LEAKS THIS. ITS PUBLIC
-	stripe.Key = "sk_test_51OrLKuDgGJQx1Mr6B29OZycDITZQGbHj0LK9l0roCuqrZGOH26XhKdtQHpdFwdkW73VTIkEhoXWKcDzBTcp7MEM800eJDJ96pK"
-
-	params := &stripe.TokenParams{
-		Card: &stripe.CardParams{
-			Number:   stripe.String("4242424242424242"),
-			ExpMonth: stripe.String("5"),
-			ExpYear:  stripe.String("2024"),
-			CVC:      stripe.String("314"),
-		},
+	if orderResponse.OrderID == "" {
+		return nil, errors.New(fmt.Sprintf("Error: %s, body: %s", "No Order ID", string(body)))
 	}
-	result, err := token.New(params)
+
+	return &orderResponse, nil
+}
+
+type StripeCardToken struct {
+	Token *stripe.Token
+}
+
+func (s StripeCardToken) GetToken() string {
+	// TODO: Not sure which is the right ID to send for Dax
+	return s.Token.ID
+}
+
+func StripeCreditCard(card *stripe.CardParams) (*StripeCardToken, error) {
+	// THIS IS A PUBLISHABLE TOKEN, SO ITS OK IF PRIME LEAKS THIS. ITS PUBLIC
+	stripe.Key = "pk_test_51OrLKuDgGJQx1Mr6CNDnGNukgQwBonSSToYC8VcmE7qBk2YEad8UuitmY54Pqp0tuZCrk8PNP9cEKVYHvuLcjsnv007CKDgOew"
+
+	tokenParams := &stripe.TokenParams{Card: card}
+	tokenResult, err := token.New(tokenParams)
+
 	if err != nil {
 		return nil, err
 	}
 
-	info := &StripeCreditCardInfo{
-		token: result,
+	info := &StripeCardToken{
+		Token: tokenResult,
 	}
 
 	return info, nil
+}
+
+type SubmitOrderRequest struct {
+	OrderID         string `json:"orderID"`
+	StripeCardToken string `json:"token"`
+}
+
+type SubmitOrderResponse struct {
+}
+
+func PurchaseOrder(bearer string, orderID string, cardInfo *StripeCardToken) (*SubmitOrderResponse, error) {
+	buf, err := json.Marshal(SubmitOrderRequest{
+		OrderID:         orderID,
+		StripeCardToken: cardInfo.GetToken(),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	// resp, err := http.Post(routeAPI("api/payment"), "application/json", bytes.NewReader(buf))
+	request, err := http.NewRequest("POST", routeAPI("api/payment"), bytes.NewReader(buf))
+	if err != nil {
+		return nil, err
+	}
+
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", bearer))
+	resp, err := http.DefaultClient.Do(request)
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("body:", string(body))
+
+	var response SubmitOrderResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		return nil, errors.New(fmt.Sprintf("Error: %s, body: %s", err, string(body)))
+	}
+
+	return &response, nil
 }

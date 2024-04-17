@@ -1,11 +1,6 @@
 package api
 
-type ProductResponse struct {
-	Count     int      `json:"count"`
-	PageCount int      `json:"page_count"`
-	Page      int      `json:"page"`
-	Results   []Product `json:"results"`
-}
+type ProductResponse []Product
 
 type Product struct {
 	Art  string
