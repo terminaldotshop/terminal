@@ -1,4 +1,5 @@
 package pages
+/*
 
 import (
 	"fmt"
@@ -69,3 +70,4 @@ func (c *CartPage) Render(m *Model) string {
 
     return widgetsContainer.Render(widgetOrders...)
 }
+*/

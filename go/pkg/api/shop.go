@@ -75,11 +75,5 @@ func GetWidgets() []Widget {
 			Active:      true,
 			Description: "Test Description",
 		},
-		{
-			Name:        "Bar Widget",
-			Price:       25.0,
-			Active:      true,
-			Description: "Another thingAnother thingAnother thingAnother thingAnother thingAnother thingAnother thingAnother thingAnother thingAnother thingAnother thing           Another thing ",
-		},
 	}
 }

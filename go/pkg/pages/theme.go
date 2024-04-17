@@ -78,7 +78,10 @@ func GetTheme(renderer *lipgloss.Renderer) Theme {
 			Foreground(lipgloss.Color("#4e545d")).
 			MarginLeft(4),
 		activeDesc:   renderer.NewStyle(),
-		activeTitle:  renderer.NewStyle(),
+		activeTitle:  renderer.NewStyle().
+            Bold(true).
+            Foreground(lipgloss.Color("#b294bb")).
+            Underline(true),
 		activeNormal: renderer.NewStyle(),
 		activePage: renderer.NewStyle().
 			Foreground(lipgloss.Color("#99cc99")).

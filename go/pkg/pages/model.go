@@ -15,49 +15,39 @@ import (
 // 	Widget
 // )
 
-type WidgetOrderInfo struct {
+type OrderInfo struct {
 	count  int
 	widget api.Widget
-}
-
-type CartInfo struct {
-	totalItems int
-	widgets    []WidgetOrderInfo
 }
 
 type Model struct {
 	currentPage int
 	pages       []Page
 
+	width  int
+	height int
+
 	renderer *lipgloss.Renderer
 	theme    Theme
-	cart     CartInfo
-	width    int
-	height   int
+	order    OrderInfo
 }
 
 func NewModel() *Model {
-	widgets := api.GetWidgets()
-
 	renderer := lipgloss.DefaultRenderer()
 
 	return &Model{
 		renderer:    renderer,
-		currentPage: 0,
+		currentPage: 1,
 		theme:       GetTheme(renderer),
-		cart: CartInfo{
-			totalItems: 4,
-			widgets: []WidgetOrderInfo{
-				{count: 3, widget: api.GetWidgets()[1]},
-				{count: 1, widget: api.GetWidgets()[0]},
-			},
-		},
-
-		pages: []Page{
-			&CartPage{},
-			&WidgetPage{
-				widget: &widgets[0],
-			},
+		width:       0,
+		height:      0,
+		pages:       []Page{
+            &MinWidthPage{},
+            &WidgetPage{},
+        },
+		order: OrderInfo{
+			count:  0,
+			widget: api.GetWidgets()[0],
 		},
 	}
 }
@@ -65,7 +55,6 @@ func NewModel() *Model {
 type Page interface {
 	Title() string
 	Render(m *Model) string
-	// Update(m *Model, msg tea.Msg) string
 }
 
 func (m Model) Init() tea.Cmd {

@@ -5,28 +5,35 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/terminalhq/terminal/go/pkg/api"
 )
 
-type WidgetPage struct {
-	widget *api.Widget
-}
+type WidgetPage struct { }
 
 func (w *WidgetPage) Title() string { return "Widget" }
 
 func (w *WidgetPage) Render(m *Model) string {
-	titleStyle := m.renderer.NewStyle().
-		Bold(true).Foreground(lipgloss.Color("#b294bb")).Underline(true).AlignHorizontal(lipgloss.Center).
+	titleStyle := m.theme.ActiveTitleForeground().
+        AlignHorizontal(lipgloss.Center).
 		Width(m.width).
 		MarginBottom(2)
 
-	artHeight := len(strings.Split(w.widget.Art, "\n"))
-	descriptionStyle := m.renderer.NewStyle().
-		Margin(0, 2).Padding(0, 2).Height(artHeight)
+    artWidth := m.width / 2
+    descWidth := m.width - artWidth
 
-	rightSide := descriptionStyle.Render(w.widget.Description)
-	row := lipgloss.JoinHorizontal(lipgloss.Left, w.widget.Art, rightSide)
+    artContainer := lipgloss.NewStyle().
+        Width(artWidth)
+
+    descContainer := lipgloss.NewStyle().
+        Width(descWidth)
+
+	descriptionStyle := m.renderer.
+        NewStyle().
+		Margin(0, 2).
+        Padding(0, 2)
+
+	rightSide := descriptionStyle.Render(m.order.widget.Description)
+	row := lipgloss.JoinHorizontal(lipgloss.Left, m.order.widget.Art, rightSide)
 
 	return fmt.Sprintf(`%s
-%s`, titleStyle.Render(fmt.Sprintf("===== %s =====", w.widget.Name)), row)
+%s`, titleStyle.Render(fmt.Sprintf("===== %s =====", m.order.widget.Name)), row)
 }
