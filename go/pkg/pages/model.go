@@ -31,6 +31,8 @@ type Model struct {
 	// Customer information
 	order OrderInfo
 	email string
+
+    shippingState ShippingState
 }
 
 func NewModel() *Model {
@@ -47,7 +49,7 @@ func NewModel() *Model {
 			&MinWidthPage{},
 			&WidgetPage{},
 			NewEmailPage(),
-			&ShippingPage{},
+			NewShippingPage(),
 			NewCreditCardPage(),
 		},
 		order: OrderInfo{
