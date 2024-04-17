@@ -33,7 +33,7 @@ func (c *CartPage) Render(m *Model) string {
     widgetOrders := make([]string, 0)
     widgetOrders = append(widgetOrders, totalWidgetCount)
 
-    for i, widgetInfo := range m.cart.widgets {
+    for _, widgetInfo := range m.cart.widgets {
 
         count := fmt.Sprintf("Count: %d", widgetInfo.count)
         price := fmt.Sprintf("$%.2f", widgetInfo.widget.Price * float64(widgetInfo.count))

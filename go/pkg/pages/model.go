@@ -5,6 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/terminalhq/terminal/go/pkg/api"
 )
 
 // type currentPage int
@@ -16,7 +17,7 @@ import (
 
 type WidgetOrderInfo struct {
 	count  int
-	widget shop.Widget
+	widget api.Widget
 }
 
 type CartInfo struct {
@@ -36,7 +37,7 @@ type Model struct {
 }
 
 func NewModel() *Model {
-	widgets := shop.GetWidgets()
+	widgets := api.GetWidgets()
 
 	renderer := lipgloss.DefaultRenderer()
 
@@ -47,8 +48,8 @@ func NewModel() *Model {
 		cart: CartInfo{
 			totalItems: 4,
 			widgets: []WidgetOrderInfo{
-				{count: 3, widget: shop.GetWidgets()[1]},
-				{count: 1, widget: shop.GetWidgets()[0]},
+				{count: 3, widget: api.GetWidgets()[1]},
+				{count: 1, widget: api.GetWidgets()[0]},
 			},
 		},
 

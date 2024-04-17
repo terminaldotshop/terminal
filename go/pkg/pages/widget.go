@@ -5,10 +5,11 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/terminalhq/terminal/go/pkg/api"
 )
 
 type WidgetPage struct {
-	widget *shop.Widget
+	widget *api.Widget
 }
 
 func (w *WidgetPage) Title() string { return "Widget" }
