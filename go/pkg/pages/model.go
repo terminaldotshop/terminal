@@ -10,8 +10,19 @@ import (
 	"github.com/terminalhq/terminal/go/pkg/api"
 )
 
-var BREAD_CRUMB_HEIGHT = 3
-var HELP_MENU = 3
+const (
+    BREAD_CRUMB_HEIGHT = 3
+    HELP_MENU = 3
+
+    MIN_WIDTH_NOT_MET_PAGE = 0
+    PRODUCT_PAGE = 1
+    EMAIL_PAGE = 2
+    SHIPPING_PAGE = 3
+    CC_PAGE = 4
+    SUMMARY_PAGE = 5
+)
+
+
 
 // type currentPage int
 //
@@ -86,7 +97,7 @@ func NewModel(toState string) *Model {
 
 	model := &Model{
 		renderer:    renderer,
-		currentPage: 1,
+		currentPage: PRODUCT_PAGE,
 		theme:       GetTheme(renderer),
 		width:       0,
 		email:       "",
@@ -110,17 +121,17 @@ func NewModel(toState string) *Model {
 	if state == goToEmail {
 		model.order.count = 1
 		model.order.widget = api.GetWidgets()[0]
-		model.currentPage = 2
+		model.currentPage = EMAIL_PAGE
 	}
 	if state == goToShipping {
 		model.email = defaultEmail
-		model.currentPage = 3
+		model.currentPage = SHIPPING_PAGE
 	}
 
 	if state == goToCC {
 		model.email = defaultEmail
 		model.shippingState = defaultShippingState
-		model.currentPage = 4
+		model.currentPage = CC_PAGE
 	}
 
 	return model
@@ -147,20 +158,21 @@ func (m Model) systemUpdates(raw tea.Msg) (bool, tea.Model, tea.Cmd) {
 		m.height = msg.Height
 
 		if m.width < MIN_WIDTH || m.height < MIN_HEIGHT {
-			m.currentPage = 0
-		} else if m.currentPage == 0 {
-			m.currentPage = 1
+			m.currentPage = MIN_WIDTH_NOT_MET_PAGE
+		} else if m.currentPage == MIN_WIDTH_NOT_MET_PAGE {
+            // PLEASE CHANGE THIS
+			m.currentPage = PRODUCT_PAGE
 		}
 
 		return true, m, nil
 	case BeginCheckout:
-		m.currentPage = 2
+		m.currentPage = EMAIL_PAGE
 		return true, m, nil
 	case StartShipping:
-		m.currentPage = 3
+		m.currentPage = SHIPPING_PAGE
 		return true, m, nil
 	case StartCC:
-		m.currentPage = 4
+		m.currentPage = CC_PAGE
 		return true, m, nil
 	case tea.KeyMsg:
 		switch msg.String() {
