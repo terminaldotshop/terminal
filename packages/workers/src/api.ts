@@ -7,6 +7,7 @@ import { vValidator } from "@hono/valibot-validator";
 import { array, email, integer, length, number, object, string } from "valibot";
 import { Resource } from "sst";
 import { swell } from "./swell";
+import { stripe } from "./stripe";
 
 const SessionContext = createContext<typeof session.$typeValues>();
 
@@ -41,20 +42,38 @@ const app = new Hono()
     return c.json({ userID: useUserID() });
   })
   .get("/api/product", async (c) => {
-    const products = await swell("/products", {});
-    return c.json(products);
+    const products = await stripe().products.list({
+      expand: ["data.default_price"],
+    });
+    return c.json(
+      products.data.map((p) => ({
+        id:
+          typeof p.default_price === "string"
+            ? p.default_price
+            : p.default_price.id,
+        name: p.name,
+        description: p.description,
+        price:
+          typeof p.default_price === "string"
+            ? p.default_price
+            : p.default_price.unit_amount,
+      })),
+    );
   })
   .post(
     "/api/order",
     vValidator(
       "json",
       object({
+        email: string(),
         shipping: object({
-          address1: string(),
-          address2: string(),
-          city: string(),
-          country: string([length(2)]),
           name: string(),
+          line1: string(),
+          line2: string(),
+          city: string(),
+          state: string(),
+          country: string([length(2)]),
+          zip: string(),
         }),
         products: array(
           object({
@@ -65,22 +84,52 @@ const app = new Hono()
       }),
     ),
     async (c) => {
-      console.log(
-        "ok",
-        await swell("/orders", {
-          method: "POST",
-          headers: {
-            "content-type": "application/x-www-form-urlencoded",
+      const body = c.req.valid("json");
+      console.log(body);
+      await stripe().customers.update(useUserID(), {
+        email: body.email,
+      });
+      const invoice = await stripe().invoices.create({
+        shipping_details: {
+          name: body.shipping.name,
+          address: {
+            city: body.shipping.city,
+            line1: body.shipping.line1,
+            line2: body.shipping.line2,
+            country: body.shipping.country,
+            state: body.shipping.state,
+            postal_code: body.shipping.zip,
           },
-          body: new URLSearchParams({
-            account_id: useUserID(),
-            "items[0][product_id]": "6615f3dc14a8960012e304d9",
-            "items[0][quantity]": "1",
-            "shipping[price]": "10",
-          }).toString(),
-        }),
-      );
-      return c.json(true);
+        },
+        shipping_cost: {
+          shipping_rate_data: {
+            type: "fixed_amount",
+            display_name: "Standard Shipping",
+            fixed_amount: {
+              currency: "usd",
+              amount: 1000,
+            },
+          },
+        },
+        customer: useUserID(),
+      });
+      for (const product of body.products) {
+        await stripe().invoiceItems.create({
+          invoice: invoice.id,
+          customer: useUserID(),
+          price: product.id,
+          quantity: product.quantity,
+        });
+      }
+      const result = await stripe().invoices.retrieve(invoice.id);
+
+      return c.json({
+        id: invoice.id,
+        tax: result.tax,
+        subtotal: result.subtotal,
+        shipping: result.shipping_cost.amount_total,
+        total: result.amount_due,
+      });
     },
   )
   .post(
@@ -88,11 +137,29 @@ const app = new Hono()
     vValidator(
       "json",
       object({
-        orderID: string(),
-        token: string(),
+        orderID: string([length(1)]),
+        token: string([length(1)]),
       }),
     ),
-    async (c) => {},
+    async (c) => {
+      const body = c.req.valid("json");
+      const paymentMethod = await stripe().paymentMethods.create({
+        type: "card",
+        card: {
+          token: body.token,
+        },
+      });
+      const attachment = await stripe().paymentMethods.attach(
+        paymentMethod.id,
+        {
+          customer: useUserID(),
+        },
+      );
+      await stripe().invoices.pay(body.orderID, {
+        payment_method: attachment.id,
+      });
+      return c.json(true);
+    },
   )
   .post(
     "/api/subscription",

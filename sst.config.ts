@@ -41,7 +41,12 @@ export default $config({
     });
     const api = new sst.cloudflare.Worker("Api", {
       handler: "./packages/workers/src/api.ts",
-      link: [secrets.SwellSecret, secrets.AirtableSecret, auth],
+      link: [
+        secrets.SwellSecret,
+        secrets.AirtableSecret,
+        auth,
+        secrets.StripeSecret,
+      ],
       domain: "api." + domain,
     });
     const www = new sst.cloudflare.StaticSite("Www", {
