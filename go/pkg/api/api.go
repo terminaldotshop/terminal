@@ -77,3 +77,48 @@ func FetchUserToken(public_key string) (*UserCredentials, error) {
 
 	return &creds, nil
 }
+
+type Order struct {
+	Shipping ShippingDetails `json:"shipping"`
+	Products []ProductOrder  `json:"products"`
+}
+
+type ShippingDetails struct {
+	Address1 string `json:"address1"`
+	Address2 string `json:"address2"`
+	City     string `json:"city"`
+	Country  string `json:"country"`
+	Name     string `json:"name"`
+}
+
+type ProductOrder struct {
+	ID       string `json:"id"`
+	Quantity int    `json:"quantity"`
+}
+
+type OrderResposne struct{}
+
+func PlaceOrder(order Order) (*OrderResposne, error) {
+	buf, err := json.Marshal(order)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := http.Post("https://api.terminal.shop/api/order", "application/json", bytes.NewReader(buf))
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var orderResponse OrderResposne
+	if err := json.Unmarshal(body, &orderResponse); err != nil {
+		return nil, err
+	}
+
+	return &orderResponse, nil
+
+}
