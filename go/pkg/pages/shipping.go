@@ -3,6 +3,7 @@ package pages
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type ShippingPage struct {
@@ -97,5 +98,7 @@ func (s *ShippingPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd) {
 func (s *ShippingPage) Title() string { return "Shipping" }
 
 func (s *ShippingPage) Render(m *Model) string {
-    return s.form.View()
+    container := lipgloss.NewStyle().
+        Height(m.GetMaxPageHeight())
+    return container.Render(s.form.View())
 }

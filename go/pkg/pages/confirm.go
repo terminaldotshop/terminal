@@ -2,6 +2,7 @@ package pages
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type ConfirmPage struct { }
@@ -20,6 +21,9 @@ func (s *ConfirmPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd) {
 func (s *ConfirmPage) Title() string { return "Confirmation" }
 
 func (s *ConfirmPage) Render(m *Model) string {
-    return "DONE"
+    container := lipgloss.NewStyle().
+        Height(m.GetMaxPageHeight())
+
+    return container.Render("Render")
 }
 

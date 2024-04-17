@@ -3,6 +3,7 @@ package pages
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type CreditCardPage struct {
@@ -113,5 +114,7 @@ func (s *CreditCardPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd)
 func (s *CreditCardPage) Title() string { return "CreditCard" }
 
 func (s *CreditCardPage) Render(m *Model) string {
-	return s.form.View()
+    container := lipgloss.NewStyle().
+        Height(m.GetMaxPageHeight())
+    return container.Render(s.form.View())
 }
