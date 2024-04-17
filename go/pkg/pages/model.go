@@ -11,18 +11,16 @@ import (
 )
 
 const (
-    BREAD_CRUMB_HEIGHT = 3
-    HELP_MENU = 3
+	BREAD_CRUMB_HEIGHT = 3
+	HELP_MENU          = 3
 
-    MIN_WIDTH_NOT_MET_PAGE = 0
-    PRODUCT_PAGE = 1
-    EMAIL_PAGE = 2
-    SHIPPING_PAGE = 3
-    CC_PAGE = 4
-    SUMMARY_PAGE = 5
+	MIN_WIDTH_NOT_MET_PAGE = 0
+	PRODUCT_PAGE           = 1
+	EMAIL_PAGE             = 2
+	SHIPPING_PAGE          = 3
+	CC_PAGE                = 4
+	SUMMARY_PAGE           = 5
 )
-
-
 
 // type currentPage int
 //
@@ -32,13 +30,15 @@ const (
 // )
 
 type OrderInfo struct {
-	count  int
+	count   int
 	product api.Product
 }
 
 type Model struct {
 	currentPage int
 	pages       []Page
+
+	minWidth bool
 
 	width  int
 	height int
@@ -53,7 +53,7 @@ type Model struct {
 	shippingState   ShippingState
 	creditCardState CreditCardState
 
-    Dialog *string
+	Dialog *string
 }
 
 var defaultShippingState = ShippingState{
@@ -104,7 +104,7 @@ func NewModel(toState string) *Model {
 		width:       0,
 		email:       "",
 		height:      0,
-        Dialog:      nil,
+		Dialog:      nil,
 		pages: []Page{
 			&MinWidthPage{},
 			&ProductPage{},
@@ -113,7 +113,7 @@ func NewModel(toState string) *Model {
 			NewCreditCardPage(),
 		},
 		order: OrderInfo{
-			count:  0,
+			count:   0,
 			product: api.GetProducts()[0],
 		},
 	}
@@ -141,7 +141,7 @@ func NewModel(toState string) *Model {
 }
 
 func (m *Model) GetMaxPageHeight() int {
-    return m.height - (BREAD_CRUMB_HEIGHT + HELP_MENU)
+	return m.height - (BREAD_CRUMB_HEIGHT + HELP_MENU)
 }
 
 type Page interface {
@@ -159,13 +159,7 @@ func (m Model) systemUpdates(raw tea.Msg) (bool, tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
-
-		if m.width < MIN_WIDTH || m.height < MIN_HEIGHT {
-			m.currentPage = MIN_WIDTH_NOT_MET_PAGE
-		} else if m.currentPage == MIN_WIDTH_NOT_MET_PAGE {
-            // PLEASE CHANGE THIS
-			m.currentPage = PRODUCT_PAGE
-		}
+        m.minWidth = m.width < MIN_WIDTH || m.height < MIN_HEIGHT
 
 		return true, m, nil
 	case NavigateProduct:
@@ -186,8 +180,8 @@ func (m Model) systemUpdates(raw tea.Msg) (bool, tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "esc":
-            m.Dialog = nil
-            return true, m, nil
+			m.Dialog = nil
+			return true, m, nil
 		case "ctrl+c":
 			return true, m, tea.Quit
 		}
@@ -212,12 +206,12 @@ func (m Model) Update(raw tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m Model) createTitle() string {
 
-    titleContainer := lipgloss.NewStyle().
-        Margin(1, 0, 1, 0)
+	titleContainer := lipgloss.NewStyle().
+		Margin(1, 0, 1, 0)
 
-    if m.currentPage == 0 {
-        return titleContainer.Render(" ")
-    }
+	if m.currentPage == 0 {
+		return titleContainer.Render(" ")
+	}
 
 	theme := GetTheme(m.renderer)
 
@@ -242,22 +236,24 @@ func (m Model) createTitle() string {
 
 func (m Model) View() string {
 
-    var renderedPage string
-    if m.Dialog != nil && len(*m.Dialog) > 0 {
-        renderedPage = DisplayDialog(m, *m.Dialog)
-    } else {
-        page := m.pages[m.currentPage]
-        log.Warn("I am on page", "title", page.Title(), "currentPage", m.currentPage)
+	var renderedPage string
+	if m.Dialog != nil && len(*m.Dialog) > 0 {
+		renderedPage = DisplayDialog(m, *m.Dialog)
+	} else {
 
-        pageStyle := m.renderer.NewStyle()
-        renderedPage = pageStyle.Render(page.Render(&m))
-    }
+		page := m.pages[m.currentPage]
+        if m.minWidth {
+            page = m.pages[0]
+        }
+
+		pageStyle := m.renderer.NewStyle()
+		renderedPage = pageStyle.Render(page.Render(&m))
+	}
 
 	return lipgloss.JoinVertical(
 		lipgloss.Top,
 		m.createTitle(),
-        renderedPage,
-        helpMenu(m),
-    )
+		renderedPage,
+		helpMenu(m),
+	)
 }
-

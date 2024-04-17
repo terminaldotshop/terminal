@@ -6,6 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type EmailPage struct {
@@ -58,5 +59,8 @@ func (w *EmailPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd) {
 func (w *EmailPage) Title() string { return "Email" }
 
 func (w *EmailPage) Render(m *Model) string {
-    return w.form.View()
+    container := lipgloss.NewStyle().
+        Height(m.GetMaxPageHeight())
+
+    return container.Render(w.form.View())
 }
