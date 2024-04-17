@@ -88,12 +88,6 @@ export default $config({
         role: githubRole.name,
       });
     }
-    const ssh = new tls.PrivateKey("SSHKey", {
-      algorithm: "ED25519",
-    });
-    ssh.privateKeyPem.apply(console.log);
-    ssh.privateKeyOpenssh.apply(console.log);
-    ssh.privateKeyPemPkcs8.apply(console.log);
     if (!$dev) {
       const repository = new aws.ecr.Repository("DockerRepository", {
         name: [$app.name, $app.stage].join("-"),
