@@ -105,13 +105,13 @@ type OrderParams struct {
 }
 
 type ShippingDetails struct {
+	Name     string  `json:"name"`
 	Address1 *string `json:"line1"`
 	Address2 *string `json:"line2"`
 	City     *string `json:"city"`
 	State    *string `json:"state,omitempty"`
-	Zip      *string `json:"zip"`
 	Country  *string `json:"country"`
-	Name     string  `json:"name"`
+	Zip      *string `json:"zip"`
 }
 
 type ProductOrder struct {

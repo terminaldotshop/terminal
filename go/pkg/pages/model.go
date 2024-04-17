@@ -60,37 +60,37 @@ type Model struct {
 }
 
 var defaultShippingState = ShippingState{
-	Name:      "default Name",
-	AddrLine1: "default AddrLine1",
-	AddrLine2: "default AddrLine2",
-	City:      "default City",
-	State:     "SD",
-	Zip:       "55555",
+	Name:      "Teej DV",
+	AddrLine1: "Streamer Lane",
+	AddrLine2: "",
+	City:      "Miami",
+	State:     "FL",
+	Zip:       "33131",
 }
 
 var defaultCreditCardState = CreditCardState{
-	Name: "default Name",
+	Name: "Teej DV",
 
-	CC:       "1234 1234 1234 1234",
-	CVC:      "123",
+	CC:       "4242 4242 4242 4242",
+	CVC:      "314",
 	ExpMonth: "12",
-	ExpYear:  "12",
+	ExpYear:  "34",
 
 	Different: true,
 }
 
 var defaultCrediCardAddr = CreditCardAddress{
 	ShippingState: ShippingState{
-		Name:      "dCCAddress Name",
-		AddrLine1: "dCCAddress AddrLine1",
-		AddrLine2: "dCCAddress AddrLine2",
-		City:      "dCCAddress City",
-		State:     "DS",
-		Zip:       "222222",
+		Name:      "TJ DeVries",
+		AddrLine1: "Credit Card Drive",
+		AddrLine2: "WithSecondLine",
+		City:      "Miami",
+		State:     "FL",
+		Zip:       "33131",
 	},
 }
 
-var defaultEmail = "piq@called.it"
+var defaultEmail = "teej_dv@twitch.tv"
 
 const (
 	goToEmail    = 1
