@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"test.terminal.shop/pkg/shop"
 )
 
 type WidgetPage struct {

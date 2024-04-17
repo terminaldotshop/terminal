@@ -5,7 +5,7 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"test.terminal.shop/pkg/pages"
+	"github.com/terminalhq/terminal/go/pkg/pages"
 )
 
 func main() {

@@ -5,7 +5,6 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"test.terminal.shop/pkg/shop"
 )
 
 // type currentPage int
