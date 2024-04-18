@@ -32,9 +32,9 @@ func getHelpBasedOnPage(m Model) string {
 	}
 
 	infoPageNav := []string{
-		helpNav(m.theme, "shift+tab", "go back to product"),
-		helpNav(m.theme, "enter", "next field or page"),
-		helpNav(m.theme, "ctrl+c", "quit"),
+		helpNav(m.theme, "S-tab", "go back to product"),
+		helpNav(m.theme, "enter/tab", "next field or page"),
+		helpNav(m.theme, "C-c", "quit"),
 	}
 
 	switch m.currentPage {
@@ -45,7 +45,7 @@ func getHelpBasedOnPage(m Model) string {
 			helpNav(m.theme, "j", "remove one from your order count"),
 			helpNav(m.theme, "k", "add one to your order count"),
 			helpNav(m.theme, "c", "begin checkout"),
-			helpNav(m.theme, "ctrl+c", "quit"),
+			helpNav(m.theme, "C-c", "quit"),
 		)
 	case EMAIL_PAGE:
 		fallthrough
@@ -60,7 +60,7 @@ func getHelpBasedOnPage(m Model) string {
 		return joinHelpItems(theme,
 			helpNav(m.theme, "enter", "to confirm and place order"),
 			helpNav(m.theme, "shift+tab", "to go back"),
-			helpNav(m.theme, "ctrl+c", "quit"),
+			helpNav(m.theme, "C-c", "quit"),
 		)
 	}
 

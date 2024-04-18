@@ -8,7 +8,7 @@ import (
 )
 
 const MIN_WIDTH = 120
-const MIN_HEIGHT = 30
+const MIN_HEIGHT = 29
 
 type MinWidthPage struct{}
 

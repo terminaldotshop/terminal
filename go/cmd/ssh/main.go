@@ -4,6 +4,8 @@ package main
 // and continually print up to date terminal information.
 
 import (
+	_ "embed"
+
 	"context"
 	"errors"
 	"fmt"
@@ -28,6 +30,9 @@ import (
 	"github.com/charmbracelet/wish/bubbletea"
 	"github.com/charmbracelet/wish/logging"
 )
+
+//go:embed react-miami.txt
+var reactMiami string
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -158,6 +163,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 var date = time.Date(2024, time.April, 18, 17, 0, 0, 0, time.UTC)
 
 func (m model) View() string {
+	minWidth := 170
+	minheight := 40
+	if time.Now().After(date) {
+		text := "GET YOUR COFFEE AT\n" + reactMiami + "\nCome Next Week to Order 'Online'"
+		if m.width < minWidth || m.height < minheight {
+			text = "Get Your Coffee at React Miami!\nCome Next Week to Order 'Online'\n(Zoom out to see the whole message)"
+		}
+
+		return m.renderer.NewStyle().
+			Width(m.width).
+			Height(m.height).
+			AlignVertical(lipgloss.Center).
+			AlignHorizontal(lipgloss.Center).
+			Render(text)
+	}
+
 	timeDiff := date.Sub(time.Now())
 	days := int(timeDiff.Hours() / 24)
 	hours := int(timeDiff.Hours()) % 24

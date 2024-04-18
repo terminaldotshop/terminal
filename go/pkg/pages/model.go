@@ -3,6 +3,7 @@ package pages
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -21,6 +22,7 @@ const (
 	CC_PAGE                = 4
 	CC_ADDR_PAGE           = 5
 	CONFIRM_PAGE           = 6
+	ANIMATION_PAGE         = 7
 )
 
 type OrderInfo struct {
@@ -85,11 +87,12 @@ var defaultBillingAddress = api.NewAddress(
 var defaultEmail = "teej_dv@twitch.tv"
 
 const (
-	goToEmail    = 1
-	goToShipping = 2
-	goToCC       = 3
-	goToCCAddr   = 4
-	goToConfirm  = 5
+	goToEmail     = 1
+	goToShipping  = 2
+	goToCC        = 3
+	goToCCAddr    = 4
+	goToConfirm   = 5
+	goToAnimation = 6
 )
 
 func stateToNumber(toState string) int {
@@ -104,6 +107,8 @@ func stateToNumber(toState string) int {
 		return goToCCAddr
 	case "confirm":
 		return goToConfirm
+	case "animation":
+		return goToAnimation
 	}
 	return 0
 }
@@ -130,6 +135,7 @@ func NewModel(toState string) *Model {
 			NewCreditCardAddress(),
 			NewConfirmPage(),
 			// TODO: Add a page to show that order worked. Animate the coffee
+			NewAnimationPage(),
 		},
 		order: OrderInfo{
 			count:   0,
@@ -185,6 +191,10 @@ func NewModel(toState string) *Model {
 		model.currentPage = CONFIRM_PAGE
 	}
 
+	if state >= goToAnimation {
+		model.currentPage = ANIMATION_PAGE
+	}
+
 	model.pages[model.currentPage].Enter(*model)
 
 	log.Warn("starting terminal.shop", "page", model.currentPage, "title", model.pages[model.currentPage].Title())
@@ -209,7 +219,10 @@ type Page interface {
 }
 
 func (m Model) Init() tea.Cmd {
-	return nil
+	return tea.Tick(100*time.Millisecond, func(t time.Time) tea.Msg {
+		return nextFrameMsg{}
+	})
+
 }
 
 func nav(m Model, newPage int) Model {
@@ -240,6 +253,10 @@ func (m Model) systemUpdates(raw tea.Msg) (bool, tea.Model, tea.Cmd) {
 		return true, nav(m, CC_ADDR_PAGE), nil
 	case NavigateConfirm:
 		return true, nav(m, CONFIRM_PAGE), nil
+	case NavigateAnimation:
+		return true, nav(m, ANIMATION_PAGE), tea.Tick(100*time.Millisecond, func(t time.Time) tea.Msg {
+			return nextFrameMsg{}
+		})
 
 	case Dialog:
 		m.Dialog = &msg.msg
@@ -267,6 +284,7 @@ func (m Model) systemUpdates(raw tea.Msg) (bool, tea.Model, tea.Cmd) {
 }
 
 func (m Model) Update(raw tea.Msg) (tea.Model, tea.Cmd) {
+	log.Warn("we updating now", "msg", raw)
 
 	if handled, model, cmd := m.systemUpdates(raw); handled {
 		return model, cmd

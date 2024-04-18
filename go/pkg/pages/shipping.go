@@ -53,7 +53,7 @@ func newShippingForm(address *api.Address) *huh.Form {
 
 					return nil
 				}),
-		),
+		).WithShowHelp(false),
 	)
 }
 
