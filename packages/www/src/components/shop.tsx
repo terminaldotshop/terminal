@@ -1,20 +1,28 @@
 import {
   Match,
+  Show,
   Switch,
   createSignal,
   onCleanup,
+  onMount,
   type Component,
   type JSX,
 } from 'solid-js'
-import SshComponent from '@components/ssh'
 import TeaserComponent, { release } from '@components/teaser'
+import PendingComponent from '@components/pending'
 
 type ShopProps = {} & JSX.HTMLAttributes<HTMLDivElement>
 
 const ShopComponent: Component<ShopProps> = () => {
   let sshTimeout: ReturnType<typeof setTimeout> | undefined
 
-  const [done, setDone] = createSignal<boolean>(new Date() > release)
+  const [ready, setReady] = createSignal(false)
+  const [done, setDone] = createSignal<boolean>(false)
+
+  onMount(() => {
+    setDone(new Date() > release)
+    setReady(true)
+  })
 
   sshTimeout = setInterval(() => {
     const now = new Date()
@@ -26,14 +34,16 @@ const ShopComponent: Component<ShopProps> = () => {
   onCleanup(() => clearInterval(sshTimeout))
 
   return (
-    <Switch fallback={<TeaserComponent />}>
-      <Match when={done()}>
-        <SshComponent />
-      </Match>
-      <Match when={!done()}>
-        <TeaserComponent />
-      </Match>
-    </Switch>
+    <Show when={ready()}>
+      <Switch>
+        <Match when={done()}>
+          <PendingComponent />
+        </Match>
+        <Match when={!done()}>
+          <TeaserComponent />
+        </Match>
+      </Switch>
+    </Show>
   )
 }
 
