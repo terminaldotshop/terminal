@@ -7,8 +7,8 @@ import (
 )
 
 func helpNav(theme Theme, k, m string) string {
-	key := theme.HelpSpecialForeground().Render(k)
-	message := theme.DescForeground().Render(fmt.Sprintf(" = %s", m))
+	key := theme.HelpSpecial().Render(k)
+	message := theme.Description().Render(fmt.Sprintf(" = %s", m))
 
 	return lipgloss.JoinHorizontal(0, key, message)
 }
@@ -47,7 +47,7 @@ func getHelpBasedOnPage(m Model) string {
 			infoPageNav...,
 		)
 
-    case CONFIRM_PAGE:
+	case CONFIRM_PAGE:
 		return lipgloss.JoinHorizontal(0,
 			helpNav(m.theme, "enter", "to confirm and place order"),
 			helpNav(m.theme, "shift+tab", "to go back"),

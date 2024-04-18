@@ -1,6 +1,8 @@
 package pages
 
 import (
+	"errors"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 	"github.com/terminalhq/terminal/go/pkg/api"
@@ -44,7 +46,13 @@ func newShippingForm(address *api.Address) *huh.Form {
 			huh.NewInput().
 				Title("Country").
 				Value(&address.Country).
-				Validate(notEmpty("Country")),
+				Validate(func(value string) error {
+					if value != "US" {
+						return errors.New("Sorry, at this time only 'US' is supported")
+					}
+
+					return nil
+				}),
 		),
 	)
 }

@@ -1,6 +1,11 @@
 package api
 
-import "github.com/stripe/stripe-go/v78"
+import (
+	"strings"
+
+	"github.com/stripe/stripe-go/v78"
+	"github.com/terminalhq/terminal/go/pkg/assert"
+)
 
 type Address struct {
 	Name      string `json:"name"`
@@ -37,6 +42,15 @@ type CreditCard struct {
 }
 
 func NewCreditCard(name, number, expMonth, expYear, cvc string) CreditCard {
+	// If we have an actual card, let's double check a few things
+	if name != "" {
+		number = strings.ReplaceAll(number, " ", "")
+
+		assert.Assert(len(number) == 16, "Invalid credit card number")
+		assert.Assert(len(expMonth) == 2, "Invalid expiration month")
+		assert.Assert(len(expYear) == 2, "Invalid expiration year")
+	}
+
 	return CreditCard{
 		Name:     name,
 		Number:   number,

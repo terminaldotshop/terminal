@@ -3,16 +3,16 @@ package pages
 import "github.com/charmbracelet/lipgloss"
 
 type Theme interface {
-	PriceForeground() lipgloss.Style
-	DescForeground() lipgloss.Style
-	TitleForeground() lipgloss.Style
-	NormalForeground() lipgloss.Style
-	ActivePriceForeground() lipgloss.Style
-	ActiveDescForeground() lipgloss.Style
-	ActiveTitleForeground() lipgloss.Style
-	HelpSpecialForeground() lipgloss.Style
+	// Descrpition Styles
+	Description() lipgloss.Style
+	ActiveDescription() lipgloss.Style
+
+	// Title Styles
+	Title() lipgloss.Style
+	ActiveTitle() lipgloss.Style
+
+	HelpSpecial() lipgloss.Style
 	HRB() lipgloss.Style
-	ActiveNormalForeground() lipgloss.Style
 
 	Page() lipgloss.Style
 	ActivePage() lipgloss.Style
@@ -37,7 +37,7 @@ func (b *BasicTheme) HRB() lipgloss.Style {
 	return b.hrb.Copy()
 }
 
-func (b *BasicTheme) HelpSpecialForeground() lipgloss.Style {
+func (b *BasicTheme) HelpSpecial() lipgloss.Style {
 	return b.help.Copy()
 }
 
@@ -45,11 +45,11 @@ func (b *BasicTheme) PriceForeground() lipgloss.Style {
 	return b.activeDesc.Copy()
 }
 
-func (b *BasicTheme) DescForeground() lipgloss.Style {
+func (b *BasicTheme) Description() lipgloss.Style {
 	return b.desc.Copy()
 }
 
-func (b *BasicTheme) TitleForeground() lipgloss.Style {
+func (b *BasicTheme) Title() lipgloss.Style {
 	return b.title.Copy()
 }
 
@@ -61,11 +61,11 @@ func (b *BasicTheme) ActivePriceForeground() lipgloss.Style {
 	return b.activeDesc.Copy()
 }
 
-func (b *BasicTheme) ActiveDescForeground() lipgloss.Style {
+func (b *BasicTheme) ActiveDescription() lipgloss.Style {
 	return b.activeDesc.Copy()
 }
 
-func (b *BasicTheme) ActiveTitleForeground() lipgloss.Style {
+func (b *BasicTheme) ActiveTitle() lipgloss.Style {
 	return b.activeTitle.Copy()
 }
 
@@ -82,8 +82,10 @@ func (b *BasicTheme) ActivePage() lipgloss.Style {
 }
 
 func GetTheme(renderer *lipgloss.Renderer) Theme {
+	orange := lipgloss.Color("#FF5C00")
+
 	return &BasicTheme{
-		desc:   renderer.NewStyle(),
+		desc:   renderer.NewStyle().Padding(0, 0, 0, 2),
 		title:  renderer.NewStyle(),
 		normal: renderer.NewStyle(),
 		page: renderer.NewStyle().
@@ -92,11 +94,12 @@ func GetTheme(renderer *lipgloss.Renderer) Theme {
 		activeDesc: renderer.NewStyle(),
 		hrb: renderer.NewStyle().
 			Bold(true).
-            Border(lipgloss.RoundedBorder()).
+			Border(lipgloss.RoundedBorder()).
 			Foreground(lipgloss.Color("#EC465A")),
 		activeTitle: renderer.NewStyle().
 			Bold(true).
-			Foreground(lipgloss.Color("#b294bb")).
+			Foreground(orange).
+			Padding(1, 0, 1, 0).
 			Underline(true),
 		activeNormal: renderer.NewStyle(),
 		activePage: renderer.NewStyle().

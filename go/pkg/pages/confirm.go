@@ -22,16 +22,20 @@ func (s *ConfirmPage) Title() string { return "Confirmation" }
 
 func (s *ConfirmPage) Render(m *Model) string {
 	container := lipgloss.NewStyle().
-		Height(m.GetMaxPageHeight())
+		Height(m.GetMaxPageHeight()).
+		PaddingLeft(2)
 
 	lines := []string{
 		RenderEmail(*m),
-		RenderShipping(*m, m.shippingAddress, "Shipping Address"),
-		RenderCreditCard(*m, m.creditCard),
+		RenderShipping(m.theme, m.shippingAddress, "Shipping Address"),
+		RenderCreditCard(m.theme, m.creditCard),
 	}
 
+	billingAddressTitle := "Billing Address"
 	if m.differentBillingAddress {
-		lines = append(lines, RenderShipping(*m, m.billingAddress, "CC Address"))
+		lines = append(lines, RenderShipping(m.theme, m.billingAddress, billingAddressTitle))
+	} else {
+		lines = append(lines, RenderSameShipping(m.theme, billingAddressTitle))
 	}
 
 	return container.Render(

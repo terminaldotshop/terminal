@@ -50,7 +50,7 @@ func (w *ProductPage) Update(m Model, raw tea.Msg) (bool, tea.Model, tea.Cmd) {
 func (w *ProductPage) Title() string { return "Order" }
 
 func (w *ProductPage) Render(m *Model) string {
-	titleStyle := m.theme.ActiveTitleForeground().
+	titleStyle := m.theme.ActiveTitle().
 		AlignHorizontal(lipgloss.Center).
 		Width(m.width).
 		MarginBottom(2)
@@ -62,7 +62,7 @@ func (w *ProductPage) Render(m *Model) string {
 	art := lipgloss.NewStyle().
 		Width(artWidth)
 
-	desc := m.theme.ActiveDescForeground().
+	desc := m.theme.ActiveDescription().
 		Width(descWidth).
 		Render(m.order.product.Description)
 

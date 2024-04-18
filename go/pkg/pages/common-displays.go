@@ -9,20 +9,16 @@ import (
 )
 
 func cityStateZip(theme Theme, city, state, zip string) string {
-	return fmt.Sprintf("%s, %s %s",
-		theme.ActiveDescForeground().Render(city),
-		theme.ActiveDescForeground().Render(state),
-		theme.ActiveDescForeground().Render(zip))
+	return theme.Description().Render(fmt.Sprintf("%s, %s %s", city, state, zip))
 }
 
 func value(theme Theme, value string) string {
-	return theme.ActiveDescForeground().Render(value)
+	return theme.Description().Render(value)
 }
 
-func RenderShipping(m Model, shipping api.Address, title string) string {
-	theme := m.theme
+func RenderShipping(theme Theme, shipping api.Address, title string) string {
 	lines := []string{
-		theme.ActiveTitleForeground().Render(title),
+		theme.ActiveTitle().Render(title),
 		value(theme, shipping.Name),
 		value(theme, shipping.AddrLine1),
 	}
@@ -38,30 +34,36 @@ func RenderShipping(m Model, shipping api.Address, title string) string {
 		lines...)
 }
 
+func RenderSameShipping(theme Theme, title string) string {
+	return lipgloss.JoinVertical(
+		0,
+		theme.ActiveTitle().Render(title),
+		theme.Description().Render("(Same as Shipping Address)"),
+	)
+}
+
 func expiration(theme Theme, month, year string) string {
-	return theme.ActiveDescForeground().Render(fmt.Sprintf("%s/%s", month, year))
+	return theme.Description().Render(fmt.Sprintf("Expires: %s/%s", month, year))
 }
 
 func cc(theme Theme, cc string) string {
-	return theme.ActiveDescForeground().Render(cc[len(cc)-4:])
+	return theme.Description().Render(
+		fmt.Sprintf("•••• •••• •••• %s", cc[len(cc)-4:]),
+	)
 }
 
 func keyValue(theme Theme, key, value string) string {
-	return fmt.Sprintf("%s: %s", theme.ActiveDescForeground().Render(key), theme.DescForeground().Render(value))
+	return fmt.Sprintf("%s: %s", theme.Description().Render(key), theme.Description().Render(value))
 }
 
-func RenderCreditCard(m Model, credit api.CreditCard) string {
-	theme := m.theme
-
+func RenderCreditCard(theme Theme, credit api.CreditCard) string {
 	return lipgloss.JoinVertical(
 		0,
-		theme.ActiveTitleForeground().Render("Credit Card Info"),
+		theme.ActiveTitle().Render("Credit Card Info"),
 		value(theme, credit.Name),
 		cc(theme, credit.Number),
-		lipgloss.JoinHorizontal(
-			0,
-			keyValue(theme, "CVC", "***"),
-			expiration(theme, credit.ExpMonth, credit.ExpYear)))
+		expiration(theme, credit.ExpMonth, credit.ExpYear),
+	)
 }
 
 func RenderEmail(m Model) string {
@@ -69,7 +71,7 @@ func RenderEmail(m Model) string {
 
 	return lipgloss.JoinVertical(
 		0,
-		theme.ActiveTitleForeground().Render("Email"),
+		theme.ActiveTitle().Render("Email"),
 		value(theme, m.email))
 }
 

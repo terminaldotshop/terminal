@@ -84,10 +84,13 @@ func (c *CreditCardPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd)
 		if c.form.State == huh.StateCompleted {
 			m.creditCard = c.card
 			m.differentBillingAddress = c.differentBillingAddress
-			if c.differentBillingAddress {
-				return true, m, NewNavigateCCAddress
+
+			nextView := NewNavigateCCAddress
+			if !c.differentBillingAddress {
+				m.billingAddress = m.shippingAddress
+				nextView = NewNavigateConfirm
 			}
-			return true, m, NewNavigateConfirm
+			return true, m, nextView
 		}
 		return true, m, cmd
 	}
@@ -99,5 +102,9 @@ func (s *CreditCardPage) Title() string { return "CreditCard" }
 
 func (s *CreditCardPage) Render(m *Model) string {
 	return RenderSplitView(*m, s.form.View(),
-		lipgloss.JoinVertical(0, RenderEmail(*m), RenderShipping(*m, m.shippingAddress, "Shipping")))
+		lipgloss.JoinVertical(
+			0,
+			RenderEmail(*m),
+			RenderShipping(m.theme, m.shippingAddress, "Shipping"),
+		))
 }

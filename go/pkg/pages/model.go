@@ -67,9 +67,9 @@ var defaultShippingState = api.NewAddress(
 var defaultCreditCard = api.NewCreditCard(
 	"Teej DV",
 	"4242 4242 4242 4242",
-	"314",
 	"12",
 	"34",
+	"314",
 )
 
 var defaultBillingAddress = api.NewAddress(
@@ -294,9 +294,10 @@ func (m Model) createTitle() string {
 
 	titles := make([]string, 0)
 	for i, page := range m.pages {
-		if i == 1 {
+		if i == 0 {
 			continue
 		}
+
 		current := i == m.currentPage
 		style := theme.Page()
 		if current {

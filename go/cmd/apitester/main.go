@@ -16,7 +16,8 @@ func main() {
 
 	fmt.Printf("product: %s\n", product.Name)
 
-	token, err := api.FetchUserToken("testing-2")
+	publicKey := "testing-2"
+	token, err := api.FetchUserToken(publicKey)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -28,7 +29,7 @@ func main() {
 			"Miami User",
 			"4242424242424242",
 			"12",
-			"2034",
+			"34",
 			"314",
 		),
 		api.NewAddress(
@@ -47,7 +48,7 @@ func main() {
 			"Brazil User",
 			"4242424242424242",
 			"12",
-			"2034",
+			"34",
 			"314",
 		),
 		api.NewAddress(

@@ -51,7 +51,7 @@ func (s *CreditCardAddress) Render(m *Model) string {
 	return RenderSplitView(*m, s.form.View(),
 		lipgloss.JoinVertical(0,
 			RenderEmail(*m),
-			RenderShipping(*m, m.shippingAddress, "Shipping"),
-			RenderCreditCard(*m, m.creditCard)),
+			RenderShipping(m.theme, m.shippingAddress, "Shipping"),
+			RenderCreditCard(m.theme, m.creditCard)),
 	)
 }
