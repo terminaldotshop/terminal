@@ -31,6 +31,7 @@ type OrderInfo struct {
 }
 
 type Model struct {
+	publicKey   string
 	currentPage int
 	pages       []Page
 
@@ -113,7 +114,42 @@ func stateToNumber(toState string) int {
 	return 0
 }
 
-func NewModel(toState string) *Model {
+func NewModel(renderer *lipgloss.Renderer, width, height int, publicKey string) *Model {
+	productPage := NewProductPage()
+
+	model := &Model{
+		publicKey:   publicKey,
+		width:       width,
+		height:      height,
+		renderer:    renderer,
+		currentPage: PRODUCT_PAGE,
+		theme:       GetTheme(renderer),
+		email:       "",
+		Dialog:      nil,
+		pages: []Page{
+			&MinWidthPage{},
+			productPage,
+			NewEmailPage(),
+			NewShippingPage(),
+			NewCreditCardPage(),
+			NewCreditCardAddress(),
+			NewConfirmPage(),
+			// TODO: Add a page to show that order worked. Animate the coffee
+			NewAnimationPage(),
+		},
+		order: OrderInfo{
+			count:   0,
+			product: productPage.Product,
+		},
+	}
+
+	model.pages[model.currentPage].Enter(*model)
+	log.Warn("starting terminal.shop", "page", model.currentPage, "title", model.pages[model.currentPage].Title())
+
+	return model
+}
+
+func NewLocalModel(toState string) *Model {
 	renderer := lipgloss.DefaultRenderer()
 
 	productPage := NewProductPage()
@@ -196,7 +232,6 @@ func NewModel(toState string) *Model {
 	}
 
 	model.pages[model.currentPage].Enter(*model)
-
 	log.Warn("starting terminal.shop", "page", model.currentPage, "title", model.pages[model.currentPage].Title())
 
 	return model
@@ -220,7 +255,7 @@ type Page interface {
 
 func (m Model) Init() tea.Cmd {
 	return tea.Tick(100*time.Millisecond, func(t time.Time) tea.Msg {
-		return nextFrameMsg{}
+		return NextFrameMsg{}
 	})
 
 }
@@ -255,7 +290,7 @@ func (m Model) systemUpdates(raw tea.Msg) (bool, tea.Model, tea.Cmd) {
 		return true, nav(m, CONFIRM_PAGE), nil
 	case NavigateAnimation:
 		return true, nav(m, ANIMATION_PAGE), tea.Tick(100*time.Millisecond, func(t time.Time) tea.Msg {
-			return nextFrameMsg{}
+			return NextFrameMsg{}
 		})
 
 	case Dialog:

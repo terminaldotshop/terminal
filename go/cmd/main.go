@@ -36,7 +36,7 @@ func main() {
 	log.SetOutput(f)
 	defer f.Close()
 
-	model := pages.NewModel(screen)
+	model := pages.NewLocalModel(screen)
 	if len(dialog) > 0 {
 		model.Dialog = &dialog
 	}

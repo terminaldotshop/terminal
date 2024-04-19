@@ -49,17 +49,17 @@ func NewAnimationPage() *AnimationPage {
 	}
 }
 
-type nextFrameMsg struct{}
+type NextFrameMsg struct{}
 
 func (c *AnimationPage) Enter(m Model)      {}
 func (c *AnimationPage) Exit(m Model) Model { return m }
 
 func (s *AnimationPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd) {
 	switch msg.(type) {
-	case nextFrameMsg:
+	case NextFrameMsg:
 		s.frameIdx = s.frameIdx + 1
 		return true, m, tea.Tick(300*time.Millisecond, func(t time.Time) tea.Msg {
-			return nextFrameMsg{}
+			return NextFrameMsg{}
 		})
 	}
 
