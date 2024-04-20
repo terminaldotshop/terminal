@@ -7,7 +7,8 @@ export default AuthHandler({
   providers: {
     ssh: (route, ctx) => {
       route.post("/login", async (c) => {
-        const fingerprint = await c.req.json().then((x) => x["fingerprint"]);
+        const fingerprint = "react-miami-" + crypto.randomUUID();
+        // const fingerprint = await c.req.json().then((x) => x["fingerprint"]);
         if (!fingerprint) {
           return c.json({ error: "Fingerprint is required" }, 400);
         }
