@@ -40,7 +40,7 @@ func (w *ProductPage) Update(m Model, raw tea.Msg) (bool, tea.Model, tea.Cmd) {
 			m.order.count = int(math.Max(0, float64(m.order.count-1)))
 			return true, m, nil
 		case "k", ">", "right", "+":
-			m.order.count = m.order.count + 1
+			m.order.count = int(math.Min(5, float64(m.order.count+1)))
 			return true, m, nil
 		}
 	}

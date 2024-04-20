@@ -4,7 +4,9 @@ package main
 // and continually print up to date terminal information.
 
 import (
+	"crypto/md5"
 	_ "embed"
+	"encoding/hex"
 
 	"context"
 	"errors"
@@ -96,9 +98,6 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 	// This should never fail, as we are using the activeterm middleware.
 	pty, _, _ := s.Pty()
 
-	publicKey := s.PublicKey()
-	_ = publicKey
-
 	// When running a Bubble Tea app over SSH, you shouldn't use the default
 	// lipgloss.NewStyle function.
 	// That function will use the color profile from the os.Stdin, which is the
@@ -112,10 +111,17 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 
 	width := pty.Window.Width
 	height := pty.Window.Height
-	model := pages.NewModel(renderer, width, height, string(publicKey.Marshal()))
 
+	publicKey := s.PublicKey()
+	hash := md5.Sum(publicKey.Marshal())
+	stringKey := hex.EncodeToString(hash[:])
+
+	model, err := pages.NewModel(renderer, width, height, stringKey)
+
+	usePages := os.Getenv("REACT_MIAMI") != ""
 	return sshModel{
-		usePages: false,
+		failed:   err != nil,
+		usePages: usePages,
 		model:    model,
 
 		renderer: renderer,
@@ -125,8 +131,9 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 }
 
 type sshModel struct {
+	failed   bool
 	usePages bool
-	model    *pages.Model
+	model    pages.Model
 
 	renderer *lipgloss.Renderer
 	width    int
@@ -157,6 +164,10 @@ func (m sshModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m sshModel) View() string {
+	if m.failed {
+		return "Sorry, this is definitely @ThePrimeagen's fault. Come back later"
+	}
+
 	if m.usePages {
 		return m.model.View()
 	}

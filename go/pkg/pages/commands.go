@@ -17,6 +17,10 @@ func NewDialog(msg string) tea.Cmd {
 	}
 }
 
+func NewNavigateAnimation() tea.Msg {
+	return NavigateAnimation{}
+}
+
 func NewNavigateConfirm() tea.Msg {
 	return NavigateConfirm{}
 }

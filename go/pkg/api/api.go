@@ -85,6 +85,8 @@ type FingerprintRequest struct {
 }
 
 type UserCredentials struct {
+	// TODO: Get the email as well from this?
+
 	UserID      string `json:"userID"`
 	AccessToken string `json:"accessToken"`
 }
@@ -207,8 +209,7 @@ type SubmitOrderRequest struct {
 	StripeCardToken string `json:"token"`
 }
 
-type SubmitOrderResponse struct {
-}
+type SubmitOrderResponse bool
 
 func PurchaseOrder(bearer string, orderID string, cardInfo *StripeCardToken) (*SubmitOrderResponse, error) {
 	buf, err := json.Marshal(SubmitOrderRequest{

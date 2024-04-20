@@ -1,6 +1,8 @@
 package pages
 
 import (
+	"fmt"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
@@ -82,6 +84,7 @@ func (c *CreditCardPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd)
 	if f, ok := form.(*huh.Form); ok {
 		c.form = f
 		if c.form.State == huh.StateCompleted {
+			oldCreditCard := m.creditCard
 			m.creditCard = c.card
 			m.differentBillingAddress = c.differentBillingAddress
 
@@ -89,6 +92,17 @@ func (c *CreditCardPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd)
 			if !c.differentBillingAddress {
 				m.billingAddress = m.shippingAddress
 				nextView = NewNavigateConfirm
+
+				// Refresh the credit card token iff the credit card has changed
+				if oldCreditCard != c.card {
+					cardparams := api.NewCardParams(m.creditCard, m.billingAddress)
+
+					var err error
+					m.stripeCardToken, err = api.StripeCreditCard(cardparams)
+					if err != nil {
+						return true, m, NewDialog(fmt.Sprintf("Credit Card Creation Failed: %s", err))
+					}
+				}
 			}
 			return true, m, nextView
 		}

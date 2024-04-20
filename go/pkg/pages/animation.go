@@ -21,7 +21,6 @@ func NewAnimationPage() *AnimationPage {
 	frameFiles, _ := fs.ReadDir(frameDir, "frames")
 	frameFilesSorted := []string{}
 	for _, f := range frameFiles {
-		log.Warn("name:", "name", f.Name())
 		if f.IsDir() {
 			continue
 		}
@@ -79,7 +78,7 @@ func (s *AnimationPage) Render(m *Model) string {
 	frameIdx := s.frameIdx % len(s.frames)
 	text := s.frames[frameIdx]
 
-	message := "Loading"
+	message := "SUCCESS"
 	length := len(message)
 	messages := []string{}
 	for idx := range message {
@@ -109,8 +108,6 @@ func (s *AnimationPage) Render(m *Model) string {
 	text = strings.Join(lines, "\n")
 
 	return container.Render(
-		fmt.Sprintf(
-			"%d\n%s", s.frameIdx, text,
-		),
+		fmt.Sprintf("\n%s", text),
 	)
 }

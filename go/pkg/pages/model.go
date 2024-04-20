@@ -31,7 +31,7 @@ type OrderInfo struct {
 }
 
 type Model struct {
-	publicKey   string
+	userToken   string
 	currentPage int
 	pages       []Page
 
@@ -47,7 +47,8 @@ type Model struct {
 	order OrderInfo
 	email string
 
-	creditCard api.CreditCard
+	creditCard      api.CreditCard
+	stripeCardToken *api.StripeCardToken
 
 	differentBillingAddress bool
 
@@ -114,11 +115,22 @@ func stateToNumber(toState string) int {
 	return 0
 }
 
-func NewModel(renderer *lipgloss.Renderer, width, height int, publicKey string) *Model {
+func NewModel(renderer *lipgloss.Renderer, width, height int, publicKey string) (Model, error) {
 	productPage := NewProductPage()
 
-	model := &Model{
-		publicKey:   publicKey,
+	userToken, err := api.FetchUserToken(publicKey)
+	if err != nil {
+		return Model{}, err
+	}
+
+	if userToken.AccessToken == "" {
+		log.Fatalf("Failed to fetch: %s", publicKey)
+	}
+
+	log.Warn("starting terminal.shop", "page", PRODUCT_PAGE, "title", productPage.Title())
+
+	model := Model{
+		userToken:   userToken.AccessToken,
 		width:       width,
 		height:      height,
 		renderer:    renderer,
@@ -143,10 +155,10 @@ func NewModel(renderer *lipgloss.Renderer, width, height int, publicKey string) 
 		},
 	}
 
-	model.pages[model.currentPage].Enter(*model)
+	model.pages[model.currentPage].Enter(model)
 	log.Warn("starting terminal.shop", "page", model.currentPage, "title", model.pages[model.currentPage].Title())
 
-	return model
+	return model, nil
 }
 
 func NewLocalModel(toState string) *Model {
@@ -319,8 +331,6 @@ func (m Model) systemUpdates(raw tea.Msg) (bool, tea.Model, tea.Cmd) {
 }
 
 func (m Model) Update(raw tea.Msg) (tea.Model, tea.Cmd) {
-	log.Warn("we updating now", "msg", raw)
-
 	if handled, model, cmd := m.systemUpdates(raw); handled {
 		return model, cmd
 	}
