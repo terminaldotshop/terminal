@@ -118,10 +118,10 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 
 	model, err := pages.NewModel(renderer, width, height, stringKey)
 
-	usePages := os.Getenv("REACT_MIAMI") != "" || true
+	// usePages := os.Getenv("REACT_MIAMI") != "" || true
 	return sshModel{
 		failed:   err != nil,
-		usePages: usePages,
+		usePages: false,
 		model:    model,
 
 		renderer: renderer,
@@ -175,10 +175,11 @@ func (m sshModel) View() string {
 
 	minWidth := 170
 	minheight := 40
-	text := "GET YOUR COFFEE AT\n" + reactMiami + "\nCome Next Week to Order 'Online'"
+	text := "GET YOUR COFFEE AT\n" + reactMiami + "\nCome Next Week to Order 'Online'. Come to the booth on Floor 10 to order in person!"
 	if m.width < minWidth || m.height < minheight {
 		text = `Get Your Coffee at React Miami!
-Come Next Week to Order 'Online'
+Come Next Week to Order 'Online'.
+Come to the booth on Floor 10 to order in person!
 (Zoom out to see the whole message)`
 	}
 
