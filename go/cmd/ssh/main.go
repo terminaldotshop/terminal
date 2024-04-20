@@ -118,7 +118,7 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 
 	model, err := pages.NewModel(renderer, width, height, stringKey)
 
-	usePages := os.Getenv("REACT_MIAMI") != ""
+	usePages := os.Getenv("REACT_MIAMI") != "" || true
 	return sshModel{
 		failed:   err != nil,
 		usePages: usePages,
@@ -133,6 +133,7 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 type sshModel struct {
 	failed   bool
 	usePages bool
+	loggedIn bool
 	model    pages.Model
 
 	renderer *lipgloss.Renderer

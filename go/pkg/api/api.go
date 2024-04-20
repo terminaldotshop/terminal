@@ -15,11 +15,8 @@ import (
 	// "github.com/stripe/stripe-go/v78/customer"
 )
 
-// const apiURL = "https://api.thdxr.dev.terminal.shop/"
-// const authURL = "https://auth.thdxr.dev.terminal.shop/"
-
-const apiURL = "https://api.adam.dev.terminal.shop/"
-const authURL = "https://auth.adam.dev.terminal.shop/"
+const apiURL = "https://api.terminal.shop/"
+const authURL = "https://auth.terminal.shop/"
 
 func routeAPI(path string) string {
 	return fmt.Sprintf("%s%s", apiURL, path)
@@ -137,11 +134,13 @@ type ShippingInfoResponse struct {
 }
 
 type OrderResponse struct {
-	OrderID  string               `json:"id"`
-	Tax      int                  `json:"tax"`
-	Shipping ShippingInfoResponse `json:"shipping"`
-	Subtotal int                  `json:"subtotal"`
-	Total    int                  `json:"total"`
+	OrderID  string `json:"id"`
+	Tax      int    `json:"tax"`
+	Subtotal int    `json:"subtotal"`
+	Total    int    `json:"total"`
+
+	// TODO(launch): this needs to do something later or we screwed
+	// Shipping ShippingInfoResponse `json:"shipping"`
 }
 
 func CreateOrder(bearer string, order OrderParams) (*OrderResponse, error) {
@@ -188,7 +187,7 @@ func (s StripeCardToken) GetToken() string {
 
 func StripeCreditCard(card *stripe.CardParams) (*StripeCardToken, error) {
 	// THIS IS A PUBLISHABLE TOKEN, SO ITS OK IF PRIME LEAKS THIS. ITS PUBLIC
-	stripe.Key = "pk_test_51OrLKuDgGJQx1Mr6CNDnGNukgQwBonSSToYC8VcmE7qBk2YEad8UuitmY54Pqp0tuZCrk8PNP9cEKVYHvuLcjsnv007CKDgOew"
+	stripe.Key = "pk_live_51OrLKuDgGJQx1Mr6tJbUNOAWOcAZ1gGs2rr6T99REuLD6tPPPfSS6iSZnLAI7Kw0EBR63m8SIcqdeb3vhVRLbqZr00zy2bzLav"
 
 	tokenParams := &stripe.TokenParams{Card: card}
 	tokenResult, err := token.New(tokenParams)

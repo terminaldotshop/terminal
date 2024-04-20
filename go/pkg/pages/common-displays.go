@@ -66,6 +66,10 @@ func RenderCreditCard(theme Theme, credit api.CreditCard) string {
 	)
 }
 
+func RenderOrder(m Model, order *api.OrderResponse) string {
+	return m.theme.HRB().Render(fmt.Sprintf("Total Cost: $%d.%d", order.Total/100, order.Total%100))
+}
+
 func RenderEmail(m Model) string {
 	theme := m.theme
 

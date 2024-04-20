@@ -63,11 +63,12 @@ func (s *ConfirmPage) Update(m Model, msg tea.Msg) (bool, tea.Model, tea.Cmd) {
 func (s *ConfirmPage) Title() string { return "Confirmation" }
 
 func (s *ConfirmPage) Render(m *Model) string {
-	container := lipgloss.NewStyle().
+	leftContainer := m.renderer.NewStyle().
 		Height(m.GetMaxPageHeight()).
 		PaddingLeft(2)
 
 	lines := []string{
+		RenderOrder(*m, currentOrder),
 		RenderEmail(*m),
 		RenderShipping(m.theme, m.shippingAddress, "Shipping Address"),
 		RenderCreditCard(m.theme, m.creditCard),
@@ -80,7 +81,7 @@ func (s *ConfirmPage) Render(m *Model) string {
 		lines = append(lines, RenderSameShipping(m.theme, billingAddressTitle))
 	}
 
-	return container.Render(
+	return leftContainer.Render(
 		lipgloss.JoinVertical(
 			0,
 			lines...))
