@@ -255,7 +255,7 @@ export default $config({
       const service = new aws.ecs.Service("SSHService", {
         cluster: cluster.arn,
         taskDefinition: taskDefinition.arn,
-        desiredCount: 1,
+        desiredCount: 3,
         launchType: "FARGATE",
         networkConfiguration: {
           assignPublicIp: true,
