@@ -276,10 +276,10 @@ export default $config({
         ],
       });
       const cert = new aws.acm.Certificate("SSLCertificate", {
-        domainName: "terminal.shop",
+        domainName: "miami." + domain,
         validationMethod: "DNS",
       });
-      const zone = await cloudflare.getZone({ name: "terminal.shop" });
+      const zone = await cloudflare.getZone({ name: domain });
       const records: cloudflare.Record[] = [];
       cert.domainValidationOptions.apply((domainValidationOptions) => {
         const [options] = domainValidationOptions;
