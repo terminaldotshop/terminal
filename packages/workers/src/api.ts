@@ -128,55 +128,55 @@ const app = new Hono()
       console.log(body);
 
       // TODO: handle other products, only nil blend for now
-      // const quantity = body.products.reduce(
-      //   (total, product) => total + product.quantity,
-      //   0,
-      // );
-      //
-      // if (quantity <= 0) throw new Error("Quantity must be greater than 0");
-      //
-      // let largeBoxesNeeded = Math.floor(quantity / 3);
-      // let singleBoxesNeeded = quantity % 3;
-      //
-      // if (singleBoxesNeeded === 2) {
-      //   largeBoxesNeeded += 1;
-      //   singleBoxesNeeded = 0; // Used a large box instead of single boxes
-      // }
-      //
-      // const parcels = [];
-      // for (let i = 0; i < largeBoxesNeeded; i++) parcels.push({ ...large });
-      // for (let i = 0; i < singleBoxesNeeded; i++) parcels.push({ ...small });
-      //
-      // const shipment = await shippo("/shipments", {
-      //   method: "POST",
-      //   body: JSON.stringify({
-      //     address_from: from,
-      //     address_to: {
-      //       ...body.shipping,
-      //       line1: undefined,
-      //       line2: undefined,
-      //       street1: body.shipping.line1,
-      //       street2: body.shipping.line2,
-      //     },
-      //     parcels,
-      //     async: false,
-      //   }),
-      // });
-      //
-      // console.log("shipment", shipment);
-      //
-      // if (shipment.status !== "SUCCESS")
-      //   throw new Error("Failed to get shipping rates.");
-      //
-      // const [rate] = shipment.rates.sort(
-      //   (a, b) => Number.parseFloat(a.amount) - Number.parseFloat(b.amount),
-      // );
-      // const shipping = {
-      //   id: rate.object_id,
-      //   name: `${rate.provider} ${rate.servicelevel.name}`,
-      //   cost: Number.parseFloat(rate.amount),
-      //   estimate: rate.duration_terms,
-      // };
+      const quantity = body.products.reduce(
+        (total, product) => total + product.quantity,
+        0,
+      );
+
+      if (quantity <= 0) throw new Error("Quantity must be greater than 0");
+
+      let largeBoxesNeeded = Math.floor(quantity / 3);
+      let singleBoxesNeeded = quantity % 3;
+
+      if (singleBoxesNeeded === 2) {
+        largeBoxesNeeded += 1;
+        singleBoxesNeeded = 0; // Used a large box instead of single boxes
+      }
+
+      const parcels = [];
+      for (let i = 0; i < largeBoxesNeeded; i++) parcels.push({ ...large });
+      for (let i = 0; i < singleBoxesNeeded; i++) parcels.push({ ...small });
+
+      const shipment = await shippo("/shipments", {
+        method: "POST",
+        body: JSON.stringify({
+          address_from: from,
+          address_to: {
+            ...body.shipping,
+            line1: undefined,
+            line2: undefined,
+            street1: body.shipping.line1,
+            street2: body.shipping.line2,
+          },
+          parcels,
+          async: false,
+        }),
+      });
+
+      console.log("shipment", shipment);
+
+      if (shipment.status !== "SUCCESS")
+        throw new Error("Failed to get shipping rates.");
+
+      const [rate] = shipment.rates.sort(
+        (a, b) => Number.parseFloat(a.amount) - Number.parseFloat(b.amount),
+      );
+      const shipping = {
+        id: rate.object_id,
+        name: `${rate.provider} ${rate.servicelevel.name}`,
+        cost: Number.parseFloat(rate.amount),
+        estimate: rate.duration_terms,
+      };
 
       await stripe().customers.update(useUserID(), {
         email: body.email,
@@ -193,19 +193,19 @@ const app = new Hono()
             postal_code: body.shipping.zip,
           },
         },
-        // metadata: {
-        //   rate: shipping.id,
-        // },
-        // shipping_cost: {
-        //   shipping_rate_data: {
-        //     type: "fixed_amount",
-        //     display_name: shipping.name,
-        //     fixed_amount: {
-        //       currency: "usd",
-        //       amount: shipping.cost * 100,
-        //     },
-        //   },
-        // },
+        metadata: {
+          rate: shipping.id,
+        },
+        shipping_cost: {
+          shipping_rate_data: {
+            type: "fixed_amount",
+            display_name: shipping.name,
+            fixed_amount: {
+              currency: "usd",
+              amount: shipping.cost * 100,
+            },
+          },
+        },
         customer: useUserID(),
       });
       for (const product of body.products) {
@@ -222,7 +222,7 @@ const app = new Hono()
         id: invoice.id,
         tax: result.tax,
         subtotal: result.subtotal,
-        // shipping,
+        shipping,
         total: result.amount_due,
       });
     },
