@@ -39,14 +39,14 @@ func (w *WidgetPage) Render(m *Model) string {
 	descWidth := m.width - artWidth
 	pageHeight := m.height - 5
 
-	art := lipgloss.NewStyle().
+	art := m.renderer.NewStyle().
 		Width(artWidth)
 
 	desc := m.theme.ActiveDescription().
 		Width(descWidth).
 		Render(m.order.product.Description)
 
-	checkoutSpacing := lipgloss.NewStyle().
+	checkoutSpacing := m.renderer.NewStyle().
 		Width(descWidth).
 		MarginTop(pageHeight - lipgloss.Height(desc) - 10).
 		Render("")
@@ -58,7 +58,7 @@ func (w *WidgetPage) Render(m *Model) string {
 		Render(" + ")
 
 	countStr := fmt.Sprintf("%d", m.order.count)
-	count := lipgloss.NewStyle().
+	count := m.renderer.NewStyle().
 		Margin(1, 1, 0, 1).
 		Render(countStr)
 
@@ -67,7 +67,7 @@ func (w *WidgetPage) Render(m *Model) string {
 		AlignVertical(lipgloss.Bottom).
 		Render("[C]heckout")
 
-	countSpacing := lipgloss.NewStyle().
+	countSpacing := m.renderer.NewStyle().
 		Width(descWidth - (lipgloss.Width(countRight) + lipgloss.Width(countLeft) + lipgloss.Width(count) + lipgloss.Width(checkout))).
 		Render("")
 

@@ -82,16 +82,16 @@ func RenderEmail(m Model) string {
 }
 
 func RenderSplitView(m Model, view1, view2 string) string {
-	container := lipgloss.NewStyle().
+	container := m.renderer.NewStyle().
 		Height(m.GetMaxPageHeight())
 
 	leftWidth := m.GetMaxPageWidth() / 2
 	rightWidth := m.GetMaxPageWidth() - leftWidth
 
-	leftContainer := lipgloss.NewStyle().
+	leftContainer := m.renderer.NewStyle().
 		Width(leftWidth)
 
-	rightContainer := lipgloss.NewStyle().
+	rightContainer := m.renderer.NewStyle().
 		Width(rightWidth)
 
 	return container.Render(

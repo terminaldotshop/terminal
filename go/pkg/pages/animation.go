@@ -69,7 +69,7 @@ func (s *AnimationPage) Title() string { return "Animation" }
 
 func (s *AnimationPage) Render(m *Model) string {
 
-	container := lipgloss.NewStyle().
+	container := m.renderer.NewStyle().
 		Height(m.GetMaxPageHeight()).
 		Width(m.GetMaxPageWidth()).
 		PaddingLeft((m.GetMaxPageWidth() - 20) / 2).

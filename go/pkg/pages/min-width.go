@@ -24,7 +24,7 @@ func (w *MinWidthPage) Render(m *Model) string {
 
 	height := m.GetMaxPageHeight()
 
-	minWidthContainer := lipgloss.NewStyle().
+	minWidthContainer := m.renderer.NewStyle().
 		Height(height).
 		AlignVertical(lipgloss.Center)
 

@@ -346,7 +346,7 @@ func (m Model) Update(raw tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m Model) createTitle() string {
 
-	titleContainer := lipgloss.NewStyle().
+	titleContainer := m.renderer.NewStyle().
 		Margin(1, 0, 1, 0)
 
 	if m.currentPage == 0 {

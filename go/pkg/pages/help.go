@@ -68,7 +68,7 @@ func getHelpBasedOnPage(m Model) string {
 }
 
 func helpMenu(m Model) string {
-	helpContainer := lipgloss.NewStyle().
+	helpContainer := m.renderer.NewStyle().
 		Border(lipgloss.DoubleBorder(), true, false, false, false).
 		Width(m.width).
 		Height(2)
