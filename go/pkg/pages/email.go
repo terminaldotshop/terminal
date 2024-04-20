@@ -16,6 +16,8 @@ type EmailPage struct {
 func newEmailForm(email *EmailPage) *huh.Form {
 	return huh.NewForm(
 		huh.NewGroup(
+			huh.NewNote().Title("If you are not at React Miami, wait til Monday."),
+			huh.NewNote().Title("If you are at React Miami, Please come and pick up your coffee"),
 			huh.NewInput().
 				Title("Email").
 				Value(&email.email).
