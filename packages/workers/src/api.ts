@@ -324,29 +324,53 @@ const app = new Hono()
     ),
     async (c) => {
       const body = c.req.valid("json");
-      const invoice = await stripe().invoices.retrieve(body.orderID);
-      invoice.metadata.rate;
-      const paymentMethod = await stripe().paymentMethods.create({
-        type: "card",
-        card: {
-          token: body.token,
-        },
-      });
+      const invoice = await stripe()
+        .invoices.retrieve(body.orderID)
+        .catch(() => {});
+      if (!invoice) {
+        throw new HTTPException(400, {
+          message: "Invalid order ID",
+        });
+      }
+      const paymentMethod = await stripe()
+        .paymentMethods.create({
+          type: "card",
+          card: {
+            token: body.token,
+          },
+        })
+        .catch((e) => e.message as string);
+      if (typeof paymentMethod === "string")
+        throw new HTTPException(400, {
+          message: paymentMethod,
+        });
       let existing = await stripe()
         .paymentMethods.list()
         .then((result) =>
           result.data.find(
             (pm) => pm.card.fingerprint === paymentMethod.card.fingerprint,
           ),
-        );
+        )
+        .catch((e) => e.message as string);
+      if (typeof existing === "string") {
+        throw new HTTPException(400, {
+          message: existing,
+        });
+      }
       if (!existing) {
         existing = await stripe().paymentMethods.attach(paymentMethod.id, {
           customer: useUserID(),
         });
       }
-      await stripe().invoices.pay(body.orderID, {
-        payment_method: existing.id,
-      });
+      const payment = await stripe()
+        .invoices.pay(body.orderID, {
+          payment_method: existing.id,
+        })
+        .catch((e) => e.message as string);
+      if (typeof payment === "string")
+        throw new HTTPException(400, {
+          message: payment,
+        });
 
       const label = await shippo("/transactions", {
         method: "POST",
@@ -355,18 +379,20 @@ const app = new Hono()
           async: false,
         }),
       });
-
-      console.log("label", label);
-
-      await stripe().invoices.update(body.orderID, {
-        metadata: {
-          ...invoice.metadata,
-          label: label.label_url,
-          trackingNumber: label.tracking_number,
-          trackingUrl: label.tracking_url_provider,
-        },
-      });
-
+      const updated = await stripe()
+        .invoices.update(body.orderID, {
+          metadata: {
+            ...invoice.metadata,
+            label: label.label_url,
+            trackingNumber: label.tracking_number,
+            trackingUrl: label.tracking_url_provider,
+          },
+        })
+        .catch((e) => e.message as string);
+      if (typeof updated === "string")
+        throw new HTTPException(400, {
+          message: updated,
+        });
       return c.json(true);
     },
   )
