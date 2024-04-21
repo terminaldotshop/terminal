@@ -1,4 +1,5 @@
 import { Hono, MiddlewareHandler } from "hono";
+import { HTTPException } from "hono/http-exception";
 import { logger } from "hono/logger";
 import { session } from "./session";
 import { createContext } from "./context";
@@ -53,7 +54,11 @@ const large = {
 
 function useUserID() {
   const session = SessionContext.use();
-  if (session.type !== "user") throw new Error("User session expected");
+  if (session.type !== "user")
+    throw new HTTPException(401, {
+      message: "User session expected",
+    });
+
   return session.properties.userID;
 }
 
@@ -132,7 +137,10 @@ const app = new Hono()
         (total, product) => total + product.quantity,
         0,
       );
-      if (quantity <= 0) throw new Error("Quantity must be greater than 0");
+      if (quantity <= 0)
+        throw new HTTPException(400, {
+          message: "Quantity must be greater than 0",
+        });
 
       let address = {
         ...body.shipping,
@@ -160,9 +168,10 @@ const app = new Hono()
         !addressValidation.is_complete ||
         !addressValidation.validation_results.is_valid
       ) {
-        throw new Error(
-          addressErrors?.join("\n") ?? "Shipping address is incomplete.",
-        );
+        throw new HTTPException(400, {
+          message:
+            addressErrors?.join("\n") ?? "Shipping address is incomplete.",
+        });
       }
 
       // use the "cleaned up" address from validation
@@ -241,7 +250,9 @@ const app = new Hono()
       console.log("shipment", shipment);
 
       if (shipment.status !== "SUCCESS")
-        throw new Error("Failed to get shipping rates.");
+        throw new HTTPException(400, {
+          message: "Failed to get shipping rates.",
+        });
 
       const [rate] = shipment.rates.sort(
         (a, b) => Number.parseFloat(a.amount) - Number.parseFloat(b.amount),
