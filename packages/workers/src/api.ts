@@ -127,6 +127,53 @@ const app = new Hono()
       const body = c.req.valid("json");
       console.log(body);
 
+      let address = {
+        ...body.shipping,
+        line1: undefined,
+        line2: undefined,
+        street1: body.shipping.line1,
+        street2: body.shipping.line2,
+      };
+
+      // validate address
+      const addressValidation = await shippo("/addresses", {
+        method: "POST",
+        body: JSON.stringify({ ...address, validate: true }),
+      });
+      console.log(
+        "addressValidation",
+        JSON.stringify(addressValidation, undefined, 2),
+      );
+
+      const addressErrors = addressValidation.validation_results.messages?.map(
+        (m) => m.text,
+      );
+
+      if (
+        !addressValidation.is_complete ||
+        !addressValidation.validation_results.is_valid
+      ) {
+        throw new Error(
+          addressErrors?.join("\n") ?? "Shipping address is incomplete.",
+        );
+      }
+
+      // use the "cleaned up" address from validation
+      address = {
+        name: addressValidation.name,
+        // @ts-expect-error
+        street_no: addressValidation.street_no,
+        street1: addressValidation.street1,
+        street2: addressValidation.street2,
+        street3: addressValidation.street3,
+        street4: addressValidation.street4,
+        city: addressValidation.city,
+        state: addressValidation.state,
+        zip: addressValidation.zip,
+        country: addressValidation.country,
+        phone: addressValidation.phone,
+      };
+
       // TODO: handle other products, only nil blend for now
       const quantity = body.products.reduce(
         (total, product) => total + product.quantity,
@@ -151,13 +198,7 @@ const app = new Hono()
         method: "POST",
         body: JSON.stringify({
           address_from: from,
-          address_to: {
-            ...body.shipping,
-            line1: undefined,
-            line2: undefined,
-            street1: body.shipping.line1,
-            street2: body.shipping.line2,
-          },
+          address_to: address,
           parcels,
           async: false,
         }),
