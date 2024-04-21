@@ -67,10 +67,9 @@ const auth: MiddlewareHandler = async (c, next) => {
   if (authHeader) {
     const match = authHeader.match(/^Bearer (.+)$/);
     if (!match) {
-      return c.json(
-        { error: "Bearer token not found or improperly formatted" },
-        401,
-      );
+      throw new HTTPException(401, {
+        message: "Bearer token not found or improperly formatted",
+      });
     }
     const bearerToken = match[1];
     const result = await session.verify(bearerToken);
