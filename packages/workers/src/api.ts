@@ -127,6 +127,13 @@ const app = new Hono()
       const body = c.req.valid("json");
       console.log(body);
 
+      // TODO: handle other products, only nil blend for now
+      const quantity = body.products.reduce(
+        (total, product) => total + product.quantity,
+        0,
+      );
+      if (quantity <= 0) throw new Error("Quantity must be greater than 0");
+
       let address = {
         ...body.shipping,
         line1: undefined,
@@ -174,13 +181,38 @@ const app = new Hono()
         phone: addressValidation.phone,
       };
 
-      // TODO: handle other products, only nil blend for now
-      const quantity = body.products.reduce(
-        (total, product) => total + product.quantity,
-        0,
-      );
+      let customsDeclarationId: string | undefined = undefined;
 
-      if (quantity <= 0) throw new Error("Quantity must be greater than 0");
+      if (address.country !== "US") {
+        const customsDeclaration = await shippo("/customs/declarations", {
+          method: "POST",
+          body: JSON.stringify({
+            contents_type: "MERCHANDISE",
+            non_delivery_option: "RETURN",
+            certify: true,
+            certify_signer: "Dax Raad",
+            eel_pfc: address.country === "CA" ? "NOEEI_30_36" : "NOEEI_30_37_a",
+            items: [
+              {
+                description: "Roasted Coffee Beans",
+                quantity,
+                net_weight: "12",
+                mass_unit: "oz",
+                value_amount: "25",
+                value_currency: "USD",
+                tariff_number: "0901.21.00",
+                origin_country: "US",
+              },
+            ],
+          }),
+        });
+        console.log(
+          "customsDeclaration",
+          JSON.stringify(customsDeclaration, undefined, 2),
+        );
+
+        customsDeclarationId = customsDeclaration.object_id;
+      }
 
       let largeBoxesNeeded = Math.floor(quantity / 3);
       let singleBoxesNeeded = quantity % 3;
@@ -200,6 +232,8 @@ const app = new Hono()
           address_from: from,
           address_to: address,
           parcels,
+          extra: { bypass_address_validation: true },
+          customs_declaration: customsDeclarationId,
           async: false,
         }),
       });
