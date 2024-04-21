@@ -352,16 +352,14 @@ const app = new Hono()
           ),
         )
         .catch((e) => e.message as string);
-      if (typeof existing === "string") {
+      if (typeof existing === "string")
         throw new HTTPException(400, {
           message: existing,
         });
-      }
-      if (!existing) {
+      if (!existing)
         existing = await stripe().paymentMethods.attach(paymentMethod.id, {
           customer: useUserID(),
         });
-      }
       const payment = await stripe()
         .invoices.pay(body.orderID, {
           payment_method: existing.id,
@@ -371,7 +369,6 @@ const app = new Hono()
         throw new HTTPException(400, {
           message: payment,
         });
-
       const label = await shippo("/transactions", {
         method: "POST",
         body: JSON.stringify({
