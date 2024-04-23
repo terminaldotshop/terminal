@@ -119,22 +119,28 @@ export default $config({
         max: 10,
       },
     });
-    // new cloudflare.SpectrumApplication("SpectrumSSH", {
-    //   dns: {
-    //     name: domain,
-    //     type: "CNAME",
-    //   },
-    //   zoneId: sst.cloudflare.DEFAULT_ACCOUNT_ID,
-    //   protocol: "ssh",
-    //   originDns: {
-    //     name: ssh.url,
-    //   },
-    //   originPort: 22,
-    // });
+    const zone = cloudflare.getZoneOutput({
+      name: "terminal.shop",
+    });
+    /*
+    new cloudflare.SpectrumApplication("SpectrumSSH", {
+      dns: {
+        name: domain,
+        type: "CNAME",
+      },
+      zoneId: zone.zoneId,
+      protocol: "ssh",
+      originDns: {
+        name: ssh.url,
+      },
+      originPort: 22,
+    });
+    */
 
     return {
       api: api.url,
       auth: auth.url,
+      zone: zone.zoneId,
     };
   },
 });
