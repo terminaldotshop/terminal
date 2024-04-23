@@ -339,6 +339,7 @@ export default $config({
         ],
       });
     }
+
     return {
       api: api.url,
       auth: auth.url,
