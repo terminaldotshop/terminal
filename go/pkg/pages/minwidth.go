@@ -10,6 +10,10 @@ import (
 const MIN_WIDTH = 120
 const MIN_HEIGHT = 29
 
+func NewMinWidthPage() *MinWidthPage {
+	return &MinWidthPage{}
+}
+
 type MinWidthPage struct{}
 
 func (w *MinWidthPage) Update(m Model, _ tea.Msg) (bool, tea.Model, tea.Cmd) {

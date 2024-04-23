@@ -2,7 +2,6 @@ package pages
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -31,6 +30,8 @@ type OrderInfo struct {
 }
 
 type Model struct {
+	testing bool
+
 	userToken   string
 	currentPage int
 	pages       []Page
@@ -58,78 +59,28 @@ type Model struct {
 	Dialog *string
 }
 
-var defaultShippingState = api.NewAddress(
-	"Teej DV",
-	"Streamer Lane",
-	"",
-	"Miami",
-	"FL",
-	"US",
-	"33131",
-)
-
-var defaultCreditCard = api.NewCreditCard(
-	"Teej DV",
-	"4242 4242 4242 4242",
-	"12",
-	"34",
-	"314",
-)
-
-var defaultBillingAddress = api.NewAddress(
-	"TJ DeVries",
-	"Credit Card Drive",
-	"WithSecondLine",
-	"Miami",
-	"FL",
-	"US",
-	"33131",
-)
-
-var defaultEmail = "teej_dv@twitch.tv"
-
-const (
-	goToEmail     = 1
-	goToShipping  = 2
-	goToCC        = 3
-	goToCCAddr    = 4
-	goToConfirm   = 5
-	goToAnimation = 6
-)
-
-func stateToNumber(toState string) int {
-	switch strings.ToLower(toState) {
-	case "email":
-		return goToEmail
-	case "shipping":
-		return goToShipping
-	case "cc":
-		return goToCC
-	case "cc-addr":
-		return goToCCAddr
-	case "confirm":
-		return goToConfirm
-	case "animation":
-		return goToAnimation
+func NewModel(
+	renderer *lipgloss.Renderer,
+	width int,
+	height int,
+	publicKey string,
+) (Model, error) {
+	product, err := api.FetchOneProduct()
+	if err != nil {
+		return Model{}, err
 	}
-	return 0
-}
 
-func NewModel(renderer *lipgloss.Renderer, width, height int, publicKey string) (Model, error) {
-	productPage := NewProductPage()
+	productPage := NewProductPage(product)
 
 	userToken, err := api.FetchUserToken(publicKey)
 	if err != nil {
 		return Model{}, err
 	}
 
-	if userToken.AccessToken == "" {
-		log.Fatalf("Failed to fetch: %s", publicKey)
-	}
-
 	log.Warn("starting terminal.shop", "page", PRODUCT_PAGE, "title", productPage.Title())
 
 	model := Model{
+		testing:     false,
 		userToken:   userToken.AccessToken,
 		width:       width,
 		height:      height,
@@ -139,14 +90,13 @@ func NewModel(renderer *lipgloss.Renderer, width, height int, publicKey string) 
 		email:       "",
 		Dialog:      nil,
 		pages: []Page{
-			&MinWidthPage{},
+			NewMinWidthPage(),
 			productPage,
 			NewEmailPage(),
 			NewShippingPage(),
 			NewCreditCardPage(),
 			NewCreditCardAddress(),
 			NewConfirmPage(),
-			// TODO: Add a page to show that order worked. Animate the coffee
 			NewAnimationPage(),
 		},
 		order: OrderInfo{
@@ -164,9 +114,15 @@ func NewModel(renderer *lipgloss.Renderer, width, height int, publicKey string) 
 func NewLocalModel(toState string) *Model {
 	renderer := lipgloss.DefaultRenderer()
 
-	productPage := NewProductPage()
+	product, err := api.FetchOneProduct()
+	if err != nil {
+		panic("no")
+	}
+
+	productPage := NewProductPage(product)
 
 	model := &Model{
+		testing:     true,
 		renderer:    renderer,
 		currentPage: PRODUCT_PAGE,
 		theme:       GetTheme(renderer),
@@ -266,6 +222,8 @@ type Page interface {
 }
 
 func (m Model) Init() tea.Cmd {
+	api.Init(m.testing)
+
 	return tea.Tick(100*time.Millisecond, func(t time.Time) tea.Msg {
 		return NextFrameMsg{}
 	})

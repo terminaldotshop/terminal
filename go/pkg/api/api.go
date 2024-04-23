@@ -92,15 +92,13 @@ func (u UserCredentials) String() string {
 	return fmt.Sprintf("{UserID: '%s', AccessToken: '%s...'}", u.UserID, string(u.AccessToken[:10]))
 }
 
-func FetchUserToken(public_key string) (*UserCredentials, error) {
-	fingerprint := FingerprintRequest{Fingerprint: public_key}
-	marshalled, _ := json.Marshal(fingerprint)
-	resp, err := http.Post(routeAuth("ssh/login"), "application/json", bytes.NewReader(marshalled))
+func FetchUserToken(publicKey string) (*UserCredentials, error) {
+	fingerprint := FingerprintRequest{Fingerprint: publicKey}
+
+	resp, body, err := post("", "ssh/login", fingerprint)
 	if err != nil {
 		return nil, err
 	}
-
-	body, err := io.ReadAll(resp.Body)
 
 	if resp.StatusCode == 500 {
 		return nil, errors.New(fmt.Sprintf("Server error: %s", string(body)))
@@ -109,6 +107,10 @@ func FetchUserToken(public_key string) (*UserCredentials, error) {
 	var creds UserCredentials
 	if err := json.Unmarshal(body, &creds); err != nil {
 		return nil, err
+	}
+
+	if creds.AccessToken == "" {
+		return nil, errors.New(fmt.Sprintf("Failed to fetch: %s", publicKey))
 	}
 
 	return &creds, nil
@@ -125,7 +127,7 @@ type ProductOrder struct {
 	Quantity int    `json:"quantity"`
 }
 
-// {"id":"in_1P6deNDgGJQx1Mr65m1t9LEE","subtotal":7500,"shipping":1000,"total":8500}
+// {"id":"in_1r65m1t9LEE","subtotal":7500,"shipping":1000,"total":8500}
 type ShippingInfoResponse struct {
 	ID          string  `json:"id"`
 	DisplayName string  `json:"name"`
@@ -134,32 +136,15 @@ type ShippingInfoResponse struct {
 }
 
 type OrderResponse struct {
-	OrderID  string `json:"id"`
-	Tax      int    `json:"tax"`
-	Subtotal int    `json:"subtotal"`
-	Total    int    `json:"total"`
-
-	// TODO(launch): this needs to do something later or we screwed
-	// Shipping ShippingInfoResponse `json:"shipping"`
+	OrderID  string               `json:"id"`
+	Shipping ShippingInfoResponse `json:"shipping"`
+	Tax      int                  `json:"tax"`
+	Subtotal int                  `json:"subtotal"`
+	Total    int                  `json:"total"`
 }
 
 func CreateOrder(bearer string, order OrderParams) (*OrderResponse, error) {
-	buf, err := json.Marshal(order)
-	if err != nil {
-		return nil, err
-	}
-
-	// resp, err := http.Post(routeAPI("api/order"), "application/json", bytes.NewReader(buf))
-	request, err := http.NewRequest("POST", routeAPI("api/order"), bytes.NewReader(buf))
-	if err != nil {
-		return nil, err
-	}
-
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", bearer))
-	resp, err := http.DefaultClient.Do(request)
-
-	body, err := io.ReadAll(resp.Body)
+	_, body, err := post(bearer, "api/order", order)
 	if err != nil {
 		return nil, err
 	}
@@ -186,9 +171,6 @@ func (s StripeCardToken) GetToken() string {
 }
 
 func StripeCreditCard(card *stripe.CardParams) (*StripeCardToken, error) {
-	// THIS IS A PUBLISHABLE TOKEN, SO ITS OK IF PRIME LEAKS THIS. ITS PUBLIC
-	stripe.Key = "pk_live_51OrLKuDgGJQx1Mr6tJbUNOAWOcAZ1gGs2rr6T99REuLD6tPPPfSS6iSZnLAI7Kw0EBR63m8SIcqdeb3vhVRLbqZr00zy2bzLav"
-
 	tokenParams := &stripe.TokenParams{Card: card}
 	tokenResult, err := token.New(tokenParams)
 
@@ -211,19 +193,45 @@ type SubmitOrderRequest struct {
 type SubmitOrderResponse bool
 
 func PurchaseOrder(bearer string, orderID string, cardInfo *StripeCardToken) (*SubmitOrderResponse, error) {
-	buf, err := json.Marshal(SubmitOrderRequest{
+	_, body, err := post(bearer, "api/payment", SubmitOrderRequest{
 		OrderID:         orderID,
 		StripeCardToken: cardInfo.GetToken(),
 	})
-
 	if err != nil {
 		return nil, err
 	}
 
-	// resp, err := http.Post(routeAPI("api/payment"), "application/json", bytes.NewReader(buf))
-	request, err := http.NewRequest("POST", routeAPI("api/payment"), bytes.NewReader(buf))
+	var response SubmitOrderResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		return nil, errors.New(fmt.Sprintf("Error: %s, body: %s", err, string(body)))
+	}
+
+	return &response, nil
+}
+
+func Init(testing bool) {
+	// THIS IS A PUBLIC KEY, SO ITS OK IF PRIME LEAKS THIS. ITS PUBLIC!!
+	//	(that's what `pk` stands for - public key)
+	//
+	//	You can prove it to yourself here: https://sourcegraph.com/search?q=context:global+pk_live_&patternType=keyword&sm=0
+	if testing {
+		stripe.Key = "pk_test_51OrLKuDgGJQx1Mr6CNDnGNukgQwBonSSToYC8VcmE7qBk2YEad8UuitmY54Pqp0tuZCrk8PNP9cEKVYHvuLcjsnv007CKDgOew"
+
+		return
+	}
+
+	stripe.Key = "pk_live_51OrLKuDgGJQx1Mr6tJbUNOAWOcAZ1gGs2rr6T99REuLD6tPPPfSS6iSZnLAI7Kw0EBR63m8SIcqdeb3vhVRLbqZr00zy2bzLav"
+}
+
+func post(bearer string, path string, payload any) (*http.Response, []byte, error) {
+	buf, err := json.Marshal(payload)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
+	}
+
+	request, err := http.NewRequest("POST", routeAPI(path), bytes.NewReader(buf))
+	if err != nil {
+		return nil, nil, err
 	}
 
 	request.Header.Set("Content-Type", "application/json")
@@ -232,15 +240,8 @@ func PurchaseOrder(bearer string, orderID string, cardInfo *StripeCardToken) (*S
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	fmt.Println("body:", string(body))
-
-	var response SubmitOrderResponse
-	if err := json.Unmarshal(body, &response); err != nil {
-		return nil, errors.New(fmt.Sprintf("Error: %s, body: %s", err, string(body)))
-	}
-
-	return &response, nil
+	return resp, body, nil
 }

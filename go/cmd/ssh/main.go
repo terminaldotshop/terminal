@@ -20,6 +20,7 @@ import (
 	"github.com/terminalhq/terminal/go/pkg/pages"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/log"
 	"github.com/charmbracelet/ssh"
@@ -119,14 +120,27 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 	model, err := pages.NewModel(renderer, width, height, stringKey)
 
 	// usePages := os.Getenv("REACT_MIAMI") != "" || true
+	coffeePassword := os.Getenv("COFFEE_PASSWORD")
 	return sshModel{
 		failed:   err != nil,
-		usePages: false,
+		usePages: true,
 		model:    model,
 
 		renderer: renderer,
 		width:    width,
 		height:   height,
+
+		// Simple password stuff
+		passwordTruth:    coffeePassword,
+		passwordAccepted: coffeePassword != "",
+		passwordForm: huh.NewForm(
+			huh.NewGroup(
+				huh.NewInput().
+					Key("password").
+					Password(true).
+					Description("Secret Password for Beta Testers"),
+			),
+		),
 	}, []tea.ProgramOption{tea.WithAltScreen()}
 }
 
@@ -139,13 +153,33 @@ type sshModel struct {
 	renderer *lipgloss.Renderer
 	width    int
 	height   int
+
+	// Simple password_truth stuff
+	passwordAccepted bool
+	passwordTruth    string
+	passwordForm     *huh.Form
 }
 
 func (m sshModel) Init() tea.Cmd {
+	if m.passwordForm != nil {
+		m.passwordForm.Init()
+	}
+
 	return m.model.Init()
 }
 
+type setPasswordValue struct{ value string }
+
 func (m sshModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	if !m.passwordAccepted {
+		form, cmd := m.passwordForm.Update(msg)
+		if f, ok := form.(*huh.Form); ok {
+			m.passwordForm = f
+		}
+
+		return m, cmd
+	}
+
 	if m.usePages {
 		return m.model.Update(msg)
 	}
@@ -167,6 +201,9 @@ func (m sshModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m sshModel) View() string {
+	if !m.passwordAccepted {
+	}
+
 	if m.failed {
 		return "Sorry, this is definitely @ThePrimeagen's fault. Come back later"
 	}

@@ -3,6 +3,7 @@ package api
 type ProductResponse []Product
 
 type Product struct {
+	ID   string `json:"id"`
 	Art  string
 	Name string `json:"name"`
 	// Sku             string `json:"sku"`
@@ -37,7 +38,6 @@ type Product struct {
 	// DateCreated     time.Time `json:"date_created"`
 	// StockStatus     any       `json:"stock_status"`
 	// DateUpdated     time.Time `json:"date_updated"`
-	ID string `json:"id"`
 }
 
 func GetProducts() []Product {

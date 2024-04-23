@@ -2,7 +2,6 @@ package pages
 
 import (
 	"fmt"
-	"log"
 	"math"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -14,12 +13,7 @@ type ProductPage struct {
 	Product *api.Product
 }
 
-func NewProductPage() *ProductPage {
-	product, err := api.FetchOneProduct()
-	if err != nil {
-		log.Fatal("Failed to fetch. Tag @thdxr on x.com")
-	}
-
+func NewProductPage(product *api.Product) *ProductPage {
 	return &ProductPage{
 		Product: product,
 	}
