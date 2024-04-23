@@ -265,6 +265,18 @@ const app = new Hono()
 
       await stripe().customers.update(useUserID(), {
         email: body.email,
+        name: body.shipping.name,
+        shipping: {
+          name: body.shipping.name,
+          address: {
+            city: body.shipping.city,
+            line1: body.shipping.line1,
+            line2: body.shipping.line2,
+            country: body.shipping.country,
+            state: body.shipping.state,
+            postal_code: body.shipping.zip,
+          },
+        },
       });
       const invoice = await stripe().invoices.create({
         shipping_details: {
