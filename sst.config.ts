@@ -8,6 +8,7 @@ export default $config({
       home: "cloudflare",
       providers: {
         aws: {
+          region: "us-east-2",
           profile: process.env.GITHUB_ACTIONS
             ? undefined
             : input.stage === "production"
