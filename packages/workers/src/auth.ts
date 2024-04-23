@@ -1,13 +1,11 @@
 import { AuthHandler } from "sst/auth";
 import { session } from "./session";
-import { swell } from "./swell";
 import { stripe } from "./stripe";
 
 export default AuthHandler({
   providers: {
     ssh: (route, ctx) => {
       route.post("/login", async (c) => {
-        // const fingerprint = "react-miami-" + crypto.randomUUID();
         const fingerprint = await c.req.json().then((x) => x["fingerprint"]);
         if (!fingerprint) {
           return c.json({ error: "Fingerprint is required" }, 400);

@@ -8,11 +8,8 @@
 
 ### david
 
-
 ### dax
-- [ ] setup cloudflare spectrum
 - [ ] product quantity concept
-
 
 ### prime
 

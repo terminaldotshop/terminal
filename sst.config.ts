@@ -11,8 +11,8 @@ export default $config({
           profile: process.env.GITHUB_ACTIONS
             ? undefined
             : input.stage === "production"
-              ? "ironbay-production"
-              : "ironbay-dev",
+              ? "terminal-production"
+              : "terminal-dev",
         },
         random: true,
         docker: true,
@@ -27,6 +27,7 @@ export default $config({
       $app.stage === "production"
         ? "terminal.shop"
         : $app.stage + ".dev.terminal.shop";
+
     const secrets = {
       SwellSecret: new sst.Secret("SwellSecret"),
       AirtableSecret: new sst.Secret("AirtableSecret"),
@@ -84,7 +85,7 @@ export default $config({
               Action: "sts:AssumeRoleWithWebIdentity",
               Condition: {
                 StringLike: github.url.apply((url) => ({
-                  [`${url}:sub`]: "repo:terminalhq/terminal:*",
+                  [`${url}:sub`]: "repo:terminaldotshop/terminal:*",
                 })),
               },
             },
@@ -96,249 +97,40 @@ export default $config({
         role: githubRole.name,
       });
     }
-    if (!$dev) {
-      const repository = new aws.ecr.Repository("DockerRepository", {
-        name: [$app.name, $app.stage].join("-"),
-        forceDelete: true,
-      });
-      const vpc = new aws.ec2.Vpc("Vpc", {
-        cidrBlock: "10.0.0.0/16",
-        enableDnsSupport: true,
-        enableDnsHostnames: true,
-      });
-      const subnet = new aws.ec2.Subnet("VpcSubnet", {
-        vpcId: vpc.id,
-        cidrBlock: "10.0.1.0/24",
-        mapPublicIpOnLaunch: true,
-      });
-      const igw = new aws.ec2.InternetGateway("VpcIgw", {
-        vpcId: vpc.id,
-      });
-      const routeTable = new aws.ec2.RouteTable("VpcRouteTable", {
-        vpcId: vpc.id,
-        routes: [
-          {
-            cidrBlock: "0.0.0.0/0",
-            gatewayId: igw.id,
-          },
+    const vpc = new sst.aws.Vpc("Vpc");
+    const cluster = new sst.aws.Cluster("Cluster", {
+      vpc,
+    });
+    const ssh = cluster.addService({
+      name: "SSH",
+      cpu: "2 vCPU",
+      memory: "4 GB",
+      image: {
+        context: "./go",
+      },
+      public: {
+        ports: [
+          { listen: "22/tcp", forward: "2222/tcp" },
+          { listen: "80/tcp", forward: "8000/tcp" },
         ],
-      });
-      const registryInfo = repository.registryId.apply(async (registryId) => {
-        const credentials = await aws.ecr.getCredentials({
-          registryId: registryId,
-        });
-        const decodedCredentials = Buffer.from(
-          credentials.authorizationToken,
-          "base64",
-        ).toString();
-        const [username, password] = decodedCredentials.split(":");
-        return {
-          server: credentials.proxyEndpoint,
-          username: username,
-          password: password,
-        };
-      });
-      const image = new docker.Image("SSHImage", {
-        build: {
-          context: resolve("./go"),
-          platform: "linux/amd64",
-        },
-        imageName: $interpolate`${repository.repositoryUrl}:${$app.stage}`,
-        registry: registryInfo,
-      });
-      new aws.ec2.RouteTableAssociation("VpcRouteTableAssociation", {
-        subnetId: subnet.id,
-        routeTableId: routeTable.id,
-      });
-      const cluster = new aws.ecs.Cluster("Cluster");
-      const executionRole = new aws.iam.Role("SSHRole", {
-        assumeRolePolicy: aws.iam.assumeRolePolicyForPrincipal({
-          Service: "ecs-tasks.amazonaws.com",
-        }),
-      });
-      new aws.iam.RolePolicyAttachment("ExecutionRolePolicyAttachment", {
-        role: executionRole.name,
-        policyArn:
-          "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
-      });
-      new aws.iam.RolePolicyAttachment("SSHRolePolicyAttachment", {
-        role: executionRole.name,
-        policyArn:
-          "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
-      });
-      const portSSH = 22;
-      const portHTTP = 80;
-      const portHTTPS = 443;
-      const taskDefinition = new aws.ecs.TaskDefinition("SSHTask", {
-        family: "ssh",
-        trackLatest: true,
-        cpu: "2048",
-        memory: "4096",
-        networkMode: "awsvpc",
-        requiresCompatibilities: ["FARGATE"],
-        executionRoleArn: executionRole.arn,
-        containerDefinitions: $jsonStringify([
-          {
-            name: "ssh",
-            image: image.repoDigest,
-            portMappings: [
-              {
-                containerPort: portSSH,
-                hostPort: portSSH,
-                protocol: "tcp",
-              },
-              {
-                containerPort: portHTTP,
-                hostPort: portHTTP,
-                protocol: "tcp",
-              },
-            ],
-            environment: [
-              {
-                name: "SSH_PORT",
-                value: portSSH.toString(),
-              },
-              {
-                name: "HTTP_PORT",
-                value: portHTTP.toString(),
-              },
-            ],
-          },
-        ]),
-      });
-      const sshSecurityGroup = new aws.ec2.SecurityGroup(
-        "SSHNlbSecurityGroup",
-        {
-          vpcId: vpc.id,
-          egress: [
-            {
-              fromPort: 0,
-              toPort: 0,
-              protocol: "-1",
-              cidrBlocks: ["0.0.0.0/0"],
-            },
-          ],
-          ingress: [
-            {
-              fromPort: portSSH,
-              toPort: portSSH,
-              protocol: "tcp",
-              cidrBlocks: ["0.0.0.0/0"],
-            },
-            {
-              fromPort: portHTTP,
-              toPort: portHTTP,
-              protocol: "tcp",
-              cidrBlocks: ["0.0.0.0/0"],
-            },
-            {
-              fromPort: portHTTPS,
-              toPort: portHTTPS,
-              protocol: "tcp",
-              cidrBlocks: ["0.0.0.0/0"],
-            },
-          ],
-        },
-      );
-      const sshTargetGroup = new aws.lb.TargetGroup("SSHNlbTargetGroup", {
-        port: portSSH,
-        protocol: "TCP",
-        targetType: "ip",
-        vpcId: vpc.id,
-      });
-      const httpTargetGroup = new aws.lb.TargetGroup("NlbTargetGroupHttp", {
-        port: portHTTP,
-        protocol: "TCP",
-        targetType: "ip",
-        vpcId: vpc.id,
-      });
-      const service = new aws.ecs.Service("SSHService", {
-        cluster: cluster.arn,
-        taskDefinition: taskDefinition.arn,
-        desiredCount: 3,
-        launchType: "FARGATE",
-        networkConfiguration: {
-          assignPublicIp: true,
-          subnets: [subnet.id],
-          securityGroups: [sshSecurityGroup.id],
-        },
-        loadBalancers: [
-          {
-            targetGroupArn: sshTargetGroup.arn,
-            containerName: "ssh",
-            containerPort: portSSH,
-          },
-          {
-            targetGroupArn: httpTargetGroup.arn,
-            containerName: "ssh",
-            containerPort: portHTTP,
-          },
-        ],
-      });
-      const cert = new aws.acm.Certificate("SSLCertificate", {
-        domainName: domain,
-        validationMethod: "DNS",
-      });
-      const zone = await cloudflare.getZone({ name: domain });
-      const records: cloudflare.Record[] = [];
-      cert.domainValidationOptions.apply((domainValidationOptions) => {
-        const [options] = domainValidationOptions;
-        records.push(
-          new cloudflare.Record("CertificateValidationRecord", {
-            zoneId: zone.zoneId,
-            name: options.resourceRecordName,
-            type: options.resourceRecordType,
-            value: options.resourceRecordValue,
-            ttl: 300,
-          }),
-        );
-      });
-      const validation = new aws.acm.CertificateValidation("CertValidation", {
-        certificateArn: cert.arn,
-        validationRecordFqdns: records.map((record) => record.hostname),
-      });
-      const nlb = new aws.lb.LoadBalancer("SSHNlb", {
-        internal: false,
-        loadBalancerType: "network",
-        subnets: [subnet.id],
-        enableCrossZoneLoadBalancing: true,
-        securityGroups: [sshSecurityGroup.id],
-      });
-      new aws.lb.Listener("SSHListener", {
-        loadBalancerArn: nlb.arn,
-        port: portSSH,
-        protocol: "TCP",
-        defaultActions: [
-          {
-            type: "forward",
-            targetGroupArn: sshTargetGroup.arn,
-          },
-        ],
-      });
-      new aws.lb.Listener("HttpListener", {
-        loadBalancerArn: nlb.arn,
-        port: portHTTP,
-        protocol: "TCP",
-        defaultActions: [
-          {
-            type: "forward",
-            targetGroupArn: httpTargetGroup.arn,
-          },
-        ],
-      });
-      new aws.lb.Listener("HttpsListener", {
-        certificateArn: validation.certificateArn,
-        loadBalancerArn: nlb.arn,
-        port: portHTTPS,
-        protocol: "TLS",
-        defaultActions: [
-          {
-            type: "forward",
-            targetGroupArn: httpTargetGroup.arn,
-          },
-        ],
-      });
-    }
+      },
+      scaling: {
+        min: 2,
+        max: 10,
+      },
+    });
+    // new cloudflare.SpectrumApplication("SpectrumSSH", {
+    //   dns: {
+    //     name: domain,
+    //     type: "CNAME",
+    //   },
+    //   zoneId: sst.cloudflare.DEFAULT_ACCOUNT_ID,
+    //   protocol: "ssh",
+    //   originDns: {
+    //     name: ssh.url,
+    //   },
+    //   originPort: 22,
+    // });
 
     return {
       api: api.url,

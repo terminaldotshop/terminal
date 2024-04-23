@@ -9,7 +9,7 @@
     "remove": "sst remove",
     "console": "sst console",
     "typecheck": "tsc -noEmit",
-    "sso": "aws sso login --sso-session=ironbay",
+    "sso": "aws sso login --sso-session=terminal --no-browser",
     "postinstall": "patch-package"
   },
   "workspaces": [
