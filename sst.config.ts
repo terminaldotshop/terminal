@@ -64,7 +64,7 @@ export default $config({
       },
     });
     if (isPermanentStage) {
-      const github = new aws.iam.OpenIdConnectProvider("GithubOidc", {
+      const github = new aws.iam.OpenIdConnectProvider("GithubProvider", {
         url: "https://token.actions.githubusercontent.com",
         clientIdLists: ["sts.amazonaws.com"],
         thumbprintLists: [

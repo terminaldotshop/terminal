@@ -158,6 +158,8 @@ func (m sshModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit
+		case "ctrl+f":
+			m.usePages = true
 		}
 	}
 
