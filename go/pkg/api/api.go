@@ -40,7 +40,7 @@ func FetchProducts() (ProductResponse, error) {
 
 	var productResponse ProductResponse
 	if err := json.Unmarshal(body, &productResponse); err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("Error: %s, Body: %s", err, body))
 	}
 
 	return productResponse, nil
@@ -95,7 +95,7 @@ func (u UserCredentials) String() string {
 func FetchUserToken(publicKey string) (*UserCredentials, error) {
 	fingerprint := FingerprintRequest{Fingerprint: publicKey}
 
-	resp, body, err := post("", "ssh/login", fingerprint)
+	resp, body, err := authPost("ssh/login", fingerprint)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func FetchUserToken(publicKey string) (*UserCredentials, error) {
 
 	var creds UserCredentials
 	if err := json.Unmarshal(body, &creds); err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("Error: %s, Body: %s", err, body))
 	}
 
 	if creds.AccessToken == "" {
@@ -235,7 +235,32 @@ func post(bearer string, path string, payload any) (*http.Response, []byte, erro
 	}
 
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", bearer))
+	if bearer != "" {
+		request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", bearer))
+	}
+
+	resp, err := http.DefaultClient.Do(request)
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return resp, body, nil
+}
+
+func authPost(path string, payload any) (*http.Response, []byte, error) {
+	buf, err := json.Marshal(payload)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	request, err := http.NewRequest("POST", routeAuth(path), bytes.NewReader(buf))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	request.Header.Set("Content-Type", "application/json")
 	resp, err := http.DefaultClient.Do(request)
 
 	body, err := io.ReadAll(resp.Body)

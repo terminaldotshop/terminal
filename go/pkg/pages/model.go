@@ -65,20 +65,22 @@ func NewModel(
 	height int,
 	publicKey string,
 ) (Model, error) {
+	log.Warn("Creating new model")
 	product, err := api.FetchOneProduct()
 	if err != nil {
 		return Model{}, err
 	}
 
+	log.Warn("Creating New Product Page")
 	productPage := NewProductPage(product)
 
+	log.Warn("Fetching User Token")
 	userToken, err := api.FetchUserToken(publicKey)
 	if err != nil {
 		return Model{}, err
 	}
 
 	log.Warn("starting terminal.shop", "page", PRODUCT_PAGE, "title", productPage.Title())
-
 	model := Model{
 		testing:     false,
 		userToken:   userToken.AccessToken,
@@ -334,12 +336,10 @@ func (m Model) createTitle() string {
 }
 
 func (m Model) View() string {
-
 	var renderedPage string
 	if m.Dialog != nil && len(*m.Dialog) > 0 {
 		renderedPage = DisplayDialog(m, *m.Dialog)
 	} else {
-
 		page := m.pages[m.currentPage]
 		if m.minWidth {
 			page = m.pages[0]

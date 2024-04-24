@@ -118,9 +118,25 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 	stringKey := hex.EncodeToString(hash[:])
 
 	model, err := pages.NewModel(renderer, width, height, stringKey)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// usePages := os.Getenv("REACT_MIAMI") != "" || true
 	coffeePassword := os.Getenv("COFFEE_PASSWORD")
+
+	var passwordForm *huh.Form
+	if coffeePassword != "" {
+		huh.NewForm(
+			huh.NewGroup(
+				huh.NewInput().
+					Key("password").
+					Password(true).
+					Description("Secret Password for Beta Testers"),
+			),
+		)
+	}
+
 	return sshModel{
 		failed:   err != nil,
 		usePages: true,
@@ -132,15 +148,8 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 
 		// Simple password stuff
 		passwordTruth:    coffeePassword,
-		passwordAccepted: coffeePassword != "",
-		passwordForm: huh.NewForm(
-			huh.NewGroup(
-				huh.NewInput().
-					Key("password").
-					Password(true).
-					Description("Secret Password for Beta Testers"),
-			),
-		),
+		passwordAccepted: coffeePassword == "",
+		passwordForm:     passwordForm,
 	}, []tea.ProgramOption{tea.WithAltScreen()}
 }
 
@@ -162,7 +171,7 @@ type sshModel struct {
 
 func (m sshModel) Init() tea.Cmd {
 	if m.passwordForm != nil {
-		m.passwordForm.Init()
+		return tea.Batch(m.passwordForm.Init(), m.model.Init())
 	}
 
 	return m.model.Init()
@@ -202,6 +211,7 @@ func (m sshModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m sshModel) View() string {
 	if !m.passwordAccepted {
+		return m.passwordForm.View()
 	}
 
 	if m.failed {
