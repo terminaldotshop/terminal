@@ -33,6 +33,15 @@ import (
 //go:embed react-miami.txt
 var reactMiami string
 
+type PasswordState int
+
+const (
+	PasswordSkip PasswordState = iota
+	PasswordPossible
+	PasswordWaiting
+	PasswordAccepted
+)
+
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	signalChan := make(chan os.Signal, 1)
@@ -91,6 +100,20 @@ func main() {
 	slog.Info("Shutting down server")
 }
 
+func newPasswordForm() *huh.Form {
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewInput().
+				Key("password").
+				Password(true).
+				Description("Secret Password for Beta Testers"),
+		),
+	)
+
+	return form
+
+}
+
 // You can wire any Bubble Tea model up to the middleware with a function that
 // handles the incoming ssh.Session. Here we just grab the terminal info and
 // pass it to the new model. You can also return tea.ProgramOptions (such as
@@ -126,20 +149,15 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 	coffeePassword := os.Getenv("COFFEE_PASSWORD")
 
 	var passwordForm *huh.Form
+	passwordState := PasswordSkip
 	if coffeePassword != "" {
-		huh.NewForm(
-			huh.NewGroup(
-				huh.NewInput().
-					Key("password").
-					Password(true).
-					Description("Secret Password for Beta Testers"),
-			),
-		)
+		passwordState = PasswordPossible
+		passwordForm = newPasswordForm()
 	}
 
 	return sshModel{
 		failed:   err != nil,
-		usePages: true,
+		usePages: false,
 		model:    model,
 
 		renderer: renderer,
@@ -147,9 +165,9 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 		height:   height,
 
 		// Simple password stuff
-		passwordTruth:    coffeePassword,
-		passwordAccepted: coffeePassword == "",
-		passwordForm:     passwordForm,
+		passwordTruth: coffeePassword,
+		passwordState: passwordState,
+		passwordForm:  passwordForm,
 	}, []tea.ProgramOption{tea.WithAltScreen()}
 }
 
@@ -164,14 +182,14 @@ type sshModel struct {
 	height   int
 
 	// Simple password_truth stuff
-	passwordAccepted bool
-	passwordTruth    string
-	passwordForm     *huh.Form
+	passwordState PasswordState
+	passwordTruth string
+	passwordForm  *huh.Form
 }
 
 func (m sshModel) Init() tea.Cmd {
 	if m.passwordForm != nil {
-		return tea.Batch(m.passwordForm.Init(), m.model.Init())
+		return tea.Batch(m.model.Init(), m.passwordForm.Init())
 	}
 
 	return m.model.Init()
@@ -180,10 +198,22 @@ func (m sshModel) Init() tea.Cmd {
 type setPasswordValue struct{ value string }
 
 func (m sshModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if !m.passwordAccepted {
+	if m.passwordState == PasswordWaiting {
 		form, cmd := m.passwordForm.Update(msg)
 		if f, ok := form.(*huh.Form); ok {
 			m.passwordForm = f
+		}
+
+		if m.passwordForm.State == huh.StateCompleted {
+			passwordValue := m.passwordForm.GetString("password")
+			if passwordValue == m.passwordTruth {
+				m.passwordState = PasswordAccepted
+				m.usePages = true
+			} else {
+				m.passwordState = PasswordPossible
+				m.passwordForm = newPasswordForm()
+				m.passwordForm.Init()
+			}
 		}
 
 		return m, cmd
@@ -201,8 +231,10 @@ func (m sshModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit
-		case "ctrl+f":
-			m.usePages = true
+		case "ctrl+p":
+			if m.passwordState == PasswordPossible {
+				m.passwordState = PasswordWaiting
+			}
 		}
 	}
 
@@ -210,7 +242,7 @@ func (m sshModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m sshModel) View() string {
-	if !m.passwordAccepted {
+	if m.passwordState == PasswordWaiting {
 		return m.passwordForm.View()
 	}
 
