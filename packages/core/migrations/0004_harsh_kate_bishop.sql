@@ -1,0 +1,1 @@
+ALTER TABLE `cart` ADD CONSTRAINT `cart_card_id_card_id_fk` FOREIGN KEY (`card_id`) REFERENCES `card`(`id`) ON DELETE set null ON UPDATE no action;

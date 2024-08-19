@@ -1,0 +1,50 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+
+interface Props extends HTMLAttributes<'div'> {
+  id: string
+}
+const { class: _, ...props } = Astro.props
+const id = Astro.props.id
+---
+
+<div
+  {...props}
+  class:list={{
+    'h-8 flex items-center bg-orange text-sm': true,
+    [Astro.props.class ?? '']: !!Astro.props.class,
+  }}
+>
+  <div
+    class="flex items-center gap-2 absolute left-1/2 -translate-x-1/2 whitespace-nowrap"
+  >
+    <slot />
+  </div>
+  <button
+    id="close-button"
+    class:list={{
+      'h-full ml-auto px-4 text-gray-11 hover:text-[#EFF7FFCC] focus:text-[#EFF7FFCC] active:text-gray-12': true,
+      'hover:bg-highlight-1 active:bg-highlight-2 focus:bg-highlight-1 focus:outline-none': true,
+    }}
+  >
+    esc
+  </button>
+</div>
+<script define:vars={{ id }}>
+  const banner = document.getElementById(id)
+  const closeButton = document.getElementById('close-button')
+
+  function close() {
+    window.localStorage.setItem(`${id}-banner`, 'closed')
+    banner?.classList.add('hidden')
+  }
+
+  if (closeButton) {
+    closeButton.onclick = close
+    closeButton.addEventListener('keypress', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        close()
+      }
+    })
+  }
+</script>

@@ -1,0 +1,11 @@
+{
+  "name": "@terminal/go",
+  "version": "0.0.0",
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "dev": "sst dev --silent go run ./cmd/ssh/main.go"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}

@@ -1,0 +1,80 @@
+# yaml-language-server: $schema=https://app.stainlessapi.com/config.schema.json
+
+organization:
+  name: terminal
+  docs: https://docs.terminal.com
+  contact: dev@terminal.com
+  github_org: terminaldotshop
+resources:
+  $shared:
+    models:
+      address: Address
+      card: Card
+      cart: Cart
+      order: Order
+      product: Product
+      productVariant: ProductVariant
+      shipping: UserShipping
+      user: User
+  product:
+    methods:
+      list: get /product
+  user:
+    methods:
+      me: get /user/me
+      update: put /user/me
+    subresources:
+      shipping:
+        methods:
+          list: get /user/shipping
+          create: post /user/shipping
+          delete: delete /user/shipping/{id}
+  card:
+    methods:
+      list: get /card
+      create: post /card
+  cart:
+    methods:
+      list: get /cart
+      setItem: put /cart/item
+      setShipping: put /cart/shipping
+      setCard: put /cart/card
+  order:
+    methods:
+      get: get /order/{id}
+      create: post /order
+package:
+  node:
+    name: "@terminal/sdk"
+    repo: terminal-sdk-js
+    skip: false
+  go:
+    name: 'terminal'
+    repo: terminal-sdk-go
+    skip: false
+settings:
+  license: Apache-2.0
+client_settings:
+  opts:
+    bearer_token:
+      type: string
+      auth:
+        security_scheme: Bearer
+      read_env: TERMINAL_BEARER_TOKEN
+environments:
+  production: https://openapi.terminal.shop/
+  dev: https://openapi.dev.terminal.shop/
+query_settings:
+  nested_format: brackets
+  array_format: comma
+readme:
+  example_requests:
+    default:
+      type: request
+      endpoint: get /product
+      params: &ref_0 {}
+    headline:
+      type: request
+      endpoint: get /product
+      params: *ref_0
+

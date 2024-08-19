@@ -1,0 +1,30 @@
+---
+const tweets = [
+  `I just ordered coffee through the terminal…
+
+"ssh terminal.shop" via @terminaldotshop`,
+  `Officially a 10x engineer now. I just ordered coffee through the terminal…
+
+"ssh terminal.shop" via @terminaldotshop`,
+  `I can already tell my skills have improved exponentially, and I haven't touched a drop yet. I just ordered coffee through the terminal…
+
+"ssh terminal.shop" via @terminaldotshop`,
+  `Ordered coffee through the terminal and haven't written a bug since…
+
+"ssh terminal.shop" via @terminaldotshop`,
+  `My build times are down 80% since I ordered coffee through the terminal…
+
+"ssh terminal.shop" via @terminaldotshop`,
+  `He's a 6, but he orders coffee through the terminal…
+
+"ssh terminal.shop" via @terminaldotshop`,
+  `Just bought coffee online without JavaScript. I just ordered coffee through the terminal…
+
+"ssh terminal.shop" via @terminaldotshop`,
+]
+
+const randomTweet = tweets[Math.floor(Math.random() * tweets.length)]
+const tweetUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(randomTweet)}`
+
+return Astro.redirect(tweetUrl)
+---

@@ -1,0 +1,19 @@
+{
+  "name": "@terminal/interval",
+  "version": "0.0.0",
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "dev": "bun --watch ./src/interval.ts"
+  },
+  "devDependencies": {},
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.606.0",
+    "@aws-sdk/s3-request-presigner": "3.606.0",
+    "@interval/sdk": "1.5.0",
+    "@terminal/core": "workspace:",
+    "pdf-lib": "1.17.1",
+    "remeda": "2.3.0"
+  }
+}

@@ -1,0 +1,68 @@
+name: sst
+
+on:
+  workflow_dispatch:
+
+concurrency: 
+  group: ${{ github.ref }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            .sst
+          key: ${{ runner.os }}-sst
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "20"
+
+      - run: "curl -fsSL https://ion.sst.dev/install | bash"
+
+      - if: github.ref == 'refs/heads/dev'
+        name: Configure Dev AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::058264103289:role/terminal-shop-dev-github
+          aws-region: us-east-2
+
+      - if: github.ref == 'refs/heads/production'
+        name: Configure Production AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::211125775473:role/terminal-shop-production-github
+          aws-region: us-east-2
+
+      - name: deps
+        run: bun install
+
+      - name: typecheck
+        run: bun typecheck
+
+      - name: Deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          STRIPE_API_KEY: ${{ github.ref == 'refs/heads/production' && secrets.PRODUCTION_STRIPE_API_KEY || secrets.DEV_STRIPE_API_KEY }}
+          PLANETSCALE_SERVICE_TOKEN_NAME: ${{ secrets.PLANETSCALE_SERVICE_TOKEN_NAME }}
+          PLANETSCALE_SERVICE_TOKEN: ${{ secrets.PLANETSCALE_SERVICE_TOKEN }}
+
+        run: |
+          sst install
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" >> ./packages/go/id_ed25519
+          echo "${{ secrets.SSH_PUBLIC_KEY }}" >> ./packages/go/id_ed25519.pub
+          sst deploy --stage=${GITHUB_REF_NAME}

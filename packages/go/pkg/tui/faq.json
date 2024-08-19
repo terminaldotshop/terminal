@@ -1,0 +1,38 @@
+[
+  {
+    "question": "where do you ship?",
+    "answer": "we're now shipping internationally, but shipping costs may be prohibitive until we have roasters in other countries. order from outside the US at your own risk!"
+  },
+  {
+    "question": "is your coffee ethically sourced?",
+    "answer": "absolutely."
+  },
+  {
+    "question": "is ordering via ssh secure?",
+    "answer": "you bet it is. arguably more secure than your browser. ssh incorporates encryption and authentication via a process called public key cryptography. if that doesn’t sound secure we don’t know what does."
+  },
+  {
+    "question": "how do you store my data?",
+    "answer": "your order is processed and stored in Stripe. we don't even have our own database!"
+  },
+  {
+    "question": "i only want to drink Nil, do you offer a subscription?",
+    "answer": "not yet, but we will. follow @terminaldotshop to learn more."
+  },
+  {
+    "question": "will Nil make me a better developer?",
+    "answer": "legally we cannot guarantee that it will, but..."
+  },
+  {
+    "question": "does coffee from the command line taste better than regular coffee?",
+    "answer": "it's just science!"
+  },
+  {
+    "question": "is it true your coffee contains the sweat of @theprimeagen?",
+    "answer": "we can neither confirm nor deny these rumors."
+  },
+  {
+    "question": "is it true your coffee contains the tears of @thdxr?",
+    "answer": "yes, this is true."
+  }
+]

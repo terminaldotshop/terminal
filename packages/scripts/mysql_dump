@@ -1,0 +1,8 @@
+#!/bin/sh
+
+host=$(echo $SST_RESOURCE_Database | jq -r '.host')
+username=$(echo $SST_RESOURCE_Database | jq -r '.username')
+password=$(echo $SST_RESOURCE_Database | jq -r '.password')
+database=$(echo $SST_RESOURCE_Database | jq -r '.database')
+
+mysqldump -h $host -u $username -p$password $database --no-create-info product product_variant > export.sql

@@ -1,0 +1,21 @@
+{
+  "name": "terminal-shop",
+  "version": "0.0.0",
+  "sideEffects": false,
+  "scripts": {
+    "dev": "sst dev",
+    "typecheck": "bun --filter=* typecheck",
+    "sso": "aws sso login --sso-session=terminal --no-browser",
+    "sdk": "sst shell ./packages/scripts/stainless"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "patch-package": "^8.0.0",
+    "sst": "3.0.42"
+  },
+  "devDependencies": {
+    "typescript": "5.5.4"
+  }
+}

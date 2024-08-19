@@ -1,0 +1,14 @@
+{
+  "name": "@terminal/scripts",
+  "version": "0.0.0",
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {},
+  "dependencies": {
+    "@terminal/core": "workspace:*",
+    "remeda": "2.2.1"
+  }
+}

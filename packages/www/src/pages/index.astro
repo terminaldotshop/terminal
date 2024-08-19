@@ -1,0 +1,9 @@
+---
+import Layout from '@layouts/base.astro'
+import Shop from '@components/shop'
+import { Resource } from 'sst'
+---
+
+<Layout>
+  <Shop apiUrl={Resource.OpenApiWorker.url} client:load />
+</Layout>

@@ -1,0 +1,10 @@
+---
+import Layout from '@layouts/base.astro'
+import FaqComponent from '@components/faq'
+
+import faqs from '../../../go/pkg/tui/faq.json'
+---
+
+<Layout>
+  <FaqComponent {faqs} client:load />
+</Layout>

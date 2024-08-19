@@ -1,0 +1,40 @@
+{
+  "name": "@terminal/core",
+  "version": "0.0.0",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "db": "sst shell drizzle-kit",
+    "db:push": "sst shell drizzle-kit push",
+    "db:connect": "sst shell ../scripts/mysql"
+  },
+  "devDependencies": {
+    "@types/bun": "1.1.5",
+    "@types/luxon": "3.4.2"
+  },
+  "dependencies": {
+    "@aws-sdk/client-sesv2": "3.606.0",
+    "@hono/valibot-validator": "0.2.2",
+    "@hono/zod-openapi": "0.11.0",
+    "@planetscale/database": "1.18.0",
+    "@tsconfig/node20": "20.1.4",
+    "@types/inquirer": "9.0.7",
+    "airtable": "0.12.2",
+    "cloudflare": "3.1.0",
+    "drizzle-kit": "0.21.1",
+    "drizzle-orm": "0.30.10",
+    "hono": "4.0.1",
+    "inquirer": "9.2.20",
+    "luxon": "3.4.4",
+    "nanoid": "5.0.7",
+    "remeda": "1.61.0",
+    "stripe": "15.2.0",
+    "ulid": "2.3.0",
+    "valibot": "0.30.0",
+    "zod": "3.23.8"
+  }
+}
