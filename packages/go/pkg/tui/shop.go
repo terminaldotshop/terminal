@@ -184,6 +184,8 @@ func (m model) UpdateSelectedTheme() model {
 		highlight = "#F5BB1D"
 	} else if strings.ToLower(product.Name) == "404" {
 		highlight = "#D53C81"
+	} else if strings.ToLower(product.Name) == "artisan" {
+		highlight = "#F9322C"
 	}
 
 	if highlight != "" {
