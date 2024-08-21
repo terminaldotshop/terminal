@@ -38,7 +38,7 @@ if you're only working on frontend you don't need to bring up the whole system -
 - `sst shell --stage=dev` - this connects you to the dev environment and opens a bash shell
 - `go run ./cmd/cli` - this will run the cli
 
-note - this loads dev secrets into your environment. most of them aren't them sensitive but if you are streaming you should avoid logging your env.
+note - this loads dev secrets into your environment. most of them aren't sensitive but if you are streaming you should avoid logging your env.
 
 
 ### Full system
