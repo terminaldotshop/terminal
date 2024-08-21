@@ -72,6 +72,7 @@ declare module "sst" {
     }
     "SSH": {
       "type": "sst.aws.Service"
+      "url": string
     }
     "SSHKey": {
       "private": string
