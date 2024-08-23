@@ -19,12 +19,12 @@
     "prettier-plugin-astro": "^0.13.0"
   },
   "dependencies": {
-    "@astrojs/solid-js": "4.4.0",
+    "@astrojs/solid-js": "4.4.1",
     "@astrojs/tailwind": "^5.1.0",
     "@solid-primitives/autofocus": "^0.0.111",
     "@solid-primitives/date": "^2.0.21",
     "@solid-primitives/selection": "^0.0.8",
-    "astro": "4.11.5",
+    "astro": "4.14.4",
     "astro-sst": "2.43.3",
     "hono": "4.0.1",
     "solid-js": "^1.8.16"

@@ -52,6 +52,7 @@ declare module "sst" {
     }
     "Interval": {
       "type": "sst.aws.Service"
+      "url": string
     }
     "IntervalBucket": {
       "name": string

@@ -17,6 +17,7 @@ export default {
       colors: {
         black: '#000000',
         white: '#FFFFFF',
+        lime: '#24FF00',
         highlight: {
           1: 'hsla(0, 0%, 100%, 0.1)',
           2: 'hsla(0, 0%, 100%, 0.15)',
