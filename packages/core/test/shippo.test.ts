@@ -15,6 +15,7 @@ describe("shippo", async () => {
 
   withTestUser("estimateShippingRate", async () => {
     const rate = await Shippo.createShipmentRate({
+      subtotal: 100,
       ounces: quantity * 12,
       address,
     });
