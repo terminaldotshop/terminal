@@ -41,7 +41,6 @@ const authFn = new sst.aws.Auth("Auth", {
 
 export const auth = new sst.cloudflare.Worker("AuthWorker", {
   url: true,
-  dev: false,
   domain: "auth." + domain,
   handler: "./packages/workers/src/proxy.ts",
   environment: {

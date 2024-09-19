@@ -105,7 +105,6 @@ export const handler = auth.authorizer({
       },
     }),
     github: GithubAdapter({
-      mode: "oauth",
       scope: "user:email",
       clientID: Resource.GithubClientID.value,
       clientSecret: Resource.GithubClientSecret.value,
