@@ -6,6 +6,8 @@ import { allSecrets } from "./secret";
 const bucket = new sst.aws.Bucket("IntervalBucket");
 cluster.addService("Interval", {
   link: [...allSecrets, database, bucket, bus],
+  cpu: "0.25 vCPU",
+  memory: "0.5 GB",
   image: {
     dockerfile: "packages/interval/Dockerfile",
   },
