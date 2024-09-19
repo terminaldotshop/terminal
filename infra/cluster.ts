@@ -3,7 +3,6 @@ import { isPermanentStage } from "./stage";
 export const vpc = isPermanentStage
   ? new sst.aws.Vpc("Vpc", {
       az: 2,
-      nat: "managed",
     })
   : sst.aws.Vpc.get("Vpc", "vpc-070a1a7598f4c12d1");
 
