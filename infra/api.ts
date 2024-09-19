@@ -20,7 +20,15 @@ export const authFingerprintKey = new random.RandomString(
 const authFn = new sst.aws.Auth("Auth", {
   authenticator: {
     url: true,
-    link: [bus, secret.StripeSecret, database, email, authFingerprintKey],
+    link: [
+      bus,
+      secret.StripeSecret,
+      database,
+      email,
+      authFingerprintKey,
+      secret.GithubClientID,
+      secret.GithubClientSecret,
+    ],
     permissions: [
       {
         actions: ["ses:SendEmail"],
@@ -33,9 +41,9 @@ const authFn = new sst.aws.Auth("Auth", {
 
 export const auth = new sst.cloudflare.Worker("AuthWorker", {
   url: true,
+  dev: false,
   domain: "auth." + domain,
   handler: "./packages/workers/src/proxy.ts",
-  live: false,
   environment: {
     ORIGIN_URL: authFn.url,
     NO_CACHE: "true",
@@ -60,7 +68,7 @@ const apiFn = new sst.aws.Function("OpenApi", {
 
 export const api = new sst.cloudflare.Worker("OpenApiWorker", {
   url: true,
-  live: false,
+  dev: false,
   domain: "openapi." + domain,
   handler: "./packages/workers/src/proxy.ts",
   environment: {

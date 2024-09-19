@@ -7,10 +7,14 @@ export default {
     }
     const url = new URL(req.url);
     const target = new URL(env.ORIGIN_URL);
-    const response = await fetch(
-      target.origin + url.pathname + url.search,
-      req,
-    );
+    const response = await fetch(target.origin + url.pathname + url.search, {
+      ...req,
+      headers: {
+        ...Object.fromEntries(req.headers.entries()),
+        "x-forwarded-host": url.host,
+      },
+      redirect: "manual",
+    });
     if (shouldCache && response.ok) {
       ctx.waitUntil(caches.default.put(req, response.clone()));
     }

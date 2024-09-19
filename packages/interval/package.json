@@ -15,6 +15,6 @@
     "@terminal/core": "workspace:",
     "pdf-lib": "1.17.1",
     "remeda": "2.3.0",
-    "sst": "3.1.2"
+    "sst": "3.1.22"
   }
 }

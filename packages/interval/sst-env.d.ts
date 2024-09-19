@@ -52,7 +52,16 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
+    "GithubClientID": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "GithubClientSecret": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "Interval": {
+      "service": string
       "type": "sst.aws.Service"
     }
     "IntervalBucket": {
@@ -73,6 +82,7 @@ declare module "sst" {
       "url": string
     }
     "SSH": {
+      "service": string
       "type": "sst.aws.Service"
       "url": string
     }
@@ -105,6 +115,9 @@ declare module "sst" {
       "id": string
       "secret": string
       "type": "stripe.index/webhookEndpoint.WebhookEndpoint"
+    }
+    "Vpc": {
+      "type": "sst.aws.Vpc"
     }
   }
 }

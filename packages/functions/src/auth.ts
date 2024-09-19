@@ -1,6 +1,6 @@
 import { auth } from "sst/aws/auth";
 import { CodeAdapter } from "sst/auth/adapter/code";
-import { Adapter } from "sst/auth/adapter";
+import { Adapter, GithubAdapter } from "sst/auth/adapter";
 import { session } from "./session";
 import { User } from "@terminal/core/user/index";
 import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
@@ -104,6 +104,12 @@ export const handler = auth.authorizer({
         );
       },
     }),
+    github: GithubAdapter({
+      mode: "oauth",
+      scope: "user:email",
+      clientID: Resource.GithubClientID.value,
+      clientSecret: Resource.GithubClientSecret.value,
+    }),
   },
   session,
   callbacks: {
@@ -112,6 +118,7 @@ export const handler = auth.authorizer({
         return true;
       },
       async success(ctx, input, req) {
+        console.log(input);
         if (input.provider === "email") {
           const email = input.claims.email!;
           let userID = await User.fromEmail(email).then((x) => x?.id);
@@ -129,7 +136,26 @@ export const handler = auth.authorizer({
         }
         if (input.provider === "ssh") {
         }
-
+        if (input.provider === "github") {
+          const response = (await fetch("https://api.github.com/user", {
+            headers: {
+              Authorization: `Bearer ${input.tokenset.access_token}`,
+            },
+          }).then((x) => x.json())) as { email: string };
+          const email = response.email;
+          let userID = await User.fromEmail(email).then((x) => x?.id);
+          if (!userID) {
+            userID = await User.create({
+              email,
+            });
+          }
+          return ctx.session({
+            type: "user",
+            properties: {
+              userID,
+            },
+          });
+        }
         throw new Error("Unknown provider");
       },
     },
