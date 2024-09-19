@@ -118,7 +118,6 @@ export const handler = auth.authorizer({
         return true;
       },
       async success(ctx, input, req) {
-        console.log(input);
         if (input.provider === "email") {
           const email = input.claims.email!;
           let userID = await User.fromEmail(email).then((x) => x?.id);
