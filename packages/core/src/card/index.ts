@@ -114,7 +114,7 @@ export module Card {
         .where(eq(userTable.stripeCustomerID, customerID))
         .limit(1)
         .then((r) => r[0]);
-      if (!user) throw new Error("User not found");
+      if (!user) return;
       const methods = await stripe.customers
         .listPaymentMethods(customerID)
         .then((r) => r.data);

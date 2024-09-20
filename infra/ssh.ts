@@ -45,11 +45,6 @@ cluster.addService("SSH", {
           max: 10,
         }
       : undefined,
-  transform: {
-    service: {
-      desiredCount: $app.stage === "production" ? 2 : 1,
-    },
-  },
   dev: {
     command: "go run ./cmd/ssh",
   },
