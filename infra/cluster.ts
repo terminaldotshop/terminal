@@ -8,4 +8,5 @@ export const vpc = isPermanentStage
 
 export const cluster = new sst.aws.Cluster("Cluster", {
   vpc,
+  forceUpgrade: "v2",
 });

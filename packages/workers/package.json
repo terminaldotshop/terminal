@@ -9,6 +9,6 @@
   "devDependencies": { "@cloudflare/workers-types": "4.20240512.0" },
   "dependencies": {
     "cloudflare": "^3.1.0",
-    "sst": "3.1.26"
+    "sst": "3.1.28"
   }
 }
