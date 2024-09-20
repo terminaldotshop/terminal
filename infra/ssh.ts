@@ -17,7 +17,7 @@ const key = new tls.PrivateKey("SSHKey", {
 
 cluster.addService("SSH", {
   cpu: "1 vCPU",
-  memory: "1 GB",
+  memory: "2 GB",
   image: {
     context: "./packages/go",
   },
