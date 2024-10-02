@@ -10,6 +10,6 @@
   "dependencies": {
     "@terminal/core": "workspace:*",
     "remeda": "2.2.1",
-    "sst": "3.1.49"
+    "sst": "3.1.52"
   }
 }

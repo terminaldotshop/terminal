@@ -14,7 +14,7 @@
     "@terminal/core": "workspace:",
     "airtable": "0.12.2",
     "hono": "4.0.1",
-    "sst": "3.1.49",
+    "sst": "3.1.52",
     "zod": "3.23.8"
   }
 }
