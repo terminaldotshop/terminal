@@ -46,6 +46,7 @@ cluster.addService("SSH", {
         }
       : undefined,
   dev: {
+    directory: "packages/go",
     command: "go run ./cmd/ssh",
   },
 });

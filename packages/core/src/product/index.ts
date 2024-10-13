@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { useTransaction } from "../drizzle/transaction";
 import {
+  SubscriptionSetting,
   productTable,
   productVariantInventoryTable,
   productVariantTable,
@@ -23,6 +24,7 @@ export module Product {
     description: z.string(),
     variants: Variant.array(),
     order: z.number().int().optional(),
+    subscription: SubscriptionSetting.optional(),
   });
 
   export type Info = z.infer<typeof Info>;
@@ -47,6 +49,7 @@ export module Product {
             name: group[0].product.name,
             description: group[0].product.description,
             order: group[0].product.order || undefined,
+            subscription: group[0].product.subscription || undefined,
             variants: !group[0].product_variant
               ? []
               : group.map((item) => ({
@@ -95,13 +98,17 @@ export module Product {
   );
 
   export const edit = fn(
-    Info.pick({ name: true, description: true, id: true, order: true }).partial(
-      {
-        name: true,
-        description: true,
-        order: true,
-      },
-    ),
+    Info.pick({
+      name: true,
+      description: true,
+      id: true,
+      order: true,
+      subscription: true,
+    }).partial({
+      name: true,
+      description: true,
+      order: true,
+    }),
     (input) =>
       useTransaction(async (tx) => {
         await tx
@@ -110,6 +117,7 @@ export module Product {
             name: input.name,
             description: input.description,
             order: input.order,
+            subscription: input.subscription || null,
           })
           .where(eq(productTable.id, input.id));
       }),

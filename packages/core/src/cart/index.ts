@@ -4,7 +4,7 @@ import { fn } from "../util/fn";
 import { cartItemTable, cartTable } from "./cart.sql";
 import { createID } from "../util/id";
 import { productVariantTable } from "../product/product.sql";
-import { and, eq, getTableColumns, ne, sql, sum } from "drizzle-orm";
+import { and, eq, getTableColumns, sql, sum } from "drizzle-orm";
 import { useUserID } from "../actor";
 import { userShippingTable } from "../user/user.sql";
 import { cardTable } from "../card/card.sql";
@@ -211,7 +211,9 @@ export module Cart {
       return useTransaction(async (tx) => {
         const id = input.id || createID("cartItem");
         const variant = await tx
-          .select({ id: productVariantTable.id })
+          .select({
+            id: productVariantTable.id,
+          })
           .from(productVariantTable)
           .where(eq(productVariantTable.id, input.productVariantID))
           .then((rows) => rows[0]);

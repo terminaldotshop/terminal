@@ -134,6 +134,13 @@
       "when": 1721588161886,
       "tag": "0018_vengeful_captain_universe",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1728857176021,
+      "tag": "0019_bent_redwing",
+      "breakpoints": true
     }
   ]
 }

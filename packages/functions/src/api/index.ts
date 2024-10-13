@@ -14,6 +14,7 @@ import { Hook } from "./hook";
 import { Print } from "./print";
 import { EmailApi } from "./email";
 import { ZodError } from "zod";
+import { SubscriptionApi } from "./subscription";
 
 const auth: MiddlewareHandler = async (c, next) => {
   const authHeader =
@@ -67,6 +68,7 @@ const routes = app
   .route("/hook", Hook.route)
   .route("/print", Print.route)
   .route("/email", EmailApi.route)
+  .route("/subscription", SubscriptionApi.route)
   .onError((error, c) => {
     if (error instanceof VisibleError) {
       return c.json(

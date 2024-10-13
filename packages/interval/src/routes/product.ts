@@ -157,7 +157,7 @@ export default new Page({
       unlisted: true,
       async handler() {
         const product = await selectProduct();
-        const [name, description, order] = await io.group([
+        const [name, description, order, subscription] = await io.group([
           io.input.text("name", {
             defaultValue: product.name,
           }),
@@ -168,12 +168,18 @@ export default new Page({
           io.input.number("order", {
             defaultValue: product.order,
           }),
+          io.select.single("subscription", {
+            options: ["none", "allowed", "required"],
+            defaultValue: product.subscription || "none",
+          }),
         ]);
         await Product.edit({
           id: product.id,
           name,
           description,
           order,
+          subscription:
+            subscription === "none" ? undefined : (subscription as any),
         });
         await ctx.redirect({
           route: "product/detail",

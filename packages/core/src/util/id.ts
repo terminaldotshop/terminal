@@ -11,6 +11,7 @@ const prefixes = {
   cartItem: "itm",
   cart: "crt",
   order: "ord",
+  subscription: "sub",
 } as const;
 
 export function createID(prefix: keyof typeof prefixes): string {

@@ -15,6 +15,7 @@ cluster.addService("Interval", {
     DRIZZLE_LOG: "true",
   },
   dev: {
+    directory: "packages/interval",
     command: "bun dev",
   },
 });
