@@ -3,7 +3,11 @@ import { createTransaction, useTransaction } from "../drizzle/transaction";
 import { fn } from "../util/fn";
 import { cartItemTable, cartTable } from "./cart.sql";
 import { createID } from "../util/id";
-import { productVariantTable } from "../product/product.sql";
+import {
+  SubscriptionSetting,
+  productTable,
+  productVariantTable,
+} from "../product/product.sql";
 import { and, eq, getTableColumns, sql, sum } from "drizzle-orm";
 import { useUserID } from "../actor";
 import { userShippingTable } from "../user/user.sql";
@@ -213,8 +217,13 @@ export module Cart {
         const variant = await tx
           .select({
             id: productVariantTable.id,
+            susbcription: productTable.subscription,
           })
           .from(productVariantTable)
+          .innerJoin(
+            productTable,
+            eq(productVariantTable.productID, productTable.id),
+          )
           .where(eq(productVariantTable.id, input.productVariantID))
           .then((rows) => rows[0]);
         if (!variant) {
@@ -230,6 +239,11 @@ export module Cart {
               ),
             );
           return;
+        }
+        if (variant.susbcription === "required") {
+          throw new Error(
+            "This product cannot be added to a cart, it must be purchased via a subscription.",
+          );
         }
         await tx
           .insert(cartItemTable)
